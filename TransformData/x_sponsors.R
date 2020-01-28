@@ -40,13 +40,18 @@ lead_sponsors<-mutate(lead_sponsors,
                                                      if_else(agency_class=="Industry","Industry",
                                                              if_else(agency_class=="U.S. Fed","U.S. Fed",
                                                                      if_else(name=="[Redacted]","Redacted",
-                                                                             if_else(agency_class=="NIH","NIH"
-                                                                                     ,"NA")))))),
+                                                                             if_else(agency_class=="NIH","NIH",
+                                                                                     if_else(agency_class=="Other","Other"
+                                                                                     ,"NA"))))))),
                       "flag_sponsor_type_academic"=if_else(sponsor_type=="Academic",1,0),
                       "flag_sponsor_type_hospital"=if_else(sponsor_type=="Hospital",1,0)
                       
                       
 )
+
+#rename columns
+colnames(lead_sponsors)[colnames(lead_sponsors)=="name"]<-"lead_sponsor_name"
+colnames(lead_sponsors)[colnames(lead_sponsors)=="id"]<-"lead_sponsor_id"
 
 #write to txt file
 write.table(lead_sponsors,"C:/ACCT/DATA/warehouse/x_lead_sponsors.txt", sep = "|", row.names = FALSE)
