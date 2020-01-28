@@ -3,8 +3,8 @@
 library(lubridate)
 
 #prepare write and append log
-var_filename_log<-"download_log.txt"
-dest_logfile<-paste("C:/ACCT/DATA/SourceFiles/",var_filename_log, sep="")
+var_filename_log<-"log_acct_download.txt"
+dest_logfile<-paste("C:/ACCT/DATA/logs/",var_filename_log, sep="")
 
 #prepare dynamic source filename and path for download from ACCT
 var_today<-today()
