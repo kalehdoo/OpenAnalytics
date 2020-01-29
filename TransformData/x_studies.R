@@ -46,9 +46,9 @@ studies_1<-subset.data.frame(studies, select =c("nct_id",
 #create new columns
 studies_1<-mutate(studies_1,
                   "study_first_posted_year"=year(study_first_posted_date),
-                  "study_first_posted_month"=month(study_first_posted_date, label = TRUE),
+                  "study_first_posted_month"=month(study_first_posted_date),
                   "study_first_posted_yrmonth"=str_sub(study_first_posted_date,1,7),
-                  
+                  "flag_study_first_posted"=if_else(str_length(study_first_posted_date)>0,1,0),
                   "flag_recruiting_status"=if_else (overall_status=="Recruiting",1,0),
                   
                   "start_year"=str_sub(start_date,1,4),
