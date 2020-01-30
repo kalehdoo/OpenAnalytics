@@ -55,16 +55,24 @@ studies_1<-mutate(studies_1,
                   "results_first_posted_year"=str_sub(results_first_posted_date,1,4),
                   "results_first_posted_month"=str_sub(results_first_posted_date,6,7),
                   "results_first_posted_yrmonth"=str_sub(results_first_posted_date,1,7),
-                  "flag_results_posted"=if_else(str_length(results_first_posted_date)>0,1,0),
+                  "flag_results_posted"=if_else(parse_date_time(as.factor(results_first_posted_date), orders = c("ymd", "dmy", "mdy"))<=as.Date(var_current_date),1,0),
                   
                   "actual_study_enrollment"=ifelse(enrollment_type=="Actual",enrollment,NA),
                   "anticipated_study_enrollment"=ifelse(enrollment_type=="Anticipated",enrollment,NA),
                   "flag_has_dmc"=case_when(has_dmc=="t" ~ 1,
                                            has_dmc=="f" ~ 0,
-                                           TRUE ~ NA_real_)
+                                           TRUE ~ NA_real_),
+                  "days_start_to_complete"= difftime(parse_date_time(as.factor(completion_date), orders = c("ymd", "dmy", "mdy")), 
+                                                       parse_date_time(as.factor(start_date), orders = c("ymd", "dmy", "mdy")), units = "days"
+                                                       ),
+                  "days_complete_to_results"= difftime(parse_date_time(as.factor(results_first_posted_date), orders = c("ymd", "dmy", "mdy")), 
+                                                       parse_date_time(as.factor(completion_date), orders = c("ymd", "dmy", "mdy")), units = "days"
+                                                        )
+                    
 )
 
 #write to txt file
 write.table(studies_1, paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_studies.txt", sep=""), sep = "|", row.names = FALSE)
+
 
 

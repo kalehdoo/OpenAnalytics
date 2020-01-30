@@ -15,7 +15,7 @@ agg_studies<-read.csv(in_path_agg_studies, header=TRUE, na.strings = "NA", sep =
 
 #create sponsor agg table with all attributes from lead sponsor
 #use data.table or setDT for faster aggregations
-agg_sponsors1<-setDT(agg_studies)[,.(
+agg_sponsors1<-setDT(agg_studies)[,list(
   cnt_studies_registered=sum(flag_study_first_posted, na.rm = TRUE),
   cnt_started_actual=sum(flag_actual_started, na.rm = TRUE),
   cnt_recruiting_status=sum(flag_recruiting_status, na.rm = TRUE),
