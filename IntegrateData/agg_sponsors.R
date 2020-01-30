@@ -5,20 +5,13 @@ library(lubridate)
 library(data.table)
 
 #set paths for data files
-in_path_agg_studies<-"C:/ACCT/DATA/warehouse/agg_studies.txt"
+in_path_agg_studies<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_studies.txt", sep="")
 
 #reads the data files into dataframes
-agg_studies<-read.csv(in_path_agg_studies, header=TRUE, sep = "|", nrows = -100)
+agg_studies<-read.csv(in_path_agg_studies, header=TRUE, na.strings = "NA", sep = "|", nrows = -100)
 
 
 #create agg at sponsor level
-#create parameters
-var_current_year<-year(today())
-var_last_year<-(var_current_year-1)
-var_last_year_2<-(var_current_year-2)
-var_last_year_3<-(var_current_year-3)
-var_last_year_4<-(var_current_year-4)
-var_last_year_5<-(var_current_year-5)
 
 #create sponsor agg table with all attributes from lead sponsor
 #use data.table or setDT for faster aggregations
@@ -64,7 +57,7 @@ agg_sponsors1<-setDT(agg_studies)[,.(
 
 
 #create sponsor agg table with all attributes from lead sponsor
-agg_sponsors2<-agg_sponsors %>%
+agg_sponsors2<-agg_sponsors1 %>%
   group_by(lead_sponsor_name) %>%
   summarise(
             ratio_results_to_completed_lstyr=100*((cnt_results_submitted_lstyr)/(cnt_completed_status_lstyr)),
@@ -83,29 +76,29 @@ agg_sponsors2<-agg_sponsors %>%
             ratio_results_to_completed_lstyr4_change=sum(ratio_results_to_completed_lstyr4, na.rm = TRUE)-sum(ratio_results_to_completed_lstyr5, na.rm = TRUE),
             
             
-            cnt_completed_status_lstyr_change=sum(cnt_completed_status_lstyr)-sum(cnt_completed_status_lstyr2),
-            cnt_completed_status_lstyr2_change=sum(cnt_completed_status_lstyr2)-sum(cnt_completed_status_lstyr3),
-            cnt_completed_status_lstyr3_change=sum(cnt_completed_status_lstyr3)-sum(cnt_completed_status_lstyr4),
-            cnt_completed_status_lstyr4_change=sum(cnt_completed_status_lstyr4)-sum(cnt_completed_status_lstyr5),
+            cnt_completed_status_lstyr_change=sum(cnt_completed_status_lstyr, na.rm = TRUE)-sum(cnt_completed_status_lstyr2, na.rm = TRUE),
+            cnt_completed_status_lstyr2_change=sum(cnt_completed_status_lstyr2, na.rm = TRUE)-sum(cnt_completed_status_lstyr3, na.rm = TRUE),
+            cnt_completed_status_lstyr3_change=sum(cnt_completed_status_lstyr3, na.rm = TRUE)-sum(cnt_completed_status_lstyr4, na.rm = TRUE),
+            cnt_completed_status_lstyr4_change=sum(cnt_completed_status_lstyr4, na.rm = TRUE)-sum(cnt_completed_status_lstyr5, na.rm = TRUE),
             
-            cnt_completed_status_lstyr_chgpc=100*(sum(cnt_completed_status_lstyr_change)/sum(cnt_completed_status_lstyr2)),
-            cnt_completed_status_lstyr2_chgpc=100*(sum(cnt_completed_status_lstyr2_change)/sum(cnt_completed_status_lstyr3)),
-            cnt_completed_status_lstyr3_chgpc=100*(sum(cnt_completed_status_lstyr3_change)/sum(cnt_completed_status_lstyr4)),
-            cnt_completed_status_lstyr4_chgpc=100*(sum(cnt_completed_status_lstyr4_change)/sum(cnt_completed_status_lstyr5)),
+            cnt_completed_status_lstyr_chgpc=100*(sum(cnt_completed_status_lstyr_change, na.rm = TRUE)/sum(cnt_completed_status_lstyr2, na.rm = TRUE)),
+            cnt_completed_status_lstyr2_chgpc=100*(sum(cnt_completed_status_lstyr2_change, na.rm = TRUE)/sum(cnt_completed_status_lstyr3, na.rm = TRUE)),
+            cnt_completed_status_lstyr3_chgpc=100*(sum(cnt_completed_status_lstyr3_change, na.rm = TRUE)/sum(cnt_completed_status_lstyr4, na.rm = TRUE)),
+            cnt_completed_status_lstyr4_chgpc=100*(sum(cnt_completed_status_lstyr4_change, na.rm = TRUE)/sum(cnt_completed_status_lstyr5, na.rm = TRUE)),
             
-            cnt_results_submitted_lstyr_change=sum(cnt_results_submitted_lstyr)-sum(cnt_results_submitted_lstyr2),
-            cnt_results_submitted_lstyr2_change=sum(cnt_results_submitted_lstyr2)-sum(cnt_results_submitted_lstyr3),
-            cnt_results_submitted_lstyr3_change=sum(cnt_results_submitted_lstyr3)-sum(cnt_results_submitted_lstyr4),
-            cnt_results_submitted_lstyr4_change=sum(cnt_results_submitted_lstyr4)-sum(cnt_results_submitted_lstyr5),
+            cnt_results_submitted_lstyr_change=sum(cnt_results_submitted_lstyr, na.rm = TRUE)-sum(cnt_results_submitted_lstyr2, na.rm = TRUE),
+            cnt_results_submitted_lstyr2_change=sum(cnt_results_submitted_lstyr2, na.rm = TRUE)-sum(cnt_results_submitted_lstyr3, na.rm = TRUE),
+            cnt_results_submitted_lstyr3_change=sum(cnt_results_submitted_lstyr3, na.rm = TRUE)-sum(cnt_results_submitted_lstyr4, na.rm = TRUE),
+            cnt_results_submitted_lstyr4_change=sum(cnt_results_submitted_lstyr4, na.rm = TRUE)-sum(cnt_results_submitted_lstyr5, na.rm = TRUE),
             
-            cnt_results_submitted_lstyr_chgpc=100*(sum(cnt_results_submitted_lstyr_change)/sum(cnt_results_submitted_lstyr2)),
-            cnt_results_submitted_lstyr2_chgpc=100*(sum(cnt_results_submitted_lstyr2_change)/sum(cnt_results_submitted_lstyr3)),
-            cnt_results_submitted_lstyr3_chgpc=100*(sum(cnt_results_submitted_lstyr3_change)/sum(cnt_results_submitted_lstyr4)),
-            cnt_results_submitted_lstyr4_chgpc=100*(sum(cnt_results_submitted_lstyr4_change)/sum(cnt_results_submitted_lstyr5))
+            cnt_results_submitted_lstyr_chgpc=100*(sum(cnt_results_submitted_lstyr_change, na.rm = TRUE)/sum(cnt_results_submitted_lstyr2, na.rm = TRUE)),
+            cnt_results_submitted_lstyr2_chgpc=100*(sum(cnt_results_submitted_lstyr2_change, na.rm = TRUE)/sum(cnt_results_submitted_lstyr3, na.rm = TRUE)),
+            cnt_results_submitted_lstyr3_chgpc=100*(sum(cnt_results_submitted_lstyr3_change, na.rm = TRUE)/sum(cnt_results_submitted_lstyr4, na.rm = TRUE)),
+            cnt_results_submitted_lstyr4_chgpc=100*(sum(cnt_results_submitted_lstyr4_change, na.rm = TRUE)/sum(cnt_results_submitted_lstyr5, na.rm = TRUE))
             
   )
 
 agg_sponsors<-left_join(agg_sponsors1,agg_sponsors2,by="lead_sponsor_name")
 
 #write to txt file
-write.table(agg_sponsors,"C:/ACCT/DATA/warehouse/agg_sponsors.txt", sep = "|", row.names = FALSE)
+write.table(agg_sponsors, paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_sponsors.txt", sep=""), sep = "|", row.names = FALSE)

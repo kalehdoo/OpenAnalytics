@@ -3,19 +3,10 @@ library(lubridate)
 library(stringr)
 
 #set paths for data files
-in_path_studies<-"C:/ACCT/DATA/unzipSrcFiles/studies.txt"
-#in_path_sponsors<-"C:/ACCT/DATA/unzipSrcFiles/sponsors.txt"
+in_path_studies<-paste(var_DIR_ACCT_HOME, "DATA/unzipSrcFiles/studies.txt", sep="")
 
 #reads the data files into dataframes
 studies<-read.csv(in_path_studies, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-#sponsors<-read.csv(in_path_sponsors, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-
-#verify the row and column count
-#nrow(studies)
-#ncol(studies)
-
-#verify data in first 10 rows
-#head(studies,10)
 
 #create subset df with selected columns
 studies_1<-subset.data.frame(studies, select =c("nct_id",
@@ -74,6 +65,6 @@ studies_1<-mutate(studies_1,
 )
 
 #write to txt file
-write.table(studies_1,"C:/ACCT/DATA/warehouse/x_studies.txt", sep = "|", row.names = FALSE)
+write.table(studies_1, paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_studies.txt", sep=""), sep = "|", row.names = FALSE)
 
 
