@@ -49,8 +49,11 @@ agg_sponsors1<-setDT(agg_studies)[,list(
   cnt_study_registered_lstyr5=sum(ifelse(study_first_posted_year==var_last_year_5[1],1,0), na.rm = TRUE),
   cnt_started_actual_lstyr5=sum(ifelse(start_year==var_last_year_5[1],flag_actual_started,0L), na.rm = TRUE),
   cnt_completed_status_lstyr5=sum(ifelse(completed_year==var_last_year_5[1],flag_completed_status,0L), na.rm = TRUE),
-  cnt_results_submitted_lstyr5=sum(ifelse(results_first_posted_year==var_last_year_5[1],flag_results_posted,0L), na.rm = TRUE)
+  cnt_results_submitted_lstyr5=sum(ifelse(results_first_posted_year==var_last_year_5[1],flag_results_posted,0L), na.rm = TRUE),
   
+  cnt_conditions=sum(cnt_conditions, na.rm = TRUE),
+  cnt_rare_condition_match=sum(cnt_match_rare_condition, na.rm = TRUE),
+  cnt_rare_condition_studies=sum(flag_rare_condition, na.rm = TRUE)
   
   ), by='lead_sponsor_name']
 
