@@ -24,7 +24,7 @@ agg_study_conditions<-data.table(x_conditions)[,list(
 ), by='nct_id']
 
 
-#agg conditions at study level
+#agg conditions at condition level
 agg_conditions<-data.table(x_conditions)[,list( 
   nct_id  = paste(nct_id, collapse =","),
   cnt_studies = length(nct_id),
