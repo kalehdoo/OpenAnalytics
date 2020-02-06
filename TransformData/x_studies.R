@@ -62,6 +62,9 @@ studies_1<-mutate(studies_1,
                   "flag_has_dmc"=case_when(has_dmc=="t" ~ 1,
                                            has_dmc=="f" ~ 0,
                                            TRUE ~ NA_real_),
+                  "register_to_start_days"= difftime(parse_date_time(as.factor(start_date), orders = c("ymd", "dmy", "mdy")), 
+                                                     parse_date_time(as.factor(study_first_posted_date), orders = c("ymd", "dmy", "mdy")), units = "days"
+                  ),
                   "start_to_complete_days"= difftime(parse_date_time(as.factor(completion_date), orders = c("ymd", "dmy", "mdy")), 
                                                        parse_date_time(as.factor(start_date), orders = c("ymd", "dmy", "mdy")), units = "days"
                                                        ),
