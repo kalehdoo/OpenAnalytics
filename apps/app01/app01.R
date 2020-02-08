@@ -4,38 +4,77 @@ library(shinydashboard)
 library(dplyr)
 library(ggplot2)
 library(plotly)
+library(markdown)
+#read data
+mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
 
-ui <- dashboardPage(
-  #controls dashboard header
-  dashboardHeader(title="Open Analytics"),
-  dashboardSidebar(
-    menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-    menuItem("Widgets", tabName = "widgets", icon = icon("th")),
-    checkboxInput("checkbox", "Choice A", value = TRUE),
-    radioButtons("radio", h3("Radio buttons"),
-                 choices = list("Choice 1" = 1, "Choice 2" = 2,
-                                "Choice 3" = 3),selected = 1)
-    
-  ),
-  #defines the body
-  dashboardBody(
-    fluidRow(
-      box(plotlyOutput("plot_1001", height = 200), title = "Studies Registered"),
-      box(plotlyOutput("plot_1002", height = 200), title = "Studies Started")
-    ),
-    #create box for plot 1001
-    fluidRow(
-      box(plotlyOutput("plot_1003", height = 200), title = "Studies Completed"),
-      box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
-    )
-  )
-)
+
+ui <- navbarPage("Open Clinical Analytics",
+                 tabPanel("Trends",
+                          sidebarLayout(
+                            sidebarPanel(width = 2,
+                              menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+                              menuItem("Widgets", tabName = "widgets", icon = icon("th")),
+                              checkboxInput("checkbox", "Choice A", value = TRUE),
+                              radioButtons("radio", h3("Radio buttons"),
+                                           choices = list("Choice 1" = 1, "Choice 2" = 2,
+                                                          "Choice 3" = 3),selected = 1)
+                            ),
+                            mainPanel(width = 10,
+                              fluidRow(
+                                tags$h4("Historical trend for last 10 years")
+                              ),        
+                              fluidRow(
+                                box(plotlyOutput("plot_1001", height = 200), title = "Studies Registered"),
+                                box(plotlyOutput("plot_1002", height = 200), title = "Studies Started")
+                              ),
+                              #create box for plot 1001
+                              fluidRow(
+                                box(plotlyOutput("plot_1003", height = 200), title = "Studies Completed"),
+                                box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
+                              )
+                            )
+                          )
+                   
+                 ),
+                 tabPanel("Summary",
+                          sidebarLayout(
+                            sidebarPanel(width = 2,
+                              menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+                              menuItem("Widgets", tabName = "widgets", icon = icon("th")),
+                              checkboxInput("checkbox", "Choice A", value = TRUE),
+                              radioButtons("radio", h3("Radio buttons"),
+                                           choices = list("Choice 1" = 1, "Choice 2" = 2,
+                                                          "Choice 3" = 3),selected = 1)
+                            ),
+                            mainPanel(
+                              fluidRow(
+                                box(plotlyOutput("plot_1005", height = 200), title = "Studies Registered"),
+                                box(plotlyOutput("plot_1006", height = 200), title = "Studies Started")
+                              ),
+                              #create box for plot 1001
+                              fluidRow(
+                                box(plotlyOutput("plot_1007", height = 200), title = "Studies Completed"),
+                                box(plotlyOutput("plot_1008", height = 200), title = "Results Posted")
+                              )
+                            )
+                          )
+                          
+                 ),
+                 navbarMenu("Sponsor",
+                            tabPanel("Sponsor1"
+                              
+                            ),
+                            tabPanel("Sponsor2"
+                              
+                            )
+                   
+                 )
+                 )
+  
 
 server <- function(input, output) {
-  #read data
-  in_mv_year_Lst10Yr<-paste(var_DIR_ACCT_HOME, "DATA/extracts/mv_year_Lst10Yr.txt", sep="")
-  mv_year_Lst10Yr<-read.csv(in_mv_year_Lst10Yr, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-  
+   
   #cteate plot 1001
   output$plot_1001 <- renderPlotly(
     {plot_ly(mv_year_Lst10Yr, x=~common_year, y=~cnt_registered, type='bar', text=~cnt_registered, textposition = 'auto')

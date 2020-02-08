@@ -1,0 +1,12 @@
+name: app01
+title: app01
+username:
+account: kalehdoo
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1780482
+bundleId: 2784624
+url: https://kalehdoo.shinyapps.io/app01/
+when: 1581172747.5333
+asMultiple: FALSE
+asStatic: FALSE
