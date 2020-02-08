@@ -11,16 +11,7 @@ mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.
 
 ui <- navbarPage("Open Clinical Analytics",
                  tabPanel("Trends",
-                          sidebarLayout(
-                            sidebarPanel(width = 2,
-                              menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-                              menuItem("Widgets", tabName = "widgets", icon = icon("th")),
-                              checkboxInput("checkbox", "Choice A", value = TRUE),
-                              radioButtons("radio", h3("Radio buttons"),
-                                           choices = list("Choice 1" = 1, "Choice 2" = 2,
-                                                          "Choice 3" = 3),selected = 1)
-                            ),
-                            mainPanel(width = 10,
+                          mainPanel(width = 12,
                               fluidRow(
                                 tags$h4("Historical trend for last 10 years")
                               ),        
@@ -34,7 +25,7 @@ ui <- navbarPage("Open Clinical Analytics",
                                 box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
                               )
                             )
-                          )
+                          
                    
                  ),
                  tabPanel("Summary",
