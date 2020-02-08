@@ -18,6 +18,7 @@ assign("var_last_year_2", (var_current_year-2), envir = .GlobalEnv)
 assign("var_last_year_3", (var_current_year-3), envir = .GlobalEnv)
 assign("var_last_year_4", (var_current_year-4), envir = .GlobalEnv)
 assign("var_last_year_5", (var_current_year-5), envir = .GlobalEnv)
+assign("var_last_year_10", (var_current_year-10), envir = .GlobalEnv)
 
 
 
