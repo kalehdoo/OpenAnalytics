@@ -2,4 +2,4 @@
 .Rhistory
 .RData
 .Ruserdata
-**apps/app01/data/
+apps/app01/data/*
