@@ -5,8 +5,8 @@ account: kalehdoo
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1780482
-bundleId: 2784624
+bundleId: 2786100
 url: https://kalehdoo.shinyapps.io/app01/
-when: 1581172747.5333
+when: 1581254586.46672
 asMultiple: FALSE
 asStatic: FALSE

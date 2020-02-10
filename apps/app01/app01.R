@@ -5,11 +5,41 @@ library(dplyr)
 library(ggplot2)
 library(plotly)
 library(markdown)
+library(DT)
+
+
+
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-
+mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
 
 ui <- navbarPage("Open Clinical Analytics",
+                 navbarMenu("Recruitment",
+                   tabPanel("Find Studies",
+                            sidebarLayout(
+                              sidebarPanel(width = 2,
+                                           checkboxGroupInput("cnames_recruiting", "Select Columns:",
+                                                              names(mv_studies_recruiting_s), selected = names(mv_studies_recruiting_s))
+                              ),
+                              mainPanel(width = 10,
+                                        fluidRow(
+                                          tags$h5("Find Clinical Studies. Search for anything on the search box on right top or search in individual columns.
+                                              Click the hyperlink on ID to navigate to clinicaltrials.gov to view study and contact details.")
+                                          
+                                        ),        
+                                        #display recriting studies data table
+                                        fluidRow(
+                                          DT::dataTableOutput("dt_recruitment_5001")
+                                        )
+                              ))
+                            
+                            
+                   ),
+                   tabPanel("Tab2"
+                     
+                   )
+                 )
+                 ,
                  tabPanel("Trends",
                           mainPanel(width = 12,
                               fluidRow(
@@ -65,6 +95,13 @@ ui <- navbarPage("Open Clinical Analytics",
   
 
 server <- function(input, output) {
+  #datatable for recruitment
+  output$dt_recruitment_5001<- renderDataTable(
+    {
+      DT::datatable(mv_studies_recruiting_s[, input$cnames_recruiting, drop=FALSE], filter = 'top', rownames = FALSE,
+                   escape=FALSE )
+    }
+  )
    
   #cteate plot 1001
   output$plot_1001 <- renderPlotly(

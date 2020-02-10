@@ -13,8 +13,8 @@ agg_facilities<-read.csv(in_path_agg_facilities, header=TRUE, sep = "|",na.strin
 #agg facilities at study level
 agg_facilities_study1<-data.table(agg_facilities)[,list( 
   country_name  = paste(unique(country), collapse =", "),
-  state_name  = paste(unique(state), collapse =", "),
-  city_name  = paste(unique(city), collapse =", "),
+  state_name  = paste(state, collapse =", "),
+  city_name  = paste(city, collapse =", "),
   cnt_sites = length(facility_id),
   cnt_site_recruiting = sum(flag_site_recruiting, na.rm = TRUE),
   flag_study_us_only = if_else(sum(flag_site_US, na.rm = TRUE)>=1,1,0)

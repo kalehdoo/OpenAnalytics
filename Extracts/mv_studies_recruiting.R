@@ -1,5 +1,6 @@
 #import libraries
 library(dplyr)
+library(sqldf)
 
 #set paths for data files
 in_path_agg_studies<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_studies.txt", sep="")
@@ -28,12 +29,12 @@ mv_studies_recruiting1<-subset.data.frame(agg_studies,
 
 #create new df with required columns and filter condition
 mv_facilities_recruiting<-subset.data.frame(agg_facilities, 
-                                         #subset=status=="Recruiting",
+                                            status=="Recruiting" |status=="Not yet recruiting",
                                          select=c(
                                            "nct_id",
                                            "facility_name",
-                                           "facility_status",
-                                           "city",
+                                           "status",
+                                           "City"="city",
                                            "state",
                                            "country",
                                            "zip",
@@ -46,7 +47,27 @@ mv_facilities_recruiting<-subset.data.frame(agg_facilities,
 mv_studies_recruiting1$nct_id<-as.character(mv_studies_recruiting1$nct_id)
 mv_facilities_recruiting$nct_id<-as.character(mv_facilities_recruiting$nct_id)
 mv_studies_recruiting<-left_join(mv_studies_recruiting1, mv_facilities_recruiting, by="nct_id")
-mv_studies_recruiting$urlid<-paste0("https://clinicaltrials.gov/ct2/show/",mv_studies_recruiting$nct_id, sep="")
+mv_studies_recruiting$urlid<-paste0("<a href=\'","https://clinicaltrials.gov/ct2/show/",mv_studies_recruiting$nct_id, "\' target=\'_blank\'>",mv_studies_recruiting$nct_id,"</a>")
+
+mv_studies_recruiting_s<-sqldf("Select urlid as 'ID',
+                                 official_title as 'Title', 
+                                 start_date as 'StartDate',
+                                 phase as 'StudyPhase',
+                                 enrollment as 'Enrollment',
+                                 case when has_dmc='t' THEN 'Yes' when has_dmc='f' THEN 'No' ELSE 'NA' END as 'DataMonitoring',
+                                 lead_sponsor_name as 'Sponsor',
+                                 condition_name as 'Condition',
+                                 case when flag_rare_condition=1 THEN 'Yes' when flag_rare_condition=0 THEN 'No' ELSE 'NA' END as 'RareDisease',
+                                 facility_name as 'Facility',
+                                 status as 'RecruitingStatus',
+                                 upper(city) as 'City',
+                                 upper(state) as 'State',
+                                 upper(country) as 'Country',
+                                 zip as 'ZipCode'
+                              from mv_studies_recruiting")
+
 
 #write to txt file
 write.table(mv_studies_recruiting,paste(var_DIR_ACCT_HOME, "DATA/extracts/mv_studies_recruiting.txt", sep=""), sep = "|", row.names = FALSE)
+
+write.table(mv_studies_recruiting_s,paste(var_DIR_ACCT_HOME, "DATA/extracts/mv_studies_recruiting_s.txt", sep=""), sep = "|", row.names = FALSE)
