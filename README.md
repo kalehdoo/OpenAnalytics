@@ -1,4 +1,6 @@
 # Open Clinical Analytics Platform by Kalehdoo (In Development)
+View the application at below link:
+https://kalehdoo.shinyapps.io/app01/
 
 ## Goal: 
 The purpose of Open Clinical Analytics Platform (OCAP) is to make clinical research analytics available to the patients and organisations that work to make patient lives better. I hope the analytics would help in making clinical trials faster and increase the success rate leading to more affordable patented drug prices.
