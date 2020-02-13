@@ -12,7 +12,7 @@ rare_disease_list<-read.csv(paste(var_DIR_MISC_HOME,"list_rare_disease.txt", sep
 
 #check if condition matches with any of the rare disease in the list
 x_conditions<- mutate(x_conditions,
-                           flag_rare_disease_match=if_else((casefold(condition_name) %in% casefold(rare_disease$Name))== TRUE,1,0)
+                           flag_rare_disease_match=if_else((casefold(condition_name) %in% casefold(rare_disease_list$Name))== TRUE,1,0)
 )
 
 #agg conditions at study level
