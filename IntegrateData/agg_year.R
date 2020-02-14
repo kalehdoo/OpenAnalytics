@@ -4,7 +4,7 @@ library(stringr)
 library(lubridate)
 
 #set paths for data files
-in_path_agg_studies<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_studies.txt", sep="")
+in_path_agg_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep="")
 
 #reads the data files into dataframes
 agg_studies<-read.csv(in_path_agg_studies, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
@@ -53,4 +53,4 @@ agg_year<-full_join(agg_year1, agg_year2, by="common_year")
 #year_f_1$common_year<- as.factor(year_f_1$common_year)
 
 #write to txt file
-write.table(agg_year,paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_year.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_year,paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_year.txt", sep=""), sep = "|", row.names = FALSE)

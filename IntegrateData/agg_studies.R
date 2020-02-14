@@ -4,11 +4,11 @@ library(stringr)
 library(lubridate)
 
 #set paths for data files
-in_path_x_studies<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_studies.txt", sep="")
-in_path_x_lead_sponsors<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_lead_sponsors.txt", sep="")
-in_path_agg_study_conditions<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_study_conditions.txt", sep="")
-in_path_agg_study_facilities<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_facilities_study.txt", sep="")
-in_path_agg_study_interventions<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_study_interventions.txt", sep="")
+in_path_x_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_studies.txt", sep="")
+in_path_x_lead_sponsors<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_lead_sponsors.txt", sep="")
+in_path_agg_study_conditions<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_study_conditions.txt", sep="")
+in_path_agg_study_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities_study.txt", sep="")
+in_path_agg_study_interventions<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_study_interventions.txt", sep="")
 
 
 #reads the data files into dataframes
@@ -37,7 +37,7 @@ agg_studies_interventions<-left_join(agg_studies_facilities,agg_study_interventi
 
 
 #write to txt file
-write.table(agg_studies_interventions,paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_studies.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_studies_interventions,paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep=""), sep = "|", row.names = FALSE)
 
 
 

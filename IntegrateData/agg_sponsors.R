@@ -5,7 +5,7 @@ library(lubridate)
 library(data.table)
 
 #set paths for data files
-in_path_agg_studies<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_studies.txt", sep="")
+in_path_agg_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep="")
 
 #reads the data files into dataframes
 agg_studies<-read.csv(in_path_agg_studies, header=TRUE, na.strings = "NA", sep = "|", nrows = -100)
@@ -104,4 +104,4 @@ agg_sponsors2<-agg_sponsors1 %>%
 agg_sponsors<-left_join(agg_sponsors1,agg_sponsors2,by="lead_sponsor_name")
 
 #write to txt file
-write.table(agg_sponsors, paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_sponsors.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_sponsors, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_sponsors.txt", sep=""), sep = "|", row.names = FALSE)

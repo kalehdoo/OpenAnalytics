@@ -5,11 +5,11 @@ library(data.table)
 library(sqldf)
 
 #set paths for data files
-in_path_x_facilities<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_facilities.txt", sep="")
+in_path_x_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_facilities.txt", sep="")
 
 #reads the data files into dataframes
 x_facilities<-read.csv(in_path_x_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-geodata<-read.csv(paste(var_DIR_MISC_HOME,"worldcities.csv", sep=""))
+geodata<-read.csv(paste(var_DIR_HOME,"Data/MISC/worldcities.csv", sep=""))
 
 geodata<- subset.data.frame(geodata, select=c("city_ascii","admin_name", "lat", "lng", "country", "iso2", "iso3")
                  )
@@ -67,5 +67,5 @@ agg_facilities<-mutate(agg_facilities,
 )
 
 #write to txt file
-write.table(agg_facilities, paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_facilities.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_facilities, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep=""), sep = "|", row.names = FALSE)
 

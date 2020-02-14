@@ -3,7 +3,7 @@ library(lubridate)
 library(stringr)
 
 #set paths for data files
-in_path_studies<-paste(var_DIR_ACCT_HOME, "DATA/unzipSrcFiles/studies.txt", sep="")
+in_path_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/unzipSrcFiles/studies.txt", sep="")
 
 #reads the data files into dataframes
 studies<-read.csv(in_path_studies, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
@@ -75,7 +75,7 @@ studies_1<-mutate(studies_1,
 )
 
 #write to txt file
-write.table(studies_1, paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_studies.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(studies_1, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_studies.txt", sep=""), sep = "|", row.names = FALSE)
 
 
 

@@ -3,7 +3,7 @@ library(dplyr)
 library(data.table)
 
 #set paths for data files
-in_path_x_interventions<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_interventions.txt", sep="")
+in_path_x_interventions<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_interventions.txt", sep="")
 
 #reads the data files into dataframes
 x_interventions<-read.csv(in_path_x_interventions, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
@@ -18,4 +18,4 @@ agg_study_interventions<-data.table(x_interventions)[,list(
   ), by='nct_id']
 
 #write to txt file
-write.table(agg_study_interventions, paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_study_interventions.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_study_interventions, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_study_interventions.txt", sep=""), sep = "|", row.names = FALSE)

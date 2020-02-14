@@ -3,7 +3,7 @@ library(lubridate)
 library(stringr)
 
 #set paths for data files
-in_path_sponsors<-paste(var_DIR_ACCT_HOME, "DATA/unzipSrcFiles/sponsors.txt", sep="")
+in_path_sponsors<-paste(var_DIR_HOME, "Data/ACCT/DATA/unzipSrcFiles/sponsors.txt", sep="")
 
 #reads the data files into dataframes
 sponsors<-read.csv(in_path_sponsors, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
@@ -54,6 +54,6 @@ colnames(lead_sponsors)[colnames(lead_sponsors)=="name"]<-"lead_sponsor_name"
 colnames(lead_sponsors)[colnames(lead_sponsors)=="id"]<-"lead_sponsor_id"
 
 #write to txt file
-write.table(lead_sponsors, paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_lead_sponsors.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(lead_sponsors, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_lead_sponsors.txt", sep=""), sep = "|", row.names = FALSE)
 
 

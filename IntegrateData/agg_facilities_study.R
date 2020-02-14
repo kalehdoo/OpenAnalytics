@@ -5,7 +5,7 @@ library(data.table)
 library(sqldf)
 
 #set paths for data files
-in_path_agg_facilities<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_facilities.txt", sep="")
+in_path_agg_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep="")
 
 #reads the data files into dataframes
 agg_facilities<-read.csv(in_path_agg_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
@@ -46,5 +46,5 @@ agg_facilities_site2<-sqldf("select facility_name, count(distinct country) as cn
 agg_facilities_site<-left_join(agg_facilities_site1, agg_facilities_site1, by="facility_name")
 
 #write to txt file
-write.table(agg_facilities_site, paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_facilities_site.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_facilities_site, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities_site.txt", sep=""), sep = "|", row.names = FALSE)
 

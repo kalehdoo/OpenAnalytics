@@ -4,11 +4,11 @@ library(stringr)
 library(data.table)
 
 #set paths for data files
-in_path_x_conditions<-paste(var_DIR_ACCT_HOME, "DATA/warehouse/x_conditions.txt", sep="")
+in_path_x_conditions<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_conditions.txt", sep="")
 
 #reads the data files into dataframes
 x_conditions<-read.csv(in_path_x_conditions, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-rare_disease_list<-read.csv(paste(var_DIR_MISC_HOME,"list_rare_disease.txt", sep=""))
+rare_disease_list<-read.csv(paste(var_DIR_HOME,"Data/MISC/list_rare_disease.txt", sep=""))
 
 #check if condition matches with any of the rare disease in the list
 x_conditions<- mutate(x_conditions,
@@ -33,5 +33,5 @@ agg_conditions<-data.table(x_conditions)[,list(
 
 
 #write to txt file
-write.table(agg_study_conditions, paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_study_conditions.txt", sep=""), sep = "|", row.names = FALSE)
-write.table(agg_conditions, paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_conditions.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_study_conditions, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_study_conditions.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_conditions, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions.txt", sep=""), sep = "|", row.names = FALSE)
