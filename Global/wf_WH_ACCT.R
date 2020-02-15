@@ -4,7 +4,7 @@ library(sqldf)
 #all scripts must be executed in the order
 #create global parameters
 
-#ACCT_HOME to store path of home dir
+#HOME to store path of home dir
 assign("var_DIR_HOME", "C:/Users/ranamanohar/Documents/GitHub/OpenAnalytics/", envir = .GlobalEnv)
 
 #set paths for data files

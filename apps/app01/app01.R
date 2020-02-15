@@ -8,20 +8,16 @@ library(markdown)
 library(DT)
 
 
-
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
 mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
+mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
+mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = country=="united states")
 
 ui <- navbarPage("Open Clinical Analytics",
                  navbarMenu("Recruitment",
                    tabPanel("Find Studies",
-                            sidebarLayout(
-                              sidebarPanel(width = 2,
-                                           checkboxGroupInput("cnames_recruiting", "Select Columns:",
-                                                              names(mv_studies_recruiting_s), selected = names(mv_studies_recruiting_s))
-                              ),
-                              mainPanel(width = 10,
+                              mainPanel(width = 12,
                                         fluidRow(
                                           tags$h5("Find Clinical Studies. Search for anything on the search box on right top or search in individual columns.
                                               Click the hyperlink on ID to navigate to clinicaltrials.gov to view study and contact details.")
@@ -29,14 +25,32 @@ ui <- navbarPage("Open Clinical Analytics",
                                         ),        
                                         #display recriting studies data table
                                         fluidRow(
-                                          DT::dataTableOutput("dt_recruitment_5001")
+                                          DT::dataTableOutput("dt_recruitment_1005")
                                         )
-                              ))
+                              )
                             
                             
                    ),
-                   tabPanel("Tab2"
+                   tabPanel("Recruitment US",
+                            mainPanel(width=12,
+                              fluidRow(
+                                  plotlyOutput("plot_1006")
+                                
+                              )
+                            )
                      
+                   ),
+                   tabPanel("Recruitment World",
+                            mainPanel(width=12,
+                                      fluidRow(
+                                        selectInput("select_map_1007", "Select Region",
+                                          c("world", "europe","asia","africa","north america","south america")
+                                        ),
+                                        plotlyOutput("plot_1007")
+                                        
+                                      )
+                            )
+                            
                    )
                  )
                  ,
@@ -70,13 +84,13 @@ ui <- navbarPage("Open Clinical Analytics",
                             ),
                             mainPanel(
                               fluidRow(
-                                box(plotlyOutput("plot_1005", height = 200), title = "Studies Registered"),
-                                box(plotlyOutput("plot_1006", height = 200), title = "Studies Started")
+                                box(plotlyOutput("plot_10051", height = 200), title = "Studies Registered"),
+                                box(plotlyOutput("plot_10061", height = 200), title = "Studies Started")
                               ),
                               #create box for plot 1001
                               fluidRow(
-                                box(plotlyOutput("plot_1007", height = 200), title = "Studies Completed"),
-                                box(plotlyOutput("plot_1008", height = 200), title = "Results Posted")
+                                box(plotlyOutput("plot_10071", height = 200), title = "Studies Completed"),
+                                box(plotlyOutput("plot_10081", height = 200), title = "Results Posted")
                               )
                             )
                           )
@@ -95,11 +109,64 @@ ui <- navbarPage("Open Clinical Analytics",
   
 
 server <- function(input, output) {
-  #datatable for recruitment
-  output$dt_recruitment_5001<- renderDataTable(
+  
+  #cteate plot 1006
+  output$plot_1006 <- renderPlotly(
     {
-      DT::datatable(mv_studies_recruiting_s[, input$cnames_recruiting, drop=FALSE], filter = 'top', rownames = FALSE,
-                   escape=FALSE )
+      plot_geo(mv_studies_recruiting_loc_US, lat = ~latitude, lon = ~longitude) %>%
+        add_markers(
+          text = ~paste(city, state, paste("Studies:", cnt_studies), sep = "<br />"),
+          color = ~cnt_studies, symbol = I("circle"), size = I(10), hoverinfo = "text"
+        ) %>%
+        hide_colorbar() %>%
+        layout(
+          title = 'Recruiting Studies in USA<br />(Hover for details)', 
+            geo = list(
+            scope = 'usa',
+            projection = list(type = 'albers usa'),
+            showland = TRUE,
+            landcolor = toRGB("gray95"),
+            subunitcolor = toRGB("gray85"),
+            countrycolor = toRGB("gray85"),
+            countrywidth = 0.8,
+            subunitwidth = 0.8
+          )
+        )
+    })
+  
+  #cteate plot 1007
+  output$plot_1007 <- renderPlotly(
+    {
+      plot_geo(mv_studies_recruiting_loc, lat = ~latitude, lon = ~longitude) %>%
+        add_markers(
+          text = ~paste(city, country, paste("Studies:", cnt_studies), sep = "<br />"),
+          color = ~cnt_studies, symbol = I("circle"), size = I(8), hoverinfo = "text"
+        ) %>%
+        hide_colorbar() %>%
+        layout(
+          title = 'Recruiting Studies Across Globe', 
+          geo = list(
+            scope = input$select_map_1007,
+            projection = list(type = 'natural earth'),
+            showland = TRUE,
+            landcolor="#DEDEDE",
+            showocean=TRUE,
+            oceancolor="#A0CFDF",
+            showcountries=TRUE,
+            subunitcolor = "#1A82C7",
+            countrycolor = "#115380",
+            countrywidth = 0.5,
+            subunitwidth = 0.5
+          )
+        )
+    })
+  
+  
+  #datatable for recruitment
+  output$dt_recruitment_1005<- renderDataTable(
+    {
+      DT::datatable(mv_studies_recruiting_s, filter = 'top', escape=FALSE,rownames = FALSE,
+                     )
     }
   )
    

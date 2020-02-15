@@ -1,6 +1,7 @@
 #import libraries
 library(dplyr)
 library(sqldf)
+library(data.table)
 
 #set paths for data files
 in_path_agg_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep="")
@@ -29,7 +30,7 @@ mv_studies_recruiting1<-subset.data.frame(agg_studies,
 
 #create new df with required columns and filter condition
 mv_facilities_recruiting<-subset.data.frame(agg_facilities, 
-                                            status=="Recruiting" |status=="Not yet recruiting",
+                                            status=="Recruiting",
                                          select=c(
                                            "nct_id",
                                            "facility_name",
@@ -51,24 +52,31 @@ mv_studies_recruiting<-left_join(mv_studies_recruiting1, mv_facilities_recruitin
 mv_studies_recruiting$urlid<-paste0("<a href=\'","https://clinicaltrials.gov/ct2/show/",mv_studies_recruiting$nct_id, "\' target=\'_blank\'>",mv_studies_recruiting$nct_id,"</a>")
 
 mv_studies_recruiting_s<-sqldf("Select urlid as 'ID',
+                                condition_name as 'Condition',
                                  official_title as 'Title', 
                                  start_date as 'StartDate',
-                                 phase as 'StudyPhase',
-                                 enrollment as 'Enrollment',
                                  case when has_dmc='t' THEN 'Yes' when has_dmc='f' THEN 'No' ELSE 'NA' END as 'DataMonitoring',
-                                 lead_sponsor_name as 'Sponsor',
-                                 condition_name as 'Condition',
                                  case when flag_rare_condition=1 THEN 'Yes' when flag_rare_condition=0 THEN 'No' ELSE 'NA' END as 'RareDisease',
-                                 facility_name as 'Facility',
-                                 status as 'RecruitingStatus',
                                  upper(city) as 'City',
                                  upper(state) as 'State',
                                  upper(country) as 'Country',
-                                 zip as 'ZipCode'
+                                 zip as 'ZipCode',
+                                 phase as 'StudyPhase',
+                                 lead_sponsor_name as 'Sponsor',
+                                 facility_name as 'Facility'
                               from mv_studies_recruiting")
 
+
+#recruitment by location
+mv_studies_recruiting_loc<-sqldf("select city, state, country, latitude, longitude, 
+                                  count(distinct nct_id) as cnt_studies,
+                                  count(distinct facility_name) as cnt_facilities
+                                 from mv_studies_recruiting 
+                                 group by city")
 
 #write to txt file
 write.table(mv_studies_recruiting,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting.txt", sep=""), sep = "|", row.names = FALSE)
 
 write.table(mv_studies_recruiting_s,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_s.txt", sep=""), sep = "|", row.names = FALSE)
+
+write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_loc.txt", sep=""), sep = "|", row.names = FALSE)
