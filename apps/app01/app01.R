@@ -19,10 +19,10 @@ ui <- navbarPage("Open Clinical Analytics",
                    tabPanel("Find Studies",
                               mainPanel(width = 12,
                                         fluidRow(
-                                          tags$h5("Find Clinical Studies. Search for anything on the search box on right top or search in individual columns.
+                                          tags$h5("Find recruiting Clinical Studies. Search for anything on the search box on right top or search in individual columns.
                                               Click the hyperlink on ID to navigate to clinicaltrials.gov to view study and contact details.")
                                           
-                                        ),        
+                                        ),
                                         #display recriting studies data table
                                         fluidRow(
                                           DT::dataTableOutput("dt_recruitment_1005")
@@ -166,7 +166,12 @@ server <- function(input, output) {
   output$dt_recruitment_1005<- renderDataTable(
     {
       DT::datatable(mv_studies_recruiting_s, filter = 'top', escape=FALSE,rownames = FALSE,
-                     )
+                    options = list(lengthChange = FALSE),callback=JS("
+           //hide column filters for the first column
+          $.each([0], function(i, v) {
+                $('input.form-control').eq(v).hide()
+              });")
+                    )
     }
   )
    
