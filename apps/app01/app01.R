@@ -10,7 +10,7 @@ library(DT)
 
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
+mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 100)
 mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
 mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = country=="united states")
 
@@ -31,24 +31,36 @@ ui <- navbarPage("Open Clinical Analytics",
                             
                             
                    ),
-                   tabPanel("Recruitment US",
+                   tabPanel("Recruitment By Location",
                             mainPanel(width=12,
-                              fluidRow(
-                                  plotlyOutput("plot_1006")
-                                
-                              )
+                                      tabsetPanel(type="tabs",
+                                                  tabPanel("USA",
+                                                           fluidRow(
+                                                             plotlyOutput("plot_1006")
+                                                           )
+                                                    
+                                                  ),
+                                                  tabPanel("World",
+                                                           fluidRow(
+                                                             column(12, align="center",
+                                                               selectInput("select_map_1007", "Select Region",
+                                                                           c("world", "europe","asia","africa","north america","south america")
+                                                             )
+                                                             )
+                                                           ),
+                                                           fluidRow(
+                                                             plotlyOutput("plot_1007")
+                                                           )
+                                                  )
+                                        
+                                      )
+                              
                             )
                      
                    ),
                    tabPanel("Recruitment World",
                             mainPanel(width=12,
-                                      fluidRow(
-                                        selectInput("select_map_1007", "Select Region",
-                                          c("world", "europe","asia","africa","north america","south america")
-                                        ),
-                                        plotlyOutput("plot_1007")
-                                        
-                                      )
+                                      
                             )
                             
                    )
@@ -120,7 +132,7 @@ server <- function(input, output) {
         ) %>%
         hide_colorbar() %>%
         layout(
-          title = 'Recruiting Studies in USA<br />(Hover for details)', 
+          title = 'Recruiting Studies in USA (Hover for details)', 
             geo = list(
             scope = 'usa',
             projection = list(type = 'albers usa'),
