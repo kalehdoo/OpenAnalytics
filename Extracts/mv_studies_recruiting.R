@@ -40,6 +40,10 @@ mv_facilities_recruiting<-subset.data.frame(agg_facilities,
                                            "country",
                                            "zip",
                                            "latitude",
+                                           "longitude",
+                                           "region",
+                                           "iso2",
+                                           "latitude",
                                            "longitude"
                                            )
                                          
@@ -63,7 +67,11 @@ mv_studies_recruiting_s<-sqldf("Select urlid as 'ID',
                                  zip as 'ZipCode',
                                  phase as 'StudyPhase',
                                  lead_sponsor_name as 'Sponsor',
-                                 facility_name as 'Facility'
+                                 facility_name as 'Facility',
+                                 region as 'Region',
+                                 iso2 as 'iso2',
+                                 latitude,
+                                 longitude
                               from mv_studies_recruiting")
 
 

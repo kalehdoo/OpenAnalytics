@@ -9,62 +9,53 @@ in_path_x_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_facilities
 
 #reads the data files into dataframes
 x_facilities<-read.csv(in_path_x_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-geodata<-read.csv(paste(var_DIR_HOME,"Data/MISC/worldcities.csv", sep=""))
 
-geodata<- subset.data.frame(geodata, select=c("city_ascii","admin_name", "lat", "lng", "country", "iso2", "iso3")
-                 )
+#create list of countries
+facility_country<-sqldf("select distinct country from x_facilities")
 
-colnames(geodata)[colnames(geodata)=="city_ascii"]<-"city"
-colnames(geodata)[colnames(geodata)=="admin_name"]<-"state"
+#read master country iso codes
+country_iso<-read.csv(paste0(var_DIR_HOME,"Data/MISC/master_country_iso.csv"), sep=",", na.strings = "", stringsAsFactors=FALSE)
 
-geodata1<-sqldf("select distinct lower(city) as city, lower(state) as state, lat as latitude, lng as longitude, lower(country) as country, iso2, iso3 
-                from geodata 
-                group by city, state, country")
+#join to get iso codes for facility countries
+facility_country_iso1<-sqldf("select distinct facility_country.country, country_iso.iso2, country_iso.iso3, country_iso.region
+                            from facility_country
+                            inner join country_iso 
+                            on (lower(facility_country.country)=lower(country_iso.name)                            )
+                                                       ")
 
+facility_country_iso2<-sqldf("select distinct facility_country.country, country_iso.iso2, country_iso.iso3, country_iso.region
+                            from facility_country
+                            inner join country_iso 
+                            on (lower(facility_country.country)=lower(country_iso.name2)
+                            and length(country_iso.name2)>0)
+                            ")
 
-x_facilities$city<-as.character(casefold(x_facilities$city))
-x_facilities$state<-as.character(casefold(x_facilities$state))
-x_facilities$country<-as.character(casefold(x_facilities$country))
+#merge the two sets
+facility_country_iso<-merge.data.frame(facility_country_iso1, facility_country_iso2, no.dups = TRUE, all=TRUE)
 
-agg_facilities<-left_join(x_facilities, geodata1, by =c("city", "state", "country"))
+#select distinct list
+facility_country_iso_final<-sqldf("select distinct country, iso2, iso3, region
+                            from facility_country_iso
+                            where length(country)>0
+                            and (length(iso2)>0 or length(iso3)>0)
+                            ")
 
+#stich country iso to facilities
+agg_facilities_countryiso<-left_join(x_facilities, facility_country_iso_final, by="country")
 
-#validate 
-#checkagg<-sqldf("select facility_id, count(*) from agg_facilities
-#                group by facility_id
-#                having count(*)>1")
-#checkagg
+#set paths for master geo data
+in_master_geolocation<-paste0(var_DIR_HOME, "Data/MISC/master_geo_city.csv")
+#reads the data files into dataframes
+master_geolocation<-read.csv(in_master_geolocation, header=TRUE, sep = ",", na.strings = "", stringsAsFactors = FALSE, nrows = -2)
 
-#create new columns to classify site into academic and hospitals
-agg_facilities<-mutate(agg_facilities,
-                       "flag_site_recruiting"=if_else(status=="Recruiting",1,0),
-                       "flag_site_US"=if_else(casefold(country)=="united states",1,0),
-                       "site_type"=if_else(facility_name!="Industry" &
-                                             grepl("university",casefold(facility_name)) | 
-                                             grepl("univerzi",casefold(facility_name)) |
-                                             grepl("institut",casefold(facility_name)) |
-                                             grepl("school",casefold(facility_name)) |
-                                             grepl("campus",casefold(facility_name)) |
-                                             grepl("college",casefold(facility_name)) |
-                                             grepl("education",casefold(facility_name)) |
-                                             grepl("academ",casefold(facility_name)) |
-                                             grepl("univers",casefold(facility_name)), "Academic",
-                                           if_else(facility_name!="Industry" &
-                                                     grepl("hospital",casefold(facility_name))|
-                                                     grepl("clinic",casefold(facility_name))|
-                                                     grepl("medical center",casefold(facility_name))|
-                                                     grepl("health center",casefold(facility_name))|
-                                                     grepl("center",casefold(facility_name))|
-                                                     grepl("centre",casefold(facility_name))|
-                                                     grepl("h?pital",casefold(facility_name))|
-                                                     grepl("hopital",casefold(facility_name)), "Hospital" ,
-                                                   if_else(facility_name=="Industry","Industry",
-                                                           if_else(facility_name=="U.S. Fed","U.S. Fed",
-                                                                   if_else(facility_name=="[Redacted]","Redacted",
-                                                                           if_else(facility_name=="NIH","NIH",
-                                                                                   if_else(facility_name=="Other","Other"
-                                                                                           ,"NA")))))))                      
-)
+master_geolocation1<-sqldf("select distinct city, iso2, max(latitude) as latitude, max(longitude) as longitude
+                          from master_geolocation
+                          group by city, iso2")
+
+#stich city lat and long to facilities
+agg_facilities_citylatlong<-left_join(agg_facilities_countryiso, master_geolocation1, by=c("city","iso2"))
+
+agg_facilities<-agg_facilities_citylatlong
 
 #write to txt file
 write.table(agg_facilities, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep=""), sep = "|", row.names = FALSE)

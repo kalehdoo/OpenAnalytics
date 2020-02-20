@@ -10,19 +10,35 @@ library(DT)
 
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 100)
+mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
 mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
-mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = country=="united states")
+mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = country=="United States")
 
 ui <- navbarPage("Open Clinical Analytics",
                  navbarMenu("Recruitment",
+                            tabPanel("Recruitment Summary",
+                                     mainPanel(width=12,
+                                               fluidRow(
+                                                 
+                                               ),
+                                               fluidRow(
+                                                 column(6, align="left",
+                                                        plotlyOutput("plot_1008")
+                                                 )
+                                                 
+                                               )
+                                     )
+                                     
+                            ),         
                    tabPanel("Find Studies",
                               mainPanel(width = 12,
                                         fluidRow(
-                                          tags$h5("Find recruiting Clinical Studies. Search for anything on the search box on right top or search in individual columns.
-                                              Click the hyperlink on ID to navigate to clinicaltrials.gov to view study and contact details.")
-                                          
-                                        ),
+                                          checkboxGroupInput(inputId = "select_dt_1005", 
+                                                             label = "Select your Region to start", 
+                                                             choices = unique(mv_studies_recruiting_s$Region),
+                                                             inline = TRUE
+                                          )
+                                          ),
                                         #display recriting studies data table
                                         fluidRow(
                                           DT::dataTableOutput("dt_recruitment_1005")
@@ -58,9 +74,11 @@ ui <- navbarPage("Open Clinical Analytics",
                             )
                      
                    ),
-                   tabPanel("Recruitment World",
+                   tabPanel("Recruitment Summary2",
                             mainPanel(width=12,
-                                      
+                                fluidRow(
+                                  #infoBoxOutput("Box1")
+                                )      
                             )
                             
                    )
@@ -122,6 +140,14 @@ ui <- navbarPage("Open Clinical Analytics",
 
 server <- function(input, output) {
   
+  #create plot 1008
+  output$plot_1008 <- renderPlotly({
+      mv_studies_recruiting_s %>%
+      group_by(Region) %>%
+      summarise(cnt=n()) %>%
+      plot_ly(values=~cnt, labels=~factor(Region), type='pie')
+  })
+  
   #cteate plot 1006
   output$plot_1006 <- renderPlotly(
     {
@@ -173,11 +199,18 @@ server <- function(input, output) {
         )
     })
   
+
   
   #datatable for recruitment
   output$dt_recruitment_1005<- renderDataTable(
     {
-      DT::datatable(mv_studies_recruiting_s, filter = 'top', escape=FALSE,rownames = FALSE,
+      mv_studies_recruiting_tab<-subset(mv_studies_recruiting_s, 
+                                        select = c("ID","Condition","Title","DataMonitoring","RareDisease","City","State","Country","ZipCode","StudyPhase","Sponsor","Facility"),
+                                        subset=Region==input$select_dt_1005
+                                        )
+      
+      DT::datatable(mv_studies_recruiting_tab, filter = 'top',
+                    escape=FALSE,rownames = FALSE,
                     options = list(lengthChange = FALSE),callback=JS("
            //hide column filters for the first column
           $.each([0], function(i, v) {
