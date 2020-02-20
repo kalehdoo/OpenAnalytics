@@ -6,13 +6,16 @@ library(ggplot2)
 library(plotly)
 library(markdown)
 library(DT)
+library("wordcloud")
+library(tm)
 
 
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
+mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 100)
 mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
 mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = country=="United States")
+agg_Studiesbyconditions<-read.csv("data/agg_Studiesbyconditions.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
 
 ui <- navbarPage("Open Clinical Analytics",
                  navbarMenu("Recruitment",
@@ -74,11 +77,22 @@ ui <- navbarPage("Open Clinical Analytics",
                             )
                      
                    ),
-                   tabPanel("Recruitment Summary2",
+                   tabPanel("Conditions",
                             mainPanel(width=12,
-                                fluidRow(
-                                  #infoBoxOutput("Box1")
-                                )      
+                                      tabsetPanel(type = "tabs",
+                                                  tabPanel("All",
+                                                    fluidRow(
+                                                      plotOutput("plot_1009")
+                                                    )
+                                                  ),
+                                                  tabPanel("Rare Conditions",
+                                                    fluidRow(
+                                                      plotOutput("plot_1010")
+                                                    )
+                                                  )
+                                        
+                                      )
+                                      
                             )
                             
                    )
@@ -139,6 +153,31 @@ ui <- navbarPage("Open Clinical Analytics",
   
 
 server <- function(input, output) {
+  
+  #Create wordcloud plot 1010
+  output$plot_1010 <- renderPlot({
+    wordcloud(words=agg_Studiesbyconditions$condition_name,
+              freq = agg_Studiesbyconditions$cnt_rareconditionstudies,
+              min.freq = 1, max.words=500,
+              #random.order=FALSE, 
+              rot.per=0.35,
+              #textStemming=TRUE,
+              #excludeWords=c("Disease","Syndrome"),
+              colors=brewer.pal(8, "Dark2"))
+  })
+  
+  #Create wordcloud plot 1009
+  output$plot_1009 <- renderPlot({
+    wordcloud(words=agg_Studiesbyconditions$condition_name,
+              freq = agg_Studiesbyconditions$cnt_recruitingstudies,
+              #freq=get(input$select_plot_1009), 
+              min.freq = 1, max.words=500,
+              #random.order=FALSE, 
+              rot.per=0.35,
+              #textStemming=TRUE,
+              #excludeWords=c("Disease","Syndrome"),
+              colors=brewer.pal(8, "Dark2"))
+  })
   
   #create plot 1008
   output$plot_1008 <- renderPlotly({

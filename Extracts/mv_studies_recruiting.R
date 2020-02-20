@@ -28,6 +28,7 @@ mv_studies_recruiting1<-subset.data.frame(agg_studies,
                                    
 )
 
+
 #create new df with required columns and filter condition
 mv_facilities_recruiting<-subset.data.frame(agg_facilities, 
                                             status=="Recruiting",
@@ -52,6 +53,7 @@ mv_facilities_recruiting<-subset.data.frame(agg_facilities,
 
 mv_studies_recruiting1$nct_id<-as.character(mv_studies_recruiting1$nct_id)
 mv_facilities_recruiting$nct_id<-as.character(mv_facilities_recruiting$nct_id)
+#join recruiting facilities to recruiting studies
 mv_studies_recruiting<-left_join(mv_studies_recruiting1, mv_facilities_recruiting, by="nct_id")
 mv_studies_recruiting$urlid<-paste0("<a href=\'","https://clinicaltrials.gov/ct2/show/",mv_studies_recruiting$nct_id, "\' target=\'_blank\'>",mv_studies_recruiting$nct_id,"</a>")
 
@@ -88,3 +90,10 @@ write.table(mv_studies_recruiting,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/m
 write.table(mv_studies_recruiting_s,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_s.txt", sep=""), sep = "|", row.names = FALSE)
 
 write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_loc.txt", sep=""), sep = "|", row.names = FALSE)
+
+#create recruiting studies by condition
+#agg conditions at condition level
+mv_recStudiesByCondition<-data.table(mv_studies_recruiting1)[,list( 
+  cnt_studies = length(nct_id)
+), by='condition_name']
+
