@@ -16,6 +16,9 @@ mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRU
 mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
 mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = country=="United States")
 agg_Studiesbyconditions<-read.csv("data/agg_Studiesbyconditions.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
+agg_condition_wordcount<-read.csv("data/agg_condition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
+agg_rarecondition_wordcount<-read.csv("data/agg_rarecondition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
+
 
 ui <- navbarPage("Open Clinical Analytics",
                  navbarMenu("Recruitment",
@@ -80,15 +83,20 @@ ui <- navbarPage("Open Clinical Analytics",
                    tabPanel("Conditions",
                             mainPanel(width=12,
                                       tabsetPanel(type = "tabs",
-                                                  tabPanel("All",
+                                                  tabPanel("Studies",
                                                     fluidRow(
                                                       plotOutput("plot_1009")
                                                     )
                                                   ),
-                                                  tabPanel("Rare Conditions",
+                                                  tabPanel("Conditioncount",
                                                     fluidRow(
                                                       plotOutput("plot_1010")
                                                     )
+                                                  ),
+                                                  tabPanel("Rare Disease",
+                                                           fluidRow(
+                                                             plotOutput("plot_1011")
+                                                           )
                                                   )
                                         
                                       )
@@ -154,15 +162,29 @@ ui <- navbarPage("Open Clinical Analytics",
 
 server <- function(input, output) {
   
+  #Create wordcloud plot 1011
+  output$plot_1011 <- renderPlot({
+    wordcloud(words=agg_rarecondition_wordcount$condition_name,
+              freq = agg_rarecondition_wordcount$cnt,
+              scale = c(3,0.5),
+              min.freq = 1, max.words=500,
+              random.order=FALSE,
+              random.color = FALSE,
+              fixed.asp = FALSE,
+              rot.per=0,
+              colors=brewer.pal(8, "Dark2"))
+  })
+  
   #Create wordcloud plot 1010
   output$plot_1010 <- renderPlot({
-    wordcloud(words=agg_Studiesbyconditions$condition_name,
-              freq = agg_Studiesbyconditions$cnt_rareconditionstudies,
+    wordcloud(words=agg_condition_wordcount$condition_name,
+              freq = agg_condition_wordcount$cnt,
+              scale = c(3,0.5),
               min.freq = 1, max.words=500,
-              #random.order=FALSE, 
-              rot.per=0.35,
-              #textStemming=TRUE,
-              #excludeWords=c("Disease","Syndrome"),
+              random.order=FALSE,
+              random.color = FALSE,
+              fixed.asp = FALSE,
+              rot.per=0,
               colors=brewer.pal(8, "Dark2"))
   })
   
@@ -170,10 +192,12 @@ server <- function(input, output) {
   output$plot_1009 <- renderPlot({
     wordcloud(words=agg_Studiesbyconditions$condition_name,
               freq = agg_Studiesbyconditions$cnt_recruitingstudies,
-              #freq=get(input$select_plot_1009), 
+              scale = c(3,0.5), 
               min.freq = 1, max.words=500,
-              #random.order=FALSE, 
-              rot.per=0.35,
+              random.order=FALSE,
+              random.color = FALSE,
+              rot.per=0,
+              fixed.asp = FALSE,
               #textStemming=TRUE,
               #excludeWords=c("Disease","Syndrome"),
               colors=brewer.pal(8, "Dark2"))
