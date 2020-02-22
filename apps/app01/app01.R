@@ -8,6 +8,8 @@ library(markdown)
 library(DT)
 library("wordcloud")
 library(tm)
+library(RColorBrewer)
+library(leaflet)
 
 
 #read data
@@ -203,12 +205,16 @@ server <- function(input, output) {
               colors=brewer.pal(8, "Dark2"))
   })
   
+  
   #create plot 1008
   output$plot_1008 <- renderPlotly({
       mv_studies_recruiting_s %>%
       group_by(Region) %>%
-      summarise(cnt=n()) %>%
-      plot_ly(values=~cnt, labels=~factor(Region), type='pie')
+      summarise(cnt=length(unique((ID)))) %>%
+      plot_ly(values=~cnt, labels=~factor(Region), type='pie')%>%
+      layout(title="Recruiting Studies by Region",
+             legend=list(orientation="h"))
+      
   })
   
   #cteate plot 1006
@@ -217,7 +223,7 @@ server <- function(input, output) {
       plot_geo(mv_studies_recruiting_loc_US, lat = ~latitude, lon = ~longitude) %>%
         add_markers(
           text = ~paste(city, state, paste("Studies:", cnt_studies), sep = "<br />"),
-          color = ~cnt_studies, symbol = I("circle"), size = I(10), hoverinfo = "text"
+          color = ~cnt_studies, symbol = I("circle"), size = ~cnt_studies*4, hoverinfo = "text"
         ) %>%
         hide_colorbar() %>%
         layout(
@@ -229,8 +235,8 @@ server <- function(input, output) {
             landcolor = toRGB("gray95"),
             subunitcolor = toRGB("gray85"),
             countrycolor = toRGB("gray85"),
-            countrywidth = 0.8,
-            subunitwidth = 0.8
+            countrywidth = 0.5,
+            subunitwidth = 1.0
           )
         )
     })
@@ -241,7 +247,7 @@ server <- function(input, output) {
       plot_geo(mv_studies_recruiting_loc, lat = ~latitude, lon = ~longitude) %>%
         add_markers(
           text = ~paste(city, country, paste("Studies:", cnt_studies), sep = "<br />"),
-          color = ~cnt_studies, symbol = I("circle"), size = I(8), hoverinfo = "text"
+          color = ~cnt_studies, symbol = I("circle"), size = ~cnt_studies*4, hoverinfo = "text"
         ) %>%
         hide_colorbar() %>%
         layout(
@@ -257,7 +263,7 @@ server <- function(input, output) {
             subunitcolor = "#1A82C7",
             countrycolor = "#115380",
             countrywidth = 0.5,
-            subunitwidth = 0.5
+            subunitwidth = 0.8
           )
         )
     })
