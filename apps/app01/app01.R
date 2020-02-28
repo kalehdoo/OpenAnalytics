@@ -52,11 +52,16 @@ ui <- navbarPage("Open Clinical Analytics",
                                         tabsetPanel(type="tabs",
                                                     tabPanel("Map",
                                                              fluidRow(
-                                                               column(12, align="center",
-                                                               selectInput(inputId = "select_country_map", 
-                                                                                  label = "Choose Country", 
+                                                               column(4, align="center", 
+                                                               selectInput(inputId = "select_country_map",
+                                                                           label = "Choose Country",
                                                                                   choices = unique(mv_studies_recruiting$country)
                                                                )
+                                                               ),
+                                                               column(7, align="left", 
+                                                                      textAreaInput(inputId = "select_condition_map",
+                                                                                  label = "Search Condition"
+                                                                      )
                                                                )
                                                              ),
                                                              fluidRow(
@@ -66,8 +71,8 @@ ui <- navbarPage("Open Clinical Analytics",
                                                     tabPanel("Table",
                                                              fluidRow(
                                                                column(12, align="center",
-                                                               selectInput(inputId = "select_country_tab", 
-                                                                           label = "Choose Country", 
+                                                               selectInput(inputId = "select_country_tab",
+                                                                           label = NULL,
                                                                            choices = unique(mv_studies_recruiting$country)
                                                                )
                                                                )
@@ -207,8 +212,8 @@ server <- function(input, output) {
   mv_studies_recruiting_map<-reactive({
     #createleaflet plot 1014 based on reactive set
     subset(mv_studies_recruiting, 
-           select = c("city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"),
-           subset=(country==input$select_country_map))
+           select = c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"),
+           subset=(country==input$select_country_map & casefold(Condition) %like%  casefold(input$select_condition_map)))
   })
   
   #reactive dataset for table with selected columns
@@ -220,16 +225,17 @@ server <- function(input, output) {
 
   #createleaflet plot 1014
   #function to display labels
-  f_labels_1014 <- function(){sprintf("<strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",mv_studies_recruiting_map()$country,mv_studies_recruiting_map()$state, mv_studies_recruiting_map()$city, mv_studies_recruiting_map()$Facility,mv_studies_recruiting_map()$Sponsor,mv_studies_recruiting_map()$Condition) %>% 
+  f_labels_1014 <- function(){sprintf("<br><strong>Study ID: %s</strong></br><strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",mv_studies_recruiting_map()$ID,mv_studies_recruiting_map()$country,mv_studies_recruiting_map()$state, mv_studies_recruiting_map()$city, mv_studies_recruiting_map()$Facility,mv_studies_recruiting_map()$Sponsor,mv_studies_recruiting_map()$Condition) %>% 
     lapply(htmltools::HTML)
   }
   output$plot_1014 <- renderLeaflet({
     leaflet(data=mv_studies_recruiting_map()) %>%
-      setView(lng=-15.037721, lat=14.451703, zoom=2) %>%
+      setView(lng=-15.037721, lat=14.451703, zoom=2.2) %>%
       addProviderTiles(providers$CartoDB.Positron,
                        options = providerTileOptions(noWrap = TRUE)) %>%
       addMarkers(~longitude, ~latitude,
-                 label = f_labels_1014(),
+                 popup = f_labels_1014(),
+                 #label = f_labels_1014(),
                  clusterOptions = markerClusterOptions())
   })
   
