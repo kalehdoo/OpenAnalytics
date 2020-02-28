@@ -7,6 +7,7 @@ in_path_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/unzipSrcFiles/facilities
 #reads the data files into dataframes
 facilities<-read.csv(in_path_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors=FALSE)
 
+facilities$name<-str_remove_all(facilities$name, "[',|]")
 colnames(facilities)[colnames(facilities)=="id"]<-"facility_id"
 colnames(facilities)[colnames(facilities)=="name"]<-"facility_name"
 
@@ -42,7 +43,7 @@ facilities<-mutate(facilities,
 )
 
 #write to txt file
-write.table(facilities, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_facilities.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(facilities, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_facilities.txt", sep=""), sep = "|", row.names = FALSE, quote = FALSE)
 
 
 

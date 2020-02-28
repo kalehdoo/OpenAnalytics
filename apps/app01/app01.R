@@ -10,59 +10,90 @@ library("wordcloud")
 library(tm)
 library(RColorBrewer)
 library(leaflet)
+library(htmltools)
+
 
 
 #read data
-mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-mv_studies_recruiting_s<-read.csv("data/mv_studies_recruiting_s.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 100)
-mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
-mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = country=="United States")
-agg_Studiesbyconditions<-read.csv("data/agg_Studiesbyconditions.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
-agg_condition_wordcount<-read.csv("data/agg_condition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
-agg_rarecondition_wordcount<-read.csv("data/agg_rarecondition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100)
+mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+mv_studies_recruiting<-subset.data.frame(mv_studies_recruiting, subset = (is.na(latitude)==FALSE))
+mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+mv_studies_recruiting_loc<-subset.data.frame(mv_studies_recruiting_loc, subset = (is.na(latitude)==FALSE))
+mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = (iso3=="USA" & length(latitude)>0))
+agg_Studiesbyconditions<-read.csv("data/agg_Studiesbyconditions.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+agg_condition_wordcount<-read.csv("data/agg_condition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+agg_rarecondition_wordcount<-read.csv("data/agg_rarecondition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
 
 
 ui <- navbarPage("Open Clinical Analytics",
                  navbarMenu("Recruitment",
                             tabPanel("Recruitment Summary",
                                      mainPanel(width=12,
-                                               fluidRow(
-                                                 
-                                               ),
-                                               fluidRow(
-                                                 column(6, align="left",
-                                                        plotlyOutput("plot_1008")
-                                                 )
-                                                 
-                                               )
+                                               tabsetPanel(type="tabs",
+                                                           tabPanel("dummy",
+                                                                    fluidRow(
+                                                                      leafletOutput("plot_1012xxx")
+                                                                    )
+                                                           ),
+                                                           tabPanel("Summary",
+                                                             fluidRow(
+                                                               column(6, align="left",
+                                                                      plotlyOutput("plot_1008")                                                               )
+                                                               
+                                                             )
+                                                           )
+                                                           )
+                                               
                                      )
                                      
                             ),         
                    tabPanel("Find Studies",
                               mainPanel(width = 12,
-                                        fluidRow(
-                                          checkboxGroupInput(inputId = "select_dt_1005", 
-                                                             label = "Select your Region to start", 
-                                                             choices = unique(mv_studies_recruiting_s$Region),
-                                                             inline = TRUE
-                                          )
-                                          ),
-                                        #display recriting studies data table
-                                        fluidRow(
-                                          DT::dataTableOutput("dt_recruitment_1005")
+                                        tabsetPanel(type="tabs",
+                                                    tabPanel("Map",
+                                                             fluidRow(
+                                                               leafletOutput("plot_1014")
+                                                             )
+                                                             ),
+                                                    tabPanel("Table",
+                                                             fluidRow(
+                                                               checkboxGroupInput(inputId = "select_dt_1005", 
+                                                                                  label = "Select your Region to start", 
+                                                                                  choices = unique(mv_studies_recruiting$Region),
+                                                                                  inline = TRUE
+                                                               )
+                                                             ),
+                                                             #display recriting studies data table
+                                                             fluidRow(
+                                                               DT::dataTableOutput("dt_recruitment_1005")
+                                                             )
+                                                             )
+                                                             
+                                                    )
+                                                    
                                         )
-                              )
-                            
-                            
-                   ),
-                   tabPanel("Recruitment By Location",
+                              ),
+                   tabPanel("Geography",
                             mainPanel(width=12,
                                       tabsetPanel(type="tabs",
-                                                  tabPanel("USA",
+                                                  tabPanel("USA Map",
+                                                           fluidRow(
+                                                             leafletOutput("plot_1012")
+                                                           )
+                                                           
+                                                  ),
+                                                  tabPanel("USA Scatter",
                                                            fluidRow(
                                                              plotlyOutput("plot_1006")
                                                            )
                                                     
+                                                  ),
+                                                  tabPanel("World Map",
+                                                           fluidRow(
+                                                             leafletOutput("plot_1013")
+                                                           )
+                                                           
                                                   ),
                                                   tabPanel("World",
                                                            fluidRow(
@@ -164,6 +195,49 @@ ui <- navbarPage("Open Clinical Analytics",
 
 server <- function(input, output) {
   
+  #createleaflet plot 1014
+  labels_1014 <- sprintf("<strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Conditions: %s</strong>",mv_studies_recruiting$country,mv_studies_recruiting$state, mv_studies_recruiting$city, mv_studies_recruiting$Facility,mv_studies_recruiting$Condition) %>% 
+    lapply(htmltools::HTML)
+  
+  output$plot_1014 <- renderLeaflet({
+    leaflet(data=mv_studies_recruiting) %>%
+      setView(lng=-3.727919, lat=40.463666, zoom=2) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      addMarkers(~longitude, ~latitude,
+                 label = labels_1014,
+                 clusterOptions = markerClusterOptions())
+  })
+  
+  #createleaflet plot 1013
+  labels_1013 <- sprintf("<strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Recruiting Studies: %s</strong>",mv_studies_recruiting_loc$state, mv_studies_recruiting_loc$city, mv_studies_recruiting_loc$cnt_studies) %>% 
+    lapply(htmltools::HTML)
+  
+  output$plot_1013 <- renderLeaflet({
+    leaflet(data=mv_studies_recruiting_loc) %>%
+      setView(lng=-3.727919, lat=40.463666, zoom=2) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      addMarkers(~longitude, ~latitude,
+                 label = labels_1013,
+                 clusterOptions = markerClusterOptions())
+  })
+  
+  #createleaflet only US plot 1012
+  labels_1012 <- sprintf("<strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Recruiting Studies: %s</strong>",mv_studies_recruiting_loc_US$state, mv_studies_recruiting_loc_US$city, mv_studies_recruiting_loc_US$cnt_studies) %>% 
+    lapply(htmltools::HTML)
+  
+  output$plot_1012 <- renderLeaflet({
+    leaflet(data=mv_studies_recruiting_loc_US) %>%
+      setView(lng=-97.922211, lat=39.381266, zoom=4.4) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      addMarkers(~longitude, ~latitude,
+                 label = labels_1012,
+                 clusterOptions = markerClusterOptions())
+  })
+
+  
   #Create wordcloud plot 1011
   output$plot_1011 <- renderPlot({
     wordcloud(words=agg_rarecondition_wordcount$condition_name,
@@ -208,7 +282,7 @@ server <- function(input, output) {
   
   #create plot 1008
   output$plot_1008 <- renderPlotly({
-      mv_studies_recruiting_s %>%
+      mv_studies_recruiting %>%
       group_by(Region) %>%
       summarise(cnt=length(unique((ID)))) %>%
       plot_ly(values=~cnt, labels=~factor(Region), type='pie')%>%
@@ -217,7 +291,7 @@ server <- function(input, output) {
       
   })
   
-  #cteate plot 1006
+  #create plot 1006
   output$plot_1006 <- renderPlotly(
     {
       plot_geo(mv_studies_recruiting_loc_US, lat = ~latitude, lon = ~longitude) %>%
@@ -227,7 +301,7 @@ server <- function(input, output) {
         ) %>%
         hide_colorbar() %>%
         layout(
-          title = 'Recruiting Studies in USA (Hover for details)', 
+          title = 'Recruiting Studies in USA', 
             geo = list(
             scope = 'usa',
             projection = list(type = 'albers usa'),
@@ -246,7 +320,7 @@ server <- function(input, output) {
     {
       plot_geo(mv_studies_recruiting_loc, lat = ~latitude, lon = ~longitude) %>%
         add_markers(
-          text = ~paste(city, country, paste("Studies:", cnt_studies), sep = "<br />"),
+          text = ~paste(city, iso3, paste("Studies:", cnt_studies), sep = "<br />"),
           color = ~cnt_studies, symbol = I("circle"), size = ~cnt_studies*4, hoverinfo = "text"
         ) %>%
         hide_colorbar() %>%
@@ -273,8 +347,8 @@ server <- function(input, output) {
   #datatable for recruitment
   output$dt_recruitment_1005<- renderDataTable(
     {
-      mv_studies_recruiting_tab<-subset(mv_studies_recruiting_s, 
-                                        select = c("ID","Condition","Title","DataMonitoring","RareDisease","City","State","Country","ZipCode","StudyPhase","Sponsor","Facility"),
+      mv_studies_recruiting_tab<-subset(mv_studies_recruiting, 
+                                        select = c("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility"),
                                         subset=Region==input$select_dt_1005
                                         )
       

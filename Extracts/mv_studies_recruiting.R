@@ -9,10 +9,13 @@ in_path_agg_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facili
 
 #reads the data files into dataframes
 agg_studies<-read.csv(in_path_agg_studies, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
-agg_facilities<-read.csv(in_path_agg_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
+agg_facilities<-read.csv(in_path_agg_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+
+agg_studies$official_title<-str_remove_all(agg_studies$official_title, "[',|]")
+agg_studies$condition_name<-str_remove_all(agg_studies$condition_name, "[',|]")
 
 #create new df with required columns and filter condition
-mv_studies_recruiting1<-subset.data.frame(agg_studies, 
+mv_studies_recruiting<-subset.data.frame(agg_studies, 
                                    subset=overall_status=="Recruiting" ,
                                    select=c(
                                      "nct_id",
@@ -36,14 +39,14 @@ mv_facilities_recruiting<-subset.data.frame(agg_facilities,
                                            "nct_id",
                                            "facility_name",
                                            "status",
-                                           "City"="city",
+                                           "city",
                                            "state",
                                            "country",
-                                           "zip",
-                                           "latitude",
-                                           "longitude",
                                            "region",
                                            "iso2",
+                                           "iso3",
+                                           "statecode",
+                                           "zip",
                                            "latitude",
                                            "longitude"
                                            )
@@ -51,49 +54,48 @@ mv_facilities_recruiting<-subset.data.frame(agg_facilities,
 )
 
 
-mv_studies_recruiting1$nct_id<-as.character(mv_studies_recruiting1$nct_id)
-mv_facilities_recruiting$nct_id<-as.character(mv_facilities_recruiting$nct_id)
-#join recruiting facilities to recruiting studies
-mv_studies_recruiting<-left_join(mv_studies_recruiting1, mv_facilities_recruiting, by="nct_id")
+mv_studies_recruiting$nct_id<-as.character(mv_studies_recruiting$nct_id)
 mv_studies_recruiting$urlid<-paste0("<a href=\'","https://clinicaltrials.gov/ct2/show/",mv_studies_recruiting$nct_id, "\' target=\'_blank\'>",mv_studies_recruiting$nct_id,"</a>")
 
-mv_studies_recruiting_s<-sqldf("Select urlid as 'ID',
+mv_facilities_recruiting$nct_id<-as.character(mv_facilities_recruiting$nct_id)
+#join recruiting facilities to recruiting studies
+mv_studies_recruiting<-left_join(mv_studies_recruiting, mv_facilities_recruiting, by="nct_id")
+
+mv_studies_recruiting<-sqldf("Select urlid as 'ID',
+                                nct_id,
                                 condition_name as 'Condition',
                                  official_title as 'Title', 
                                  start_date as 'StartDate',
                                  case when has_dmc='t' THEN 'Yes' when has_dmc='f' THEN 'No' ELSE 'NA' END as 'DataMonitoring',
                                  case when flag_rare_condition=1 THEN 'Yes' when flag_rare_condition=0 THEN 'No' ELSE 'NA' END as 'RareDisease',
-                                 upper(city) as 'City',
-                                 upper(state) as 'State',
-                                 upper(country) as 'Country',
+                                 city,
+                                 state,
+                                 country,
                                  zip as 'ZipCode',
                                  phase as 'StudyPhase',
                                  lead_sponsor_name as 'Sponsor',
                                  facility_name as 'Facility',
                                  region as 'Region',
-                                 iso2 as 'iso2',
+                                 iso2,
+                                 iso3,
+                                 statecode,
                                  latitude,
                                  longitude
-                              from mv_studies_recruiting")
+                              from mv_studies_recruiting
+                             where nct_id is not null")
 
 
 #recruitment by location
-mv_studies_recruiting_loc<-sqldf("select city, state, country, latitude, longitude, 
-                                  count(distinct nct_id) as cnt_studies,
-                                  count(distinct facility_name) as cnt_facilities
-                                 from mv_studies_recruiting 
-                                 group by city")
+#agg conditions at condition level
+mv_studies_recruiting_loc<-data.table(mv_studies_recruiting)[,list(
+  latitude=median(as.double(latitude)),
+  longitude=median(as.double(longitude)),
+  cnt_studies = length(unique(nct_id))
+), by=c('iso2','iso3', 'state','statecode','city')]
+
 
 #write to txt file
 write.table(mv_studies_recruiting,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting.txt", sep=""), sep = "|", row.names = FALSE)
 
-write.table(mv_studies_recruiting_s,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_s.txt", sep=""), sep = "|", row.names = FALSE)
-
 write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_loc.txt", sep=""), sep = "|", row.names = FALSE)
-
-#create recruiting studies by condition
-#agg conditions at condition level
-mv_recStudiesByCondition<-data.table(mv_studies_recruiting1)[,list( 
-  cnt_studies = length(nct_id)
-), by='condition_name']
 
