@@ -6,17 +6,16 @@ library(ggplot2)
 library(plotly)
 library(markdown)
 library(DT)
-library("wordcloud")
-library(tm)
+# library("wordcloud")
+# library(tm)
 library(RColorBrewer)
 library(leaflet)
 library(htmltools)
 
 
-
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
-mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -1000, stringsAsFactors = FALSE)
 mv_studies_recruiting<-subset.data.frame(mv_studies_recruiting, subset = (is.na(latitude)==FALSE))
 mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
 mv_studies_recruiting_loc<-subset.data.frame(mv_studies_recruiting_loc, subset = (is.na(latitude)==FALSE))
@@ -53,15 +52,24 @@ ui <- navbarPage("Open Clinical Analytics",
                                         tabsetPanel(type="tabs",
                                                     tabPanel("Map",
                                                              fluidRow(
+                                                               column(12, align="center",
+                                                               selectInput(inputId = "select_country_map", 
+                                                                                  label = "Choose Country", 
+                                                                                  choices = unique(mv_studies_recruiting$country)
+                                                               )
+                                                               )
+                                                             ),
+                                                             fluidRow(
                                                                leafletOutput("plot_1014")
                                                              )
                                                              ),
                                                     tabPanel("Table",
                                                              fluidRow(
-                                                               checkboxGroupInput(inputId = "select_dt_1005", 
-                                                                                  label = "Select your Region to start", 
-                                                                                  choices = unique(mv_studies_recruiting$Region),
-                                                                                  inline = TRUE
+                                                               column(12, align="center",
+                                                               selectInput(inputId = "select_country_tab", 
+                                                                           label = "Choose Country", 
+                                                                           choices = unique(mv_studies_recruiting$country)
+                                                               )
                                                                )
                                                              ),
                                                              #display recriting studies data table
@@ -195,17 +203,33 @@ ui <- navbarPage("Open Clinical Analytics",
 
 server <- function(input, output) {
   
-  #createleaflet plot 1014
-  labels_1014 <- sprintf("<strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Conditions: %s</strong>",mv_studies_recruiting$country,mv_studies_recruiting$state, mv_studies_recruiting$city, mv_studies_recruiting$Facility,mv_studies_recruiting$Condition) %>% 
-    lapply(htmltools::HTML)
+  #reactive dataset for maps with reduced columns
+  mv_studies_recruiting_map<-reactive({
+    #createleaflet plot 1014 based on reactive set
+    subset(mv_studies_recruiting, 
+           select = c("city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"),
+           subset=(country==input$select_country_map))
+  })
   
+  #reactive dataset for table with selected columns
+  mv_studies_recruiting_tab<-reactive({
+    subset(mv_studies_recruiting, 
+           select = c("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility"),
+           subset=(country==input$select_country_tab))
+  })
+
+  #createleaflet plot 1014
+  #function to display labels
+  f_labels_1014 <- function(){sprintf("<strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",mv_studies_recruiting_map()$country,mv_studies_recruiting_map()$state, mv_studies_recruiting_map()$city, mv_studies_recruiting_map()$Facility,mv_studies_recruiting_map()$Sponsor,mv_studies_recruiting_map()$Condition) %>% 
+    lapply(htmltools::HTML)
+  }
   output$plot_1014 <- renderLeaflet({
-    leaflet(data=mv_studies_recruiting) %>%
-      setView(lng=-3.727919, lat=40.463666, zoom=2) %>%
+    leaflet(data=mv_studies_recruiting_map()) %>%
+      setView(lng=-15.037721, lat=14.451703, zoom=2) %>%
       addProviderTiles(providers$CartoDB.Positron,
                        options = providerTileOptions(noWrap = TRUE)) %>%
       addMarkers(~longitude, ~latitude,
-                 label = labels_1014,
+                 label = f_labels_1014(),
                  clusterOptions = markerClusterOptions())
   })
   
@@ -345,14 +369,10 @@ server <- function(input, output) {
 
   
   #datatable for recruitment
-  output$dt_recruitment_1005<- renderDataTable(
-    {
-      mv_studies_recruiting_tab<-subset(mv_studies_recruiting, 
-                                        select = c("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility"),
-                                        subset=Region==input$select_dt_1005
-                                        )
-      
-      DT::datatable(mv_studies_recruiting_tab, filter = 'top',
+  
+  
+  output$dt_recruitment_1005<- renderDataTable({
+      DT::datatable(mv_studies_recruiting_tab(), filter = 'top',
                     escape=FALSE,rownames = FALSE,
                     options = list(lengthChange = FALSE),callback=JS("
            //hide column filters for the first column

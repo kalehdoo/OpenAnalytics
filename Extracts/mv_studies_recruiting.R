@@ -1,18 +1,20 @@
-#import libraries
-library(dplyr)
-library(sqldf)
-library(data.table)
-
-#set paths for data files
-in_path_agg_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep="")
-in_path_agg_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep="")
+  #import libraries
+  library(dplyr)
+  library(sqldf)
+  library(data.table)
+  library(stringr)
+  
+  #set paths for data files
+  in_path_agg_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep="")
+  in_path_agg_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep="")
 
 #reads the data files into dataframes
 agg_studies<-read.csv(in_path_agg_studies, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
 agg_facilities<-read.csv(in_path_agg_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
 
 agg_studies$official_title<-str_remove_all(agg_studies$official_title, "[',|]")
-agg_studies$condition_name<-str_remove_all(agg_studies$condition_name, "[',|]")
+agg_studies$condition_name<-str_remove_all(agg_studies$condition_name, "['|]")
+
 
 #create new df with required columns and filter condition
 mv_studies_recruiting<-subset.data.frame(agg_studies, 
