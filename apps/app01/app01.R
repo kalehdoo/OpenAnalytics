@@ -6,16 +6,16 @@ library(ggplot2)
 library(plotly)
 library(markdown)
 library(DT)
-# library("wordcloud")
-# library(tm)
 library(RColorBrewer)
 library(leaflet)
 library(htmltools)
+library(data.table)
+library(wordcloud)
 
 
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
-mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -1000, stringsAsFactors = FALSE)
+mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 10000, stringsAsFactors = FALSE)
 mv_studies_recruiting<-subset.data.frame(mv_studies_recruiting, subset = (is.na(latitude)==FALSE))
 mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
 mv_studies_recruiting_loc<-subset.data.frame(mv_studies_recruiting_loc, subset = (is.na(latitude)==FALSE))
@@ -25,9 +25,9 @@ agg_condition_wordcount<-read.csv("data/agg_condition_wordcount.txt", header=TRU
 agg_rarecondition_wordcount<-read.csv("data/agg_rarecondition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
 
 
-ui <- navbarPage("Open Clinical Analytics",
+ui <- shinyUI(navbarPage(title="Kalehdoo", 
                  navbarMenu("Recruitment",
-                            tabPanel("Recruitment Summary",
+                            tabPanel("Summary",
                                      mainPanel(width=12,
                                                tabsetPanel(type="tabs",
                                                            tabPanel("dummy",
@@ -47,7 +47,7 @@ ui <- navbarPage("Open Clinical Analytics",
                                      )
                                      
                             ),         
-                   tabPanel("Find Studies",
+                   tabPanel("Study Finder",
                               mainPanel(width = 12,
                                         tabsetPanel(type="tabs",
                                                     tabPanel("Map",
@@ -90,7 +90,13 @@ ui <- navbarPage("Open Clinical Analytics",
                    tabPanel("Geography",
                             mainPanel(width=12,
                                       tabsetPanel(type="tabs",
-                                                  tabPanel("USA Map",
+                                                  tabPanel("USA States",
+                                                           fluidRow(
+                                                             plotlyOutput("plot_1015")
+                                                           )
+                                                           
+                                                  ),
+                                                  tabPanel("USA Cities",
                                                            fluidRow(
                                                              leafletOutput("plot_1012")
                                                            )
@@ -102,13 +108,13 @@ ui <- navbarPage("Open Clinical Analytics",
                                                            )
                                                     
                                                   ),
-                                                  tabPanel("World Map",
+                                                  tabPanel("World Cities",
                                                            fluidRow(
                                                              leafletOutput("plot_1013")
                                                            )
                                                            
                                                   ),
-                                                  tabPanel("World",
+                                                  tabPanel("World Scatter",
                                                            fluidRow(
                                                              column(12, align="center",
                                                                selectInput("select_map_1007", "Select Region",
@@ -119,6 +125,12 @@ ui <- navbarPage("Open Clinical Analytics",
                                                            fluidRow(
                                                              plotlyOutput("plot_1007")
                                                            )
+                                                  ),
+                                                  tabPanel("World Countries",
+                                                           fluidRow(
+                                                             plotlyOutput("plot_1016")
+                                                           )
+                                                           
                                                   )
                                         
                                       )
@@ -204,6 +216,7 @@ ui <- navbarPage("Open Clinical Analytics",
                    
                  )
                  )
+)
   
 
 server <- function(input, output) {
@@ -239,8 +252,62 @@ server <- function(input, output) {
                  clusterOptions = markerClusterOptions())
   })
   
-  #createleaflet plot 1013
-  labels_1013 <- sprintf("<strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Recruiting Studies: %s</strong>",mv_studies_recruiting_loc$state, mv_studies_recruiting_loc$city, mv_studies_recruiting_loc$cnt_studies) %>% 
+  #create choropleth plot 1016 world map
+  mv_studies_recruiting_loc_agg<-mv_studies_recruiting_loc %>%
+    group_by(iso3) %>%
+    summarise(total_studies=sum(cnt_studies))
+  
+  output$plot_1016 <- renderPlotly({
+    plot_geo(mv_studies_recruiting_loc_agg) %>%
+      add_trace(
+        z=~total_studies, locations=~iso3,
+        color=~total_studies, colors=brewer.pal(7,"Reds")) %>%
+      hide_colorbar() %>%
+      layout(
+        title = 'Recruiting Studies in World', 
+        geo = list(
+          scope = input$select_map_1007,
+          projection = list(type = 'natural earth'),
+          showland = TRUE,
+          landcolor="#DEDEDE",
+          showocean=TRUE,
+          oceancolor="#A0CFDF",
+          showcountries=TRUE,
+          subunitcolor = "#1A82C7",
+          countrycolor = "#115380",
+          countrywidth = 0.5,
+          subunitwidth = 0.8
+        )
+      )
+  })
+  
+    mv_studies_recruiting_loc_US_agg<-mv_studies_recruiting_loc_US %>%
+    group_by(statecode) %>%
+    summarise(total_studies=sum(cnt_studies))
+  
+    #create choropleth plot 1015 US states map
+    output$plot_1015 <- renderPlotly({
+      plot_geo(mv_studies_recruiting_loc_US_agg, locationmode="USA-states") %>%
+      add_trace(
+        z=~total_studies, locations=~statecode,
+        color=~total_studies, colors=brewer.pal(7,"Oranges")) %>%
+      hide_colorbar() %>%
+      layout(
+        title = 'Recruiting Studies in USA', 
+        geo = list(
+          projection = list(type = 'albers usa'),
+          showland = TRUE,
+          landcolor = toRGB("gray95"),
+          subunitcolor = toRGB("gray85"),
+          countrycolor = toRGB("gray85"),
+          countrywidth = 0.5,
+          subunitwidth = 1.0
+        )
+      )
+  })
+  
+  #createleaflet plot 1013 world map
+  labels_1013 <- sprintf("<strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Recruiting Studies: %s</strong>",mv_studies_recruiting_loc$iso3,mv_studies_recruiting_loc$state, mv_studies_recruiting_loc$city, mv_studies_recruiting_loc$cnt_studies) %>% 
     lapply(htmltools::HTML)
   
   output$plot_1013 <- renderLeaflet({
