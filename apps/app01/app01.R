@@ -15,17 +15,16 @@ library(wordcloud)
 
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
-mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 10000, stringsAsFactors = FALSE)
+#mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.rds", header=TRUE, sep = "|", na.strings = "NA", nrows = -10000, stringsAsFactors = FALSE)
+mv_studies_recruiting<-readRDS("data/mv_studies_recruiting.rds")
 mv_studies_recruiting<-subset.data.frame(mv_studies_recruiting, subset = (is.na(latitude)==FALSE))
 mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
 mv_studies_recruiting_loc<-subset.data.frame(mv_studies_recruiting_loc, subset = (is.na(latitude)==FALSE))
 mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = (iso3=="USA" & length(latitude)>0))
 agg_Studiesbyconditions<-read.csv("data/agg_Studiesbyconditions.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
-agg_condition_wordcount<-read.csv("data/agg_condition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
-agg_rarecondition_wordcount<-read.csv("data/agg_rarecondition_wordcount.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
 
 
-ui <- shinyUI(navbarPage(title="Kalehdoo", 
+ui <- navbarPage(title="Kalehdoo", 
                  navbarMenu("Recruitment",
                             tabPanel("Summary",
                                      mainPanel(width=12,
@@ -50,17 +49,26 @@ ui <- shinyUI(navbarPage(title="Kalehdoo",
                    tabPanel("Study Finder",
                               mainPanel(width = 12,
                                         tabsetPanel(type="tabs",
-                                                    tabPanel("Map",
+                                                    tabPanel("World Map",
                                                              fluidRow(
-                                                               column(4, align="center", 
-                                                               selectInput(inputId = "select_country_map",
-                                                                           label = "Choose Country",
-                                                                                  choices = unique(mv_studies_recruiting$country)
-                                                               )
+                                                               column(3, align="left", 
+                                                                      textInput(inputId = "select_city_map",
+                                                                                label = "Search City"
+                                                                      )
                                                                ),
-                                                               column(7, align="left", 
-                                                                      textAreaInput(inputId = "select_condition_map",
-                                                                                  label = "Search Condition"
+                                                               column(3, align="left", 
+                                                                      textInput(inputId = "select_condition_map",
+                                                                                label = "Search Condition"
+                                                                      )
+                                                               ),
+                                                               column(3, align="left", 
+                                                                      textInput(inputId = "select_facility_map",
+                                                                                label = "Search Facility"
+                                                                      )
+                                                               ),
+                                                               column(3, align="left", 
+                                                                      textInput(inputId = "select_sponsor_map",
+                                                                                label = "Search Sponsor"
                                                                       )
                                                                )
                                                              ),
@@ -68,13 +76,27 @@ ui <- shinyUI(navbarPage(title="Kalehdoo",
                                                                leafletOutput("plot_1014")
                                                              )
                                                              ),
-                                                    tabPanel("Table",
+                                                    tabPanel("Details",
                                                              fluidRow(
-                                                               column(12, align="center",
-                                                               selectInput(inputId = "select_country_tab",
-                                                                           label = NULL,
-                                                                           choices = unique(mv_studies_recruiting$country)
-                                                               )
+                                                               column(3, align="left", 
+                                                                      textInput(inputId = "select_city_tab",
+                                                                                label = "Search City"
+                                                                      )
+                                                               ),
+                                                               column(3, align="left", 
+                                                                      textInput(inputId = "select_condition_tab",
+                                                                                label = "Search Condition"
+                                                                      )
+                                                               ),
+                                                               column(3, align="left", 
+                                                                      textInput(inputId = "select_facility_tab",
+                                                                                label = "Search Facility"
+                                                                      )
+                                                               ),
+                                                               column(3, align="left", 
+                                                                      textInput(inputId = "select_sponsor_tab",
+                                                                                label = "Search Sponsor"
+                                                                      )
                                                                )
                                                              ),
                                                              #display recriting studies data table
@@ -145,16 +167,6 @@ ui <- shinyUI(navbarPage(title="Kalehdoo",
                                                     fluidRow(
                                                       plotOutput("plot_1009")
                                                     )
-                                                  ),
-                                                  tabPanel("Conditioncount",
-                                                    fluidRow(
-                                                      plotOutput("plot_1010")
-                                                    )
-                                                  ),
-                                                  tabPanel("Rare Disease",
-                                                           fluidRow(
-                                                             plotOutput("plot_1011")
-                                                           )
                                                   )
                                         
                                       )
@@ -216,7 +228,7 @@ ui <- shinyUI(navbarPage(title="Kalehdoo",
                    
                  )
                  )
-)
+
   
 
 server <- function(input, output) {
@@ -226,14 +238,14 @@ server <- function(input, output) {
     #createleaflet plot 1014 based on reactive set
     subset(mv_studies_recruiting, 
            select = c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"),
-           subset=(country==input$select_country_map & casefold(Condition) %like%  casefold(input$select_condition_map)))
+           subset=(casefold(city) %like%  casefold(input$select_city_map) & casefold(Condition) %like%  casefold(input$select_condition_map) & casefold(Sponsor) %like%  casefold(input$select_sponsor_map)& casefold(Facility) %like%  casefold(input$select_facility_map)))
   })
   
   #reactive dataset for table with selected columns
   mv_studies_recruiting_tab<-reactive({
     subset(mv_studies_recruiting, 
            select = c("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility"),
-           subset=(country==input$select_country_tab))
+           subset=(casefold(city) %like%  casefold(input$select_city_tab) & casefold(Condition) %like%  casefold(input$select_condition_tab) & casefold(Sponsor) %like%  casefold(input$select_sponsor_tab)& casefold(Facility) %like%  casefold(input$select_facility_tab)))
   })
 
   #createleaflet plot 1014
@@ -335,32 +347,6 @@ server <- function(input, output) {
   })
 
   
-  #Create wordcloud plot 1011
-  output$plot_1011 <- renderPlot({
-    wordcloud(words=agg_rarecondition_wordcount$condition_name,
-              freq = agg_rarecondition_wordcount$cnt,
-              scale = c(3,0.5),
-              min.freq = 1, max.words=500,
-              random.order=FALSE,
-              random.color = FALSE,
-              fixed.asp = FALSE,
-              rot.per=0,
-              colors=brewer.pal(8, "Dark2"))
-  })
-  
-  #Create wordcloud plot 1010
-  output$plot_1010 <- renderPlot({
-    wordcloud(words=agg_condition_wordcount$condition_name,
-              freq = agg_condition_wordcount$cnt,
-              scale = c(3,0.5),
-              min.freq = 1, max.words=500,
-              random.order=FALSE,
-              random.color = FALSE,
-              fixed.asp = FALSE,
-              rot.per=0,
-              colors=brewer.pal(8, "Dark2"))
-  })
-  
   #Create wordcloud plot 1009
   output$plot_1009 <- renderPlot({
     wordcloud(words=agg_Studiesbyconditions$condition_name,
@@ -393,8 +379,8 @@ server <- function(input, output) {
     {
       plot_geo(mv_studies_recruiting_loc_US, lat = ~latitude, lon = ~longitude) %>%
         add_markers(
-          text = ~paste(city, state, paste("Studies:", cnt_studies), sep = "<br />"),
-          color = ~cnt_studies, symbol = I("circle"), size = ~cnt_studies*4, hoverinfo = "text"
+          text = ~paste(paste("City Name:", city), paste("State Name:", state), paste("Num of Studies:", cnt_studies), sep = "<br />"),
+          colors="Set2", color = ~cnt_studies, symbol = I("circle"), size = ~cnt_studies*100, hoverinfo = "text"
         ) %>%
         hide_colorbar() %>%
         layout(
@@ -403,11 +389,9 @@ server <- function(input, output) {
             scope = 'usa',
             projection = list(type = 'albers usa'),
             showland = TRUE,
-            landcolor = toRGB("gray95"),
-            subunitcolor = toRGB("gray85"),
-            countrycolor = toRGB("gray85"),
-            countrywidth = 0.5,
-            subunitwidth = 1.0
+            landcolor = "#F9F4F8",
+            subunitcolor = "#6C5E68",
+            subunitwidth = 1
           )
         )
     })
@@ -445,13 +429,9 @@ server <- function(input, output) {
   
   
   output$dt_recruitment_1005<- renderDataTable({
-      DT::datatable(mv_studies_recruiting_tab(), filter = 'top',
+      DT::datatable(mv_studies_recruiting_tab(),
                     escape=FALSE,rownames = FALSE,
-                    options = list(lengthChange = FALSE),callback=JS("
-           //hide column filters for the first column
-          $.each([0], function(i, v) {
-                $('input.form-control').eq(v).hide()
-              });")
+                    options = list(lengthChange = FALSE)
                     )
     }
   )
