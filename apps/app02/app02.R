@@ -8,8 +8,8 @@ library(data.table)
 
 
 #read data
-#mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 50000, stringsAsFactors = FALSE)
-mv_studies_recruiting<-readRDS("data/mv_studies_recruiting.rds")
+mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 100000, stringsAsFactors = FALSE)
+#mv_studies_recruiting<-readRDS("data/mv_studies_recruiting.rds")
 mv_studies_recruiting<-subset.data.frame(mv_studies_recruiting, 
                                           subset = (is.na(nct_id)==FALSE & is.na(latitude)==FALSE),
                                           select=c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"))
