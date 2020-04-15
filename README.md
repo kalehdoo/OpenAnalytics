@@ -4,7 +4,7 @@ Note: Since the dashboards are data intensive, it may take few seconds for the a
 https://kalehdoo.shinyapps.io/app01/
 
 ## Goal: 
-The purpose of Open Clinical Analytics Platform (OCAP) is to make clinical research analytics available to the patients and organisations that work to make patient lives better. I hope the analytics would help in making clinical trials faster and increase the success rate leading to more affordable patented drug prices.
+The purpose of Open Clinical Analytics Platform (OCAP) is to make clinical research analytics available to the patients and organisations  working to make patient lives better. I hope the analytics would help in making clinical trials faster and increase the success rate leading to more affordable patented drug prices.
 
 ## System Overview:
 The clinical trials data is obtained from CTTI website: https://aact.ctti-clinicaltrials.org/pipe_files
