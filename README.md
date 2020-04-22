@@ -2,6 +2,7 @@
 Link to the shiny application hosted at shinyapps.io(free account):
 Note: Since the dashboards are data intensive, it may take few seconds for the app to load, so have patience.
 https://kalehdoo.shinyapps.io/app01/
+If you are passionate about contributing to this project, send me a note and we can discuss further.
 
 ## Goal: 
 The purpose of Open Clinical Analytics Platform (OCAP) is to make clinical research analytics available to the patients and organisations  working to make patient lives better. I hope the analytics would help in making clinical trials faster and increase the success rate leading to more affordable patented drug prices.
