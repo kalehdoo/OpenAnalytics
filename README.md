@@ -6,8 +6,8 @@ If you are passionate about contributing to this project, send me a note and we 
 
 ## Goal: 
 The goal of the project is to make Clinical Intelligence accessible to all patients and organizations such as Pharmaceutical sponsors, CROs, public interest groups and non-profits contributing to improve clinical research and life sciences. 
-The platform is being built using open-source technologies creating analytics upon publicly available data. 
-We hope the analytics would help in making clinical trials faster and increase the success rate leading to more affordable patented drug prices.
+The platform is being built using open-source technologies like R and Shiny. 
+We hope the analytics would help the entire community.
 
 ## System Overview:
 The clinical trials data is obtained from CTTI website: https://aact.ctti-clinicaltrials.org/pipe_files
