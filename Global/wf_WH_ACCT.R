@@ -21,6 +21,7 @@ if(!file.exists(in_path_batch)) {
 batchid<-read.csv(in_path_batch, header = TRUE)
 
 NextBatchId<-sqldf("select max(BatchId)+1 from batchid")
+NextBatchId<-NextBatchId[[1]]
 write(NextBatchId,in_path_batch, append = TRUE)
 
 
@@ -46,28 +47,85 @@ if(!file.exists(dest_whlogfile)) {
 write(paste(NextBatchId,"StageStart",now(), sep="|"), dest_whlogfile, append=TRUE)
 write(paste(NextBatchId,"start_x_studies",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"TransformData/x_studies.R"))
+write(paste(NextBatchId,"end_x_studies",now(), sep="|"), dest_whlogfile, append=TRUE)
 write(paste(NextBatchId,"start_x_sponsors",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"TransformData/x_sponsors.R"))
+write(paste(NextBatchId,"end_x_sponsors",now(), sep="|"), dest_whlogfile, append=TRUE)
 write(paste(NextBatchId,"start_x_conditions",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"TransformData/x_conditions.R"))
+write(paste(NextBatchId,"end_x_conditions",now(), sep="|"), dest_whlogfile, append=TRUE)
 write(paste(NextBatchId,"start_x_facilities",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"TransformData/x_facilities.R"))
+write(paste(NextBatchId,"end_x_facilities",now(), sep="|"), dest_whlogfile, append=TRUE)
 write(paste(NextBatchId,"start_x_interventions",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"TransformData/x_interventions.R"))
+write(paste(NextBatchId,"end_x_interventions",now(), sep="|"), dest_whlogfile, append=TRUE)
+write(paste(NextBatchId,"start_x_prep_geo_master",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"TransformData/x_prep_geo_master.R"))
+write(paste(NextBatchId,"end_x_prep_geo_master",now(), sep="|"), dest_whlogfile, append=TRUE)
 write(paste(NextBatchId,"StageEnd",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 
 #execute to create integrated aggregate tables in warehouse
-source(paste0(var_DIR_HOME,"IntegrateData/agg_conditions_study.R"))
-source(paste0(var_DIR_HOME,"IntegrateData/agg_facilities.R"))
+write(paste(NextBatchId,"IntegrationStart",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_studyconditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_studyconditions_study.R"))
+write(paste(NextBatchId,"end_agg_studyconditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_studyfacilities",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_studyfacilities.R"))
+write(paste(NextBatchId,"end_agg_studyfacilities",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_facilities_study",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_facilities_study.R"))
+write(paste(NextBatchId,"end_agg_facilities_study",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_interventions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_interventions_study.R"))
+write(paste(NextBatchId,"end_agg_interventions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_conditions_all",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_conditions_all.R"))
+write(paste(NextBatchId,"end_agg_studyconditions_facilities",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_conditions_recruiting",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_conditions_recruiting.R"))
+write(paste(NextBatchId,"end_agg_conditions_recruiting",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_studyconditions_facilities",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_studyconditions_facilities.R"))
+write(paste(NextBatchId,"end_agg_studyconditions_facilities",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_studies",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_studies.R"))
+write(paste(NextBatchId,"end_agg_studies",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_sponsors",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_sponsors.R"))
+write(paste(NextBatchId,"end_agg_sponsors",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_year",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_year.R"))
+write(paste(NextBatchId,"end_agg_year",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"IntegrationEnd",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 #execute to create extract summary tables in extract folder
+write(paste(NextBatchId,"DataMartStart",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_mv_year_Lst10Yr",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"Extracts/mv_year_Lst10Yr.R"))
+write(paste(NextBatchId,"end_mv_year_Lst10Yr",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_mv_studies_recruiting",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"Extracts/mv_studies_recruiting.R"))
+write(paste(NextBatchId,"end_mv_studies_recruiting",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"DataMartEnd",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+#remove data in the memory and quit the session without saving the session
+rm(list = ls())
+q("no", 1, FALSE)
 
 

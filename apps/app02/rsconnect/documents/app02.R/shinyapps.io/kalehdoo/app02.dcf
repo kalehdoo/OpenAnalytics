@@ -5,9 +5,9 @@ account: kalehdoo
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1882345
-bundleId: 2875951
+bundleId: 3087350
 url: https://kalehdoo.shinyapps.io/app02/
-when: 1584042773.1583
+when: 1588276912.18758
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: data/mv_studies_recruiting.rds
+ignoredFiles: data/mv_studies_recruiting.txt

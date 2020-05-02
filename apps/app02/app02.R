@@ -4,25 +4,75 @@ library(dplyr)
 library(leaflet)
 library(htmltools)
 library(data.table)
-
-
+library(DT)
 
 #read data
-mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 100000, stringsAsFactors = FALSE)
-#mv_studies_recruiting<-readRDS("data/mv_studies_recruiting.rds")
-mv_studies_recruiting<-subset.data.frame(mv_studies_recruiting, 
-                                          subset = (is.na(nct_id)==FALSE & is.na(latitude)==FALSE),
-                                          select=c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"))
-mv_studies_recruiting_americas<- select(filter(mv_studies_recruiting, Region=="Americas"),c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"))
-#mv_studies_recruiting_us<- select(filter(mv_studies_recruiting, Region=="Americas" & country=="United States"),c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"))
-mv_studies_recruiting_europe<- select(filter(mv_studies_recruiting, Region=="Europe"),c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"))
-mv_studies_recruiting_asia<- select(filter(mv_studies_recruiting, Region=="Asia"),c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"))
-mv_studies_recruiting_oceania<- select(filter(mv_studies_recruiting, Region=="Oceania"),c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"))
-mv_studies_recruiting_africa<- select(filter(mv_studies_recruiting, Region=="Africa"),c("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude"))
+mv_studies_recruiting<-readRDS("data/mv_studies_recruiting.rds") %>%
+  filter(is.na(nct_id)==FALSE) %>%
+  select("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility","Region","latitude","longitude","nct_id")
 
-rm(mv_studies_recruiting)
+mv_studies_recruiting_tab<-mv_studies_recruiting %>% 
+       select("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility")
+       
+
+mv_studies_recruiting_world<-mv_studies_recruiting %>%
+  filter(casefold(Condition) %like% "coronavirus" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
+  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+
+mv_studies_recruiting_US<-mv_studies_recruiting %>%
+  filter(country=="United States" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
+  select("ID","city","state","country","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+
+mv_studies_recruiting_americas<-mv_studies_recruiting %>%
+  filter(country!="United States" & Region=="Americas" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
+  select("ID","city","state","country","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+
+
+mv_studies_recruiting_europe<-mv_studies_recruiting %>%
+  filter(Region=="Europe" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
+  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+
+mv_studies_recruiting_asia<-mv_studies_recruiting %>%
+  filter(Region=="Asia" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
+  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+
+mv_studies_recruiting_oceania<-mv_studies_recruiting %>%
+  filter(Region=="Oceania" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
+  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+
+mv_studies_recruiting_africa<-mv_studies_recruiting %>%
+  filter(Region=="Africa" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
+  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+
 
 ui <- navbarPage("Kalehdoo",
+                 tabPanel("Global-Coronavirus",
+                          fluidRow(
+                            column(3, align="left", 
+                                   textInput(inputId = "select_city_map_world",
+                                             label = "Search City"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_condition_map_world",
+                                             label = "Search Condition"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_facility_map_world",
+                                             label = "Search Facility"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_sponsor_map_world",
+                                             label = "Search Sponsor"
+                                   )
+                            )
+                          ),
+                          fluidRow(
+                            leafletOutput("plot_1020")
+                          )
+                 ),
                  tabPanel("Europe",
                           fluidRow(
                             column(3, align="left", 
@@ -130,6 +180,65 @@ ui <- navbarPage("Kalehdoo",
                           fluidRow(
                             leafletOutput("plot_1017")
                           )
+                 ),
+                 tabPanel("USA",
+                          fluidRow(
+                            column(3, align="left", 
+                                   textInput(inputId = "select_city_map_us",
+                                             label = "Search City"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_condition_map_us",
+                                             label = "Search Condition"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_facility_map_us",
+                                             label = "Search Facility"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_sponsor_map_us",
+                                             label = "Search Sponsor"
+                                   )
+                            )
+                          ),
+                          fluidRow(
+                            leafletOutput("plot_1018")
+                          )
+                 ),
+                 tabPanel("Rest of Americas",
+                          fluidRow(
+                            column(3, align="left", 
+                                   textInput(inputId = "select_city_map_americas",
+                                             label = "Search City"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_condition_map_americas",
+                                             label = "Search Condition"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_facility_map_americas",
+                                             label = "Search Facility"
+                                   )
+                            ),
+                            column(3, align="left", 
+                                   textInput(inputId = "select_sponsor_map_americas",
+                                             label = "Search Sponsor"
+                                   )
+                            )
+                          ),
+                          fluidRow(
+                            leafletOutput("plot_1019")
+                          )
+                 ),
+                 tabPanel("Table Details",
+                          fluidRow(
+                            DT::dataTableOutput("dt_recruitment_1021")
+                          )
                  )
                  
                  
@@ -139,6 +248,28 @@ ui <- navbarPage("Kalehdoo",
 
 
 server <- function(input, output) {
+  
+  #reactive dataset for world maps with reduced columns
+  mv_studies_recruiting_map_world<-reactive({
+    #createleaflet plot 1020 based on reactive set
+    subset(mv_studies_recruiting_world, 
+           subset=(casefold(city) %like%  casefold(input$select_city_map_world) & casefold(Condition) %like%  casefold(input$select_condition_map_world) & casefold(Sponsor) %like%  casefold(input$select_sponsor_map_world)& casefold(Facility) %like%  casefold(input$select_facility_map_world)))
+  })
+  
+  #createleaflet plot 1020
+  #function to display labels
+  f_labels_1020 <- function(){sprintf("<br><strong>Study ID: %s</strong></br><strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",mv_studies_recruiting_map_world()$ID,mv_studies_recruiting_map_world()$country,mv_studies_recruiting_map_world()$state, mv_studies_recruiting_map_world()$city, mv_studies_recruiting_map_world()$Facility,mv_studies_recruiting_map_world()$Sponsor,mv_studies_recruiting_map_world()$Condition) %>% 
+      lapply(htmltools::HTML)
+  }
+  output$plot_1020 <- renderLeaflet({
+    leaflet(data=mv_studies_recruiting_map_world()) %>%
+      setView(lng=-4.055685, lat=41.294856, zoom=1.5) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      addMarkers(~longitude, ~latitude,
+                 popup = f_labels_1020(),
+                 clusterOptions = markerClusterOptions())
+  })
   
   #reactive dataset for maps with reduced columns
   mv_studies_recruiting_map_europe<-reactive({
@@ -217,7 +348,7 @@ server <- function(input, output) {
     #createleaflet plot 1017 based on reactive set
     subset(mv_studies_recruiting_oceania, 
            #select = c("ID","city","state","country","Condition","Sponsor","Facility","nct_id","latitude","longitude"),
-           subset=(casefold(city) %like%  casefold(input$select_city_map_africa) & casefold(Condition) %like%  casefold(input$select_condition_map_africa) & casefold(Sponsor) %like%  casefold(input$select_sponsor_map_africa)& casefold(Facility) %like%  casefold(input$select_facility_map_africa)))
+           subset=(casefold(city) %like%  casefold(input$select_city_map_oceania) & casefold(Condition) %like%  casefold(input$select_condition_map_oceania) & casefold(Sponsor) %like%  casefold(input$select_sponsor_map_oceania)& casefold(Facility) %like%  casefold(input$select_facility_map_oceania)))
   })
   
   #createleaflet plot 1016
@@ -234,6 +365,60 @@ server <- function(input, output) {
                  popup = f_labels_1017(),
                  #label = f_labels_1014(),
                  clusterOptions = markerClusterOptions())
+  })
+  
+  #reactive dataset for US maps
+  mv_studies_recruiting_map_us<-reactive({
+    #createleaflet plot 1017 based on reactive set
+    subset(mv_studies_recruiting_US, 
+           #select = c("ID","city","state","country","Condition","Sponsor","Facility","nct_id","latitude","longitude"),
+           subset=(casefold(city) %like%  casefold(input$select_city_map_us) & casefold(Condition) %like%  casefold(input$select_condition_map_us) & casefold(Sponsor) %like%  casefold(input$select_sponsor_map_us)& casefold(Facility) %like%  casefold(input$select_facility_map_us)))
+  })
+  
+  #createleaflet plot 1018
+  #function to display labels
+  f_labels_1018 <- function(){sprintf("<br><strong>Study ID: %s</strong></br><strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",mv_studies_recruiting_map_us()$ID,mv_studies_recruiting_map_us()$country,mv_studies_recruiting_map_us()$state, mv_studies_recruiting_map_us()$city, mv_studies_recruiting_map_us()$Facility,mv_studies_recruiting_map_us()$Sponsor,mv_studies_recruiting_map_us()$Condition) %>% 
+      lapply(htmltools::HTML)
+  }
+  output$plot_1018 <- renderLeaflet({
+    leaflet(data=mv_studies_recruiting_map_us()) %>%
+      setView(lng=-100.437012, lat=47.650589, zoom=2.7) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      addMarkers(~longitude, ~latitude,
+                 popup = f_labels_1018(),
+                 clusterOptions = markerClusterOptions())
+  })
+  
+  #reactive dataset for US maps
+  mv_studies_recruiting_map_americas<-reactive({
+    #createleaflet plot 1017 based on reactive set
+    subset(mv_studies_recruiting_americas, 
+           #select = c("ID","city","state","country","Condition","Sponsor","Facility","nct_id","latitude","longitude"),
+           subset=(casefold(city) %like%  casefold(input$select_city_map_americas) & casefold(Condition) %like%  casefold(input$select_condition_map_americas) & casefold(Sponsor) %like%  casefold(input$select_sponsor_map_americas)& casefold(Facility) %like%  casefold(input$select_facility_map_americas)))
+  })
+  
+  #createleaflet plot 1019
+  #function to display labels
+  f_labels_1019 <- function(){sprintf("<br><strong>Study ID: %s</strong></br><strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",mv_studies_recruiting_map_americas()$ID,mv_studies_recruiting_map_americas()$country,mv_studies_recruiting_map_americas()$state, mv_studies_recruiting_map_americas()$city, mv_studies_recruiting_map_americas()$Facility,mv_studies_recruiting_map_americas()$Sponsor,mv_studies_recruiting_map_americas()$Condition) %>% 
+      lapply(htmltools::HTML)
+  }
+  output$plot_1019 <- renderLeaflet({
+    leaflet(data=mv_studies_recruiting_map_americas()) %>%
+      setView(lng=-90.522713, lat=14.628434, zoom=2.0) %>%
+      addProviderTiles(providers$CartoDB.Positron,
+                       options = providerTileOptions(noWrap = TRUE)) %>%
+      addMarkers(~longitude, ~latitude,
+                 popup = f_labels_1019(),
+                 clusterOptions = markerClusterOptions())
+  })
+  
+  #reactive dataset for maps with reduced columns
+  output$dt_recruitment_1021<- renderDataTable({
+  DT::datatable(mv_studies_recruiting_tab, filter = 'top',
+                escape=FALSE,rownames = FALSE,
+                options = list(lengthChange = FALSE)
+  )
   })
   
 }
