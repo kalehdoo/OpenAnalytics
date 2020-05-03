@@ -5,7 +5,7 @@ https://kalehdoo.shinyapps.io/app01/
 If you are passionate about contributing to this project, send me a note and we can discuss further.
 
 ## Goal: 
-The goal of the project is to make Clinical Intelligence accessible to all patients and organizations such as Pharmaceutical sponsors, CROs, public interest groups and non-profits contributing to improve clinical research and life sciences. 
+The goal of the project is to make Clinical Intelligence accessible to all patients and organizations such as Pharmaceutical sponsors, CROs, public interest groups, and non-profits contributing to improve clinical research and life sciences. 
 The platform is being built using open-source technologies like R and Shiny. 
 We hope the analytics would help the entire community.
 
