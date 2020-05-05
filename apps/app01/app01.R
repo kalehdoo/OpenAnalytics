@@ -11,41 +11,72 @@ library(leaflet)
 library(htmltools)
 library(data.table)
 library(wordcloud)
-
+library(shinythemes)
 
 #read data
 mv_year_Lst10Yr<-read.csv("data/mv_year_Lst10Yr.txt", header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
-mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 50000, stringsAsFactors = FALSE)
-#mv_studies_recruiting<-readRDS("data/mv_studies_recruiting.rds")
-mv_studies_recruiting<-subset.data.frame(mv_studies_recruiting, subset = (is.na(latitude)==FALSE),nrows = 50000)
-mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 50000, stringsAsFactors = FALSE)
+mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 5000, stringsAsFactors = FALSE)
+mv_studies_recruiting<-subset.data.frame(mv_studies_recruiting)
+mv_studies_recruiting_loc<-read.csv("data/mv_studies_recruiting_loc.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 5000, stringsAsFactors = FALSE)
 mv_studies_recruiting_loc<-subset.data.frame(mv_studies_recruiting_loc, subset = (is.na(latitude)==FALSE))
 mv_studies_recruiting_loc_US<-subset.data.frame(mv_studies_recruiting_loc, subset = (iso3=="USA" & length(latitude)>0))
-agg_Studiesbyconditions<-read.csv("data/agg_Studiesbyconditions.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 50000, stringsAsFactors = FALSE)
+agg_Studiesbyconditions<-read.csv("data/agg_Studiesbyconditions.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 5000, stringsAsFactors = FALSE)
 
+mv_studies_recruiting_table<-subset.data.frame(mv_studies_recruiting, 
+         select = c("nct_id","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility"),
+)
 
-ui <- navbarPage(title="Kalehdoo", 
+ui <- navbarPage(title="Oakbloc",
+                 windowTitle = "Oakbloc Analytics",
+                 theme = shinytheme("united"),
+                 collapsible = TRUE,
+                 #Landing Home page starts
+                 tabPanel(title="Home",
+                          fluidRow((h4("Oakbloc's Open Clinical Analytics Platform", style="margin-top:0px;margin-left:5%; margin-right:5%"))),
+                          fluidRow((p("Making Clinical Intelligence accessible to all patients and organizations such as Pharmaceuticals, CROs, public interest groups, and non-profits contributing to improve clinical research and life sciences. The source code is available on ",tags$a(href="https://github.com/kalehdoo/OpenAnalytics","Github.",class="externallink",target="_blank"), "The source data used is available to public at ",tags$a(href="https://aact.ctti-clinicaltrials.org","ACCT-CTTI.", target="_blank"),style="margin-top:0px;margin-left:1%; margin-right:1%")))
+                          
+                            
+                 ),
+                 #Recruitment Dashboard starts here
                  navbarMenu("Recruitment",
                             tabPanel("Summary",
                                      mainPanel(width=12,
                                                tabsetPanel(type="tabs",
-                                                           tabPanel("dummy",
-                                                                    fluidRow(
-                                                                      leafletOutput("plot_1012xxx")
-                                                                    )
-                                                           ),
                                                            tabPanel("Summary",
-                                                             fluidRow(
-                                                               column(6, align="left",
-                                                                      plotlyOutput("plot_1008")                                                               )
-                                                               
-                                                             )
+                                                             fluidRow(style = "height:50px;background-color: orange; padding: 5px; border-style: solid; border-width: 1px;",
+                                                               column(12,
+                                                                      shinydashboard::valueBoxOutput("box_studies", width = 2),
+                                                                      shinydashboard::valueBoxOutput("box_sponsors", width = 2),
+                                                                      shinydashboard::valueBoxOutput("box_countries", width = 2),
+                                                                      shinydashboard::valueBoxOutput("box_cities", width = 2),
+                                                                      shinydashboard::valueBoxOutput("box_facilities", width = 2)
+                                                                      )
+                                                              ),       
+                                                             fluidRow(style="padding: 5px; border-style: solid; border-width: 1px;",
+                                                               column(6, align="left",style="border-right: 1px solid",
+                                                                      plotlyOutput("plot_1008")),
+                                                               column(6, align="left",style="border-left: 1px solid;",
+                                                                      plotlyOutput("plot_1008_2"))
+                                                               ),
+                                                             fluidRow(style="padding: 5px; border-style: solid; border-width: 1px;",
+                                                               column(6, align="left",style="border-right: 1px solid",
+                                                                      plotlyOutput("plot_1008_3")),
+                                                               column(6, align="left",style="border-left: 1px solid;",
+                                                                      plotlyOutput("plot_1008_4"))
+                                                              ),
+                                                             fluidRow(style = "height:30px;background-color: #48ADE8; border-bottom: 1px solid;",
+                                                                             p("Open Source Clinical Analytics Developed by: ",tags$a(href="https://www.oakbloc.com/analytics.html","Oakbloc",class="externallink",target="_blank"), "---", "The source code is available on ",tags$a(href="https://github.com/kalehdoo/OpenAnalytics","Github",class="externallink",target="_blank"), "---","Follow us on ",tags$a(href="https://twitter.com/kalehdoo","Twitter",class="externallink",target="_blank"))   
+                                                              )
+                                                             ),#summary tab ends here
+                                                           tabPanel("Data",
+                                                                    fluidRow(
+                                                                      DT::dataTableOutput("dt_recruitment")
+                                                                    )
+                                                           )
                                                            )
                                                            )
                                                
-                                     )
-                                     
-                            ),         
+                                     ),
                    tabPanel("Study Finder",
                               mainPanel(width = 12,
                                         tabsetPanel(type="tabs",
@@ -76,7 +107,7 @@ ui <- navbarPage(title="Kalehdoo",
                                                                leafletOutput("plot_1014")
                                                              )
                                                              ),
-                                                    tabPanel("Details",
+                                                    tabPanel("Table Details",
                                                              fluidRow(
                                                                column(3, align="left", 
                                                                       textInput(inputId = "select_city_tab",
@@ -233,6 +264,11 @@ ui <- navbarPage(title="Kalehdoo",
 
 server <- function(input, output) {
   
+  #display recruitment data
+  output$dt_recruitment<- renderDataTable(
+      DT::datatable(mv_studies_recruiting_table, filter = 'top')
+                    )
+  
   #reactive dataset for maps with reduced columns
   mv_studies_recruiting_map<-reactive({
     #createleaflet plot 1014 based on reactive set
@@ -244,7 +280,7 @@ server <- function(input, output) {
   #reactive dataset for table with selected columns
   mv_studies_recruiting_tab<-reactive({
     subset(mv_studies_recruiting, 
-           select = c("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility"),
+           select = c("nct_id","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility"),
            subset=(casefold(city) %like%  casefold(input$select_city_tab) & casefold(Condition) %like%  casefold(input$select_condition_tab) & casefold(Sponsor) %like%  casefold(input$select_sponsor_tab)& casefold(Facility) %like%  casefold(input$select_facility_tab)))
   })
 
@@ -365,13 +401,111 @@ server <- function(input, output) {
   
   #create plot 1008
   output$plot_1008 <- renderPlotly({
-      mv_studies_recruiting %>%
+    mv_studies_recruiting %>%
       group_by(Region) %>%
-      summarise(cnt=length(unique((ID)))) %>%
+      summarise(cnt=length(unique((nct_id)))) %>%
       plot_ly(values=~cnt, labels=~factor(Region), type='pie')%>%
       layout(title="Recruiting Studies by Region",
              legend=list(orientation="h"))
       
+  })
+  
+  #create plot 1008_2
+  top_rec_sponsors<-data.frame(mv_studies_recruiting, stringsAsFactors = FALSE) %>%
+    filter(is.na(Sponsor)==FALSE) %>%
+    group_by(Sponsor) %>%
+    summarise(cnt_st=length(unique((nct_id)))) %>%
+    top_n(10, cnt_st) %>%
+    arrange(desc(cnt_st))
+    
+  top_rec_sponsors$Sponsor<-factor(top_rec_sponsors$Sponsor, levels = unique(top_rec_sponsors$Sponsor)[order(top_rec_sponsors$cnt_st, decreasing = FALSE)])
+  top_rec_sponsors$text_display<-paste0(top_rec_sponsors$Sponsor,' ',top_rec_sponsors$cnt_st)
+  
+  output$plot_1008_2 <- renderPlotly({
+      top_rec_sponsors %>%
+      plot_ly(y=~Sponsor, x=~cnt_st, type='bar', text=~text_display, textposition = 'inside', orientation='h')%>%
+      layout(title="Top Recruiting Sponsors",
+             xaxis= list(title='# Recruiting Studies'),
+             yaxis= list(title='Sponsor Name', showticklabels = FALSE))
+  })
+  
+  #create plot 1008_3
+  top_rec_countries<-data.frame(mv_studies_recruiting, stringsAsFactors = FALSE) %>%
+    filter(is.na(country)==FALSE) %>%
+    group_by(country) %>%
+    summarise(cnt_st=length(unique((nct_id)))) %>%
+    top_n(10, cnt_st) %>%
+    arrange(desc(cnt_st))
+  #sorting conditions by y values
+  top_rec_countries$country<-factor(top_rec_countries$country, levels = unique(top_rec_countries$country)[order(top_rec_countries$cnt_st, decreasing = FALSE)])
+  top_rec_countries$text_display<-paste0(top_rec_countries$country,' ',top_rec_countries$cnt_st)
+  
+  output$plot_1008_3 <- renderPlotly({
+    top_rec_countries %>%
+      plot_ly(y=~country, x=~cnt_st, type='bar', text=~text_display, textposition = 'auto', orientation='h')%>%
+      layout(title="Top Recruiting Countries",
+             xaxis= list(title='# Recruiting Studies'),
+             yaxis= list(title='Country Name', showticklabels = FALSE))
+  })
+  
+  #create plot 1008_4
+  output$plot_1008_4 <- renderPlotly({
+    mv_studies_recruiting %>%
+      group_by(StudyPhase) %>%
+      summarise(cnt_st=length(unique((nct_id)))) %>%
+      plot_ly(values=~cnt_st, labels=~(StudyPhase), type='pie')%>%
+      layout(title="Recruiting Studies by Phase",
+             legend=list(orientation="h"))
+    
+  })
+  
+  #Create recruitment infobox
+  summ_rec<-data.frame(
+    cnt_studies=length(unique(mv_studies_recruiting$nct_id)),
+    cnt_sponsors=length(unique(mv_studies_recruiting$Sponsor)),
+    cnt_countries=length(unique(mv_studies_recruiting$country)),
+    cnt_cities=length(unique(mv_studies_recruiting$city)),
+    cnt_facilities=length(unique(mv_studies_recruiting$Facility))
+    )
+  
+  output$box_studies <- shinydashboard::renderValueBox({
+    infoBox(
+      "Studies: ",
+      summ_rec$cnt_studies,
+      icon = icon("credit-card")
+    )
+  })
+  
+  output$box_sponsors <- shinydashboard::renderValueBox({
+    infoBox(
+      "Sponsors: ",
+      summ_rec$cnt_sponsors,
+      icon = icon("credit-card")
+    )
+  })
+  
+  output$box_countries <- shinydashboard::renderValueBox({
+    infoBox(
+      "Countries: ",
+      summ_rec$cnt_countries,
+      icon = icon("credit-card")
+    )
+  })
+  
+  output$box_cities <- shinydashboard::renderValueBox({
+    infoBox(
+      "Cities: ",
+      summ_rec$cnt_cities,
+      icon = icon("credit-card")
+    )
+  })
+  
+  output$box_facilities <- shinydashboard::renderValueBox({
+    infoBox(
+      "Facilities: ",
+      summ_rec$cnt_facilities,
+      icon = icon("credit-card")
+    )
   })
   
   #create plot 1006
@@ -425,9 +559,7 @@ server <- function(input, output) {
   
 
   
-  #datatable for recruitment
-  
-  
+  #datatable for recruitment find studies
   output$dt_recruitment_1005<- renderDataTable({
       DT::datatable(mv_studies_recruiting_tab(),
                     escape=FALSE,rownames = FALSE,
