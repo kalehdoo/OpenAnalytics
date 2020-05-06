@@ -6,7 +6,7 @@ library(lubridate)
 #set paths for data files
 in_path_x_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_studies.txt", sep="")
 in_path_x_lead_sponsors<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_lead_sponsors.txt", sep="")
-in_path_agg_study_conditions<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_study_conditions.txt", sep="")
+in_path_agg_study_conditions<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_study.txt", sep="")
 in_path_agg_study_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities_study.txt", sep="")
 in_path_agg_study_interventions<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_study_interventions.txt", sep="")
 
@@ -27,17 +27,18 @@ agg_studies_sponsors$nct_id<-as.character(agg_studies_sponsors$nct_id)
 agg_study_conditions$nct_id<-as.character(agg_study_conditions$nct_id)
 agg_studies_conditions<-left_join(agg_studies_sponsors,agg_study_conditions,by="nct_id")
 
-#stich facilities at study level
+#stitch facilities at study level
 agg_study_facilities$nct_id<-as.character(agg_study_facilities$nct_id)
 agg_studies_facilities<-left_join(agg_studies_conditions,agg_study_facilities,by="nct_id")
 
-#stich facilities at study level
+#stitch facilities at study level
 agg_study_interventions$nct_id<-as.character(agg_study_interventions$nct_id)
 agg_studies_interventions<-left_join(agg_studies_facilities,agg_study_interventions,by="nct_id")
 
+agg_studies_combined<-agg_studies_interventions
 
-#write to txt file
-write.table(agg_studies_interventions,paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep=""), sep = "|", row.names = FALSE)
+#write combined results to agg_studies txt file
+write.table(agg_studies_combined,paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep=""), sep = "|", row.names = FALSE)
 
 
 

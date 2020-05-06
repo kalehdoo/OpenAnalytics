@@ -32,13 +32,22 @@ mv_studies_recruiting<-subset.data.frame(agg_studies,
                                      "has_dmc",
                                      "lead_sponsor_name",
                                      "condition_name",
-                                     "flag_rare_condition"
+                                     "flag_rare_condition",
+                                     "study_type",
+                                     "study_first_posted_yrmonth",
+                                     "start_yrmonth",
+                                     "register_to_start_days",
+                                     "agency_class",
+                                     "sponsor_type",
+                                     "cnt_conditions",
+                                     "cnt_sites",
+                                     "intervention_type"
                                    )
                                    
 )
 
 
-#create new df with required columns and filter condition
+#facilities recruiting with required columns and filter condition
 mv_facilities_recruiting<-subset.data.frame(agg_facilities, 
                                             status=="Recruiting",
                                          select=c(
@@ -86,7 +95,16 @@ mv_studies_recruiting<-sqldf("Select urlid as 'ID',
                                  iso3,
                                  statecode,
                                  latitude,
-                                 longitude
+                                 longitude,
+                                 study_type as 'StudyType',
+                                 study_first_posted_yrmonth as 'PostedYrMon',
+                                 start_yrmonth as 'StartYrMon',
+                                  register_to_start_days as 'RegToStartDays',
+                                  agency_class as 'AgencyClass',
+                                  sponsor_type as 'SponsorType',
+                                  cnt_conditions as 'CntConditions',
+                                  cnt_sites as 'CntSites',
+                                  intervention_type as 'InterventionType'
                               from mv_studies_recruiting
                              where nct_id is not null")
 
