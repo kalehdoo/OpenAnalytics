@@ -81,8 +81,47 @@ mv_studies_recruiting_table <-
       "CntConditions",
       "CntSites",
       "InterventionType"
-    ),
+    )
   )
+
+#recruiting data at study level
+mv_recruiting_studylevel<-data.table(mv_studies_recruiting)[,list( 
+  cnt_cities=length(unique(city)),
+  cnt_countries=length(unique(country)),
+  cnt_facilities=length(unique(Facility)),
+  Condition = unique(Condition),
+  Title = unique(Title),
+  DataMonitoring = unique(DataMonitoring),
+  RareDisease = unique(RareDisease),
+  StudyPhase = unique(StudyPhase),
+  Sponsor = unique(Sponsor),
+  StudyType = unique(StudyType),
+  PostedYrMon = unique(PostedYrMon),
+  StartYrMon = unique(StartYrMon),
+  RegToStartDays = unique(RegToStartDays),
+  AgencyClass = unique(AgencyClass),
+  SponsorType = unique(SponsorType),
+  CntConditions = unique(CntConditions),
+  CntSites = unique(CntSites),
+  InterventionType = unique(InterventionType)
+), by='nct_id']
+
+#recruiting data at sponsor level
+rec_sponsors <- mv_studies_recruiting %>%
+  group_by(Sponsor) %>%
+  summarise(AgencyClass = unique(AgencyClass),
+            SponsorType = unique(SponsorType),
+            cnt_studies = length(unique(nct_id)),
+            cnt_dataMonitor = sum(ifelse(DataMonitoring=="Yes",1,0)),
+            cnt_rareDisease = sum(ifelse(RareDisease=="Yes",1,0)),
+            median_regToStartDays = median(RegToStartDays),
+            cnt_cities=length(unique(city)),
+            cnt_countries=length(unique(country)),
+            cnt_facilities=length(unique(Facility)),
+            cnt_conditions = sum(unique(CntConditions)),
+            CntSites = sum(unique(CntSites))
+  )
+
 
 ui <- navbarPage(
   title = "Oakbloc",
@@ -92,11 +131,11 @@ ui <- navbarPage(
   #Landing Home page starts
   tabPanel(title = "Home",
            fluidRow((
-             h4("Oakbloc's Open Clinical Analytics Platform", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+             h4("Oakbloc's Open Clinical Analytics Platform (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
            )),
            fluidRow((
              p(
-               "Making Clinical Intelligence accessible to all patients and organizations such as Pharmaceuticals, CROs, public interest groups, and non-profits contributing to improve clinical research and life sciences. The source code is available on ",
+               "Making Clinical Intelligence accessible to all patients and organizations such as Pharmaceuticals, CROs, public interest groups, independent consultants, and non-profits contributing to improve clinical research and life sciences for the larger benefit to the entire community. The source code is available on ",
                tags$a(
                  href = "https://github.com/kalehdoo/OpenAnalytics",
                  "Github.",
@@ -273,6 +312,57 @@ ui <- navbarPage(
                )
                
              )),
+    tabPanel("Sponsor",
+      mainPanel(width = 12,
+        tabsetPanel(type = "tabs",
+                    tabPanel("Summary",
+                             fluidRow(
+                               style = "height:50px;background-color: orange; padding: 5px; border-style: solid; border-width: 1px;",
+                               column(
+                                 12,
+                                 shinydashboard::valueBoxOutput("box_studies1", width = 2),
+                                 shinydashboard::valueBoxOutput("box_sponsors1", width = 2),
+                                 shinydashboard::valueBoxOutput("box_countries1", width = 2),
+                                 shinydashboard::valueBoxOutput("box_cities1", width = 2),
+                                 shinydashboard::valueBoxOutput("box_facilities1", width = 2)
+                               )
+                             ),
+                             
+                             fluidRow(
+                               style = "padding: 5px; border-style: solid; border-width: 1px;",
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border-right: 1px solid",
+                                 plotlyOutput("plot_1030_1")
+                               ),
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border-left: 1px solid;",
+                                 plotlyOutput("plot_1030_3")
+                               )
+                             ),
+                             fluidRow(
+                               style = "padding: 5px; border-style: solid; border-width: 1px;",
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border-right: 1px solid",
+                                 plotlyOutput("plot_1030_4")
+                               ),
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border-left: 1px solid;",
+                                 plotlyOutput("plot_1030_2")
+                               )
+                             )
+                    
+                             )
+        )
+      )
+    ),
     tabPanel("Conditions",
              mainPanel(
                width = 12,
@@ -685,6 +775,65 @@ server <- function(input, output) {
     infoBox("Facilities: ",
             summ_rec$cnt_facilities,
             icon = icon("credit-card"))
+  })
+  
+  #create plot 1030
+  
+  #create plot 1030_1
+  output$plot_1030_1 <- renderPlotly({
+    rec_sponsors %>%
+      group_by(AgencyClass) %>%
+      summarise(cnt_sponsors = length(unique((Sponsor)))) %>%
+      plot_ly(
+        values =  ~ cnt_sponsors,
+        labels =  ~ (AgencyClass),
+        type = 'pie'
+      ) %>%
+      layout(title = "Sponsors by Class",
+             legend = list(orientation = "h"))
+  })
+  
+  #create plot 1030_2
+  output$plot_1030_2 <- renderPlotly({
+    rec_sponsors %>%
+      group_by(SponsorType) %>%
+      summarise(cnt_sponsors = length(unique((Sponsor)))) %>%
+      plot_ly(
+        values =  ~ cnt_sponsors,
+        labels =  ~ (SponsorType),
+        type = 'pie'
+      ) %>%
+      layout(title = "Sponsors by Class",
+             legend = list(orientation = "h"))
+  })
+
+  #create plot 1030_3
+  output$plot_1030_3 <- renderPlotly({
+    plot_ly() %>%
+      add_trace(data=rec_sponsors,x=~cnt_countries,y=~cnt_facilities, type="scatter", 
+                mode="markers",
+                color = ~AgencyClass, 
+                hoverinfo = 'text',
+                text = ~paste('Sponsor Name: ',Sponsor,
+                              'Countries: ', cnt_countries,
+                              'Facilities: ', cnt_facilities
+                              )
+                ) %>%
+      layout(
+        xaxis= list(title="Countries Recruiting", showgrid=TRUE),
+        yaxis= list(title="Facilities Recruiting", showgrid=TRUE))
+        })
+  
+  #create plot 1030_4
+  output$plot_1030_4 <- renderPlotly({
+    plot_ly() %>%
+      add_trace(data=rec_sponsors,y=~cnt_rareDisease, x = ~SponsorType, 
+                type="bar"
+      ) %>%
+      layout(
+        xaxis= list(title="Type of Sponsor", showgrid=TRUE),
+        yaxis= list(title="Studies with Rare Condition", showgrid=TRUE)
+      )
   })
   
   #create plot 1006
