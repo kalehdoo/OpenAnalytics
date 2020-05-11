@@ -52,7 +52,7 @@ agg_Studiesbyconditions <-
 #mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 5000, stringsAsFactors = FALSE)
 mv_studies_recruiting <- readRDS("data/mv_studies_recruiting.rds")
 mv_studies_recruiting <- subset.data.frame(mv_studies_recruiting) %>%
-  sample_frac(0.3, replace = FALSE)
+  sample_frac(0.1, replace = FALSE)
 
 #recruiting data without ID
 mv_studies_recruiting_table <-
@@ -117,9 +117,9 @@ rec_sponsors <- mv_studies_recruiting %>%
             median_regToStartDays = median(RegToStartDays),
             cnt_cities=length(unique(city)),
             cnt_countries=length(unique(country)),
-            cnt_facilities=length(unique(Facility)),
             cnt_conditions = sum(unique(CntConditions)),
-            CntSites = sum(unique(CntSites))
+            cnt_recFacilities=length(unique(Facility)),
+            TotalFacilities = sum(unique(CntSites))
   )
 
 
@@ -131,7 +131,7 @@ ui <- navbarPage(
   #Landing Home page starts
   tabPanel(title = "Home",
            fluidRow((
-             h4("Oakbloc's Open Clinical Analytics Platform (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+             h4("Open Clinical Analytics Platform (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
            )),
            fluidRow((
              p(
@@ -359,7 +359,9 @@ ui <- navbarPage(
                                )
                              )
                     
-                             )
+                             ),
+                    tabPanel("Sponsor Data",
+                             fluidRow(DT::dataTableOutput("dt_sponsor_recruitment")))
         )
       )
     ),
@@ -810,13 +812,13 @@ server <- function(input, output) {
   #create plot 1030_3
   output$plot_1030_3 <- renderPlotly({
     plot_ly() %>%
-      add_trace(data=rec_sponsors,x=~cnt_countries,y=~cnt_facilities, type="scatter", 
+      add_trace(data=rec_sponsors,x=~cnt_countries,y=~cnt_recFacilities, type="scatter", 
                 mode="markers",
                 color = ~AgencyClass, 
                 hoverinfo = 'text',
                 text = ~paste('Sponsor Name: ',Sponsor,
                               'Countries: ', cnt_countries,
-                              'Facilities: ', cnt_facilities
+                              'Facilities: ', cnt_recFacilities
                               )
                 ) %>%
       layout(
@@ -835,6 +837,9 @@ server <- function(input, output) {
         yaxis= list(title="Studies with Rare Condition", showgrid=TRUE)
       )
   })
+  
+  #display sponsor recruiting summary data
+  output$dt_sponsor_recruitment <- renderDataTable(DT::datatable(rec_sponsors, filter = 'top'))
   
   #create plot 1006
   output$plot_1006 <- renderPlotly({
