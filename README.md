@@ -1,4 +1,4 @@
-# Open Clinical Analytics Platform by Kalehdoo (In Development)
+# Open Clinical Analytics Platform (In Development)
 Link to the shiny application hosted at shinyapps.io(free account):
 Note: Since the dashboards are data intensive, it may take few seconds for the app to load, so have patience.
 https://kalehdoo.shinyapps.io/app01/
