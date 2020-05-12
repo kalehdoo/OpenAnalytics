@@ -86,9 +86,10 @@ mv_studies_recruiting_table <-
 
 #recruiting data at study level
 mv_recruiting_studylevel<-data.table(mv_studies_recruiting)[,list( 
+  totalFacilities = unique(CntSites),
   cnt_cities=length(unique(city)),
   cnt_countries=length(unique(country)),
-  cnt_facilities=length(unique(Facility)),
+  cnt_recFacilities=length(unique(Facility)),
   Condition = unique(Condition),
   Title = unique(Title),
   DataMonitoring = unique(DataMonitoring),
@@ -102,7 +103,6 @@ mv_recruiting_studylevel<-data.table(mv_studies_recruiting)[,list(
   AgencyClass = unique(AgencyClass),
   SponsorType = unique(SponsorType),
   CntConditions = unique(CntConditions),
-  CntSites = unique(CntSites),
   InterventionType = unique(InterventionType)
 ), by='nct_id']
 
@@ -201,6 +201,39 @@ ui <- navbarPage(
                      )
                    )
                  ),
+                 tabPanel(
+                   "Summary 2",
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     column(
+                       6,
+                       align = "left",
+                       style = "border-right: 1px solid",
+                       plotlyOutput("plot_1008_5")
+                     ),
+                     column(
+                       6,
+                       align = "left",
+                       style = "border-left: 1px solid;",
+                       plotlyOutput("plot_1008_6")
+                     )
+                   ),
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     column(
+                       6,
+                       align = "left",
+                       style = "border-right: 1px solid",
+                       plotlyOutput("plot_1008_31")
+                     ),
+                     column(
+                       6,
+                       align = "left",
+                       style = "border-left: 1px solid;",
+                       plotlyOutput("plot_1008_41")
+                     )
+                   )
+                 ),#Summary tab 2 ends here
                  #summary tab ends here
                  tabPanel("Data",
                           fluidRow(DT::dataTableOutput("dt_recruitment")))
@@ -779,8 +812,39 @@ server <- function(input, output) {
             icon = icon("credit-card"))
   })
   
-  #create plot 1030
+  #Recruitment - Summary2
+  #create plot 1008_5
+  output$plot_1008_5 <- renderPlotly({
+    plot_ly(data=mv_recruiting_studylevel,
+            x = ~RegToStartDays,
+            type = "histogram",
+            histfunc="count",
+            histnorm = "")
+  })
   
+  #create plot 1008_6
+  output$plot_1008_6 <- renderPlotly({
+    plot_ly() %>%
+      add_trace(data=mv_recruiting_studylevel,x=~RegToStartDays,y=~totalFacilities, type="scatter", 
+                mode="markers",
+                color = ~StudyType,
+                text = ~ paste(
+                  paste("Study ID:", nct_id),
+                  paste("Sponsor:", Sponsor),
+                  paste("Num of Sites:", totalFacilities),
+                  paste("Lead Time:", RegToStartDays),
+                  sep = "<br />"
+                ),
+                hoverinfo = 'text'
+      ) %>%
+      layout(
+        xaxis= list(title="Days (Reg to Study Start)", showgrid=TRUE),
+        yaxis= list(title="Number of Sites", showgrid=TRUE))
+  })
+  
+  
+  
+  #create plot 1030 - for Recruiting-sponsor
   #create plot 1030_1
   output$plot_1030_1 <- renderPlotly({
     rec_sponsors %>%
@@ -816,10 +880,12 @@ server <- function(input, output) {
                 mode="markers",
                 color = ~AgencyClass, 
                 hoverinfo = 'text',
-                text = ~paste('Sponsor Name: ',Sponsor,
-                              'Countries: ', cnt_countries,
-                              'Facilities: ', cnt_recFacilities
-                              )
+                text = ~ paste(
+                  paste("Sponsor:", Sponsor),
+                  paste("Countries:", cnt_countries),
+                  paste("Facilities:", cnt_recFacilities),
+                  sep = "<br />"
+                )
                 ) %>%
       layout(
         xaxis= list(title="Countries Recruiting", showgrid=TRUE),
