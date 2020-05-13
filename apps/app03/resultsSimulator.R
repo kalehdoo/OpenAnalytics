@@ -31,7 +31,7 @@ df_measurement<-data.frame(
 )
 
 #Generate observations for measurements
-out_path<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/resultsSimulator.txt", sep="")
+out_path<-paste(var_DIR_HOME, "apps/app03/data/resultsSimulator.txt", sep="")
 
 #delete the previous output file if exists
 if(file.exists(out_path)) {
@@ -56,7 +56,7 @@ for (i in 1:nrow(df_measurement)) {
 }
 
 #set paths for data files
-in_observations<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/resultsSimulator.txt", sep="")
+in_observations<-paste(var_DIR_HOME, "apps/app03/data/resultsSimulator.txt", sep="")
 
 #reads the data files into dataframes
 df_observations<-read.csv(in_observations, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
