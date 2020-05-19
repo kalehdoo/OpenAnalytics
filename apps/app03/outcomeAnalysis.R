@@ -1,0 +1,159 @@
+#analyse the outcome of the experiment
+library(dplyr)
+
+#set paths for data files
+in_patient_observation_log<-paste(var_DIR_HOME, "apps/app03/data/patient_observations_log.csv", sep="")
+
+#reads the data files into dataframes
+patient_observation_log<-read.csv(in_patient_observation_log, header=TRUE, sep = ",",na.strings = "NA", nrows = -100)
+
+observation_set1<- patient_observation_log %>%
+  filter(measurement_name==var_measurement_name) %>%
+  select(patient_id, gender, age, random, obsSeq, measurement_unit, actual_value)
+
+var_measurement_name="Exercise Capacity"
+Var_before_reading=as.numeric(min(observation_set1$obsSeq))
+Var_after_reading=as.numeric(max(observation_set1$obsSeq))
+
+observation_set1<- subset(observation_set1) %>%
+  filter(obsSeq %in% c(Var_before_reading,Var_after_reading))
+  
+observation_set1_agg<- observation_set1 %>%
+  group_by(patient_id) %>%
+  summarise(
+    "random"=unique(random),
+    "gender" = unique(gender),
+    "before_value" = max(if_else(obsSeq==Var_before_reading,actual_value,0)),
+    "after_value" = max(if_else(obsSeq==Var_after_reading,actual_value,0))  
+  )
+
+observation_set1_agg$diff<-observation_set1_agg$after_value - observation_set1_agg$before_value
+
+##########################################################
+#Begin analysis
+##########################################################
+
+#test if the means are distributed normally
+#treatment group
+
+obs_set1_agg_treatment<-observation_set1_agg %>%
+  filter(random=="Treatment")
+
+###################################################
+#Paired T Test to compare the means of before and after
+#Paired T Test (dependent)
+#the distribution or before and after values
+boxplot(obs_set1_agg_treatment$before_value, obs_set1_agg_treatment$after_value)
+library(plotly)
+plot_ly() %>%
+  add_trace(y=~before_value, type="box", data = obs_set1_agg_treatment, name="Before",
+            boxpoints = "all", jitter = 0.3,pointpos = -1.8) %>%
+  add_trace(y=~after_value, type="box", name="after",
+            boxpoints = "all", jitter = 0.3,pointpos = -1.8)
+
+
+#the distribution of the difference
+qqnorm(obs_set1_agg_treatment$diff)
+qqline(obs_set1_agg_treatment$diff)
+
+#T test to check if the before and after means are different
+var_conf_level=0.95
+#Paired T-test (dependent samples)
+res_pttest<-t.test(obs_set1_agg_treatment$after_value, obs_set1_agg_treatment$before_value, 
+       mu=0, alternative = "two.sided", paired = TRUE, 
+       conf.level = var_conf_level)
+
+
+###################################
+#unpaired T Test to compare the means of male and female
+#unpaired T Test (independent)
+
+obs_set1_agg_treatment %>%
+  group_by(gender) %>%
+  summarise(
+    count=n(),
+    mean=mean(diff, na.rm = TRUE),
+    sd=sd(diff, na.rm = TRUE)
+  )
+
+#normality test
+#From the output, the two p-values are greater than the significance level 0.05 implying that the distribution of the data are not significantly different from the normal distribution. 
+#In other words, we can assume the normality.
+with(obs_set1_agg_treatment, shapiro.test(diff[gender == "M"]))
+with(obs_set1_agg_treatment, shapiro.test(diff[gender == "F"]))
+
+#the distribution of the difference
+qqnorm(obs_set1_agg_treatment$diff[obs_set1_agg_treatment$gender=="F"])
+qqline(obs_set1_agg_treatment$diff[obs_set1_agg_treatment$gender=="F"])
+
+qqnorm(obs_set1_agg_treatment$diff[obs_set1_agg_treatment$gender=="M"])
+qqline(obs_set1_agg_treatment$diff[obs_set1_agg_treatment$gender=="M"])
+
+#boxplot(obs_set1_agg_treatment$diff ~ obs_set1_agg_treatment$gender)
+plot_ly() %>%
+  add_trace(y=~diff, color=~gender, type="box", data=obs_set1_agg_treatment,
+            boxpoints = "all", jitter = 0.3,pointpos = -1.8)
+
+#F-Test - Do the two populations have the same variances?
+#The p-value of F-test is p = 0.1713596. 
+#It’s greater than the significance level alpha = 0.05. 
+#In conclusion, there is no significant difference between the variances of the two sets of data. 
+#Therefore, we can use the classic t-test witch assume equality of the two variances.
+res_ftest <- var.test(diff ~ gender, data = obs_set1_agg_treatment)
+res_ftest
+
+#Is there any significant difference between women and men difference?
+# Compute t-test
+#res <- t.test(women_weight, men_weight, var.equal = TRUE)
+res_ttest <- t.test(diff ~ gender, data = obs_set1_agg_treatment, var.equal = TRUE,
+                    alternate="two.sided", conf=var_conf_level, paired=FALSE)
+res_ttest
+
+##############################
+#unpaired T Test to compare the means of control and treatment
+#unpaired T Test (independent)
+
+observation_set1_agg %>%
+  group_by(random) %>%
+  summarise(
+    count=n(),
+    mean=mean(diff, na.rm = TRUE),
+    sd=sd(diff, na.rm = TRUE)
+  )
+
+#normality test
+#From the output, the two p-values are greater than the significance level 0.05 implying that the distribution of the data are not significantly different from the normal distribution. 
+#In other words, we can assume the normality.
+with(observation_set1_agg, shapiro.test(diff[random == "Control"]))
+with(observation_set1_agg, shapiro.test(diff[random == "Treatment"]))
+
+#Visualize the distribution of the difference in QQ plot
+qqnorm(observation_set1_agg$diff[observation_set1_agg$random=="Control"])
+qqline(observation_set1_agg$diff[observation_set1_agg$random=="Control"])
+
+qqnorm(observation_set1_agg$diff[observation_set1_agg$random=="Treatment"])
+qqline(observation_set1_agg$diff[observation_set1_agg$random=="Treatment"])
+
+#boxplot(obs_set1_agg_treatment$diff ~ obs_set1_agg_treatment$gender)
+plot_ly() %>%
+  add_trace(y=~diff, color=~random, type="box", data=observation_set1_agg,
+            boxpoints = "all", jitter = 0.3,pointpos = -1.8)
+
+#F-Test - Do the two populations have the same variances?
+#The p-value of F-test is p = 0.1713596. 
+#It’s greater than the significance level alpha = 0.05. 
+#In conclusion, there is no significant difference between the variances of the two sets of data. 
+#Therefore, we can use the classic t-test witch assume equality of the two variances.
+res_ftest <- var.test(diff ~ random, data = observation_set1_agg)
+res_ftest
+
+#Is there any significant difference between women and men difference?
+# Compute t-test
+#The p-value of the test is 0.01327, which is less than the significance level alpha = 0.05. 
+#We can conclude that men’s average weight is significantly different from women’s average weight with a p-value = 0.01327.
+#res <- t.test(women_weight, men_weight, var.equal = TRUE)
+res_ttest <- t.test(diff ~ random, data = observation_set1_agg, var.equal = TRUE,
+                    alternate="two.sided", conf=var_conf_level, paired=FALSE)
+res_ttest
+res_ttest$p.value
+################################################

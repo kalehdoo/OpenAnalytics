@@ -5,18 +5,22 @@ library(leaflet)
 library(htmltools)
 library(data.table)
 library(DT)
+library(shinythemes)
 
 #read data
 mv_studies_recruiting<-readRDS("data/mv_studies_recruiting.rds") %>%
   filter(is.na(nct_id)==FALSE) %>%
   select("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility","Region","latitude","longitude","nct_id")
 
+mv_studies_recruiting <- subset.data.frame(mv_studies_recruiting) %>%
+  sample_frac(0.2, replace = FALSE)
+
 mv_studies_recruiting_tab<-mv_studies_recruiting %>% 
        select("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility")
        
 
 mv_studies_recruiting_world<-mv_studies_recruiting %>%
-  filter(casefold(Condition) %like% "coronavirus" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
+  filter(is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
   select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
 
 mv_studies_recruiting_US<-mv_studies_recruiting %>%
@@ -45,8 +49,30 @@ mv_studies_recruiting_africa<-mv_studies_recruiting %>%
   select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
 
 
-ui <- navbarPage("Kalehdoo",
-                 tabPanel("Global-Coronavirus",
+ui <- navbarPage(
+                 title = "Oakbloc",
+                 windowTitle = "StudyFinder",
+                 theme = shinytheme("united"),
+                 tabPanel(title = "Home",
+                          fluidRow((
+                            h4("Open Clinical Study Finder App (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+                          )),
+                          fluidRow((
+                            p(
+                              "Enhancing user experience for all patients and organizations such as Pharmaceuticals, CROs, public interest groups, independent consultants, and non-profits contributing to find the recruiting studies. The source code is available on ",
+                              tags$a(
+                                href = "https://github.com/kalehdoo/OpenAnalytics",
+                                "Github.",
+                                class = "externallink",
+                                target = "_blank"
+                              ),
+                              "The source data used is available to public at ",
+                              tags$a(href = "https://aact.ctti-clinicaltrials.org", "ACCT-CTTI.", target =
+                                       "_blank"),
+                              style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                            )
+                          ))),
+                 tabPanel("Globe",
                           fluidRow(
                             column(3, align="left", 
                                    textInput(inputId = "select_city_map_world",
