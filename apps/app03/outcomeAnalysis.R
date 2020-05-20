@@ -10,15 +10,15 @@ patient_observation_log<-read.csv(in_patient_observation_log, header=TRUE, sep =
 
 var_measurement_name="Exercise Capacity"
 
-observation_set1<- patient_observation_log %>%
+observation_set1_full<- patient_observation_log %>%
   filter(measurement_name==var_measurement_name) %>%
   select(patient_id, gender, age, random, obsSeq, measurement_unit, actual_value)
 
 #first reading as baseline and max reading as after treatment
-Var_before_reading=as.numeric(min(observation_set1$obsSeq))
-Var_after_reading=as.numeric(max(observation_set1$obsSeq))
+Var_before_reading=as.numeric(min(observation_set1_full$obsSeq))
+Var_after_reading=as.numeric(max(observation_set1_full$obsSeq))
 
-observation_set1<- subset(observation_set1) %>%
+observation_set1<- subset(observation_set1_full) %>%
   filter(obsSeq %in% c(Var_before_reading,Var_after_reading))
   
 observation_set1_agg<- observation_set1 %>%
@@ -174,5 +174,17 @@ TukeyHSD(aov(model_anova))
 #plot to visualize the effect of treatment as compared to control
 plot_ly(data=observation_set1) %>%
   add_trace(x=~obsSeq, y=~actual_value, 
-            type="scatter",mode="line", 
+            type="scatter",mode="lines", 
             color=~random)
+
+######################################################
+#Visualize all observations
+plot_ly(data=observation_set1_full) %>%
+  add_trace(x=~patient_id, y=~obsSeq, z=~actual_value,
+            type="scatter3d",mode="lines", 
+            color=~random)
+
+plot_ly(data=observation_set1_full) %>%
+  add_trace(x=~obsSeq, y=~patient_id, z=~actual_value,
+            type="heatmap")
+#####################################################
