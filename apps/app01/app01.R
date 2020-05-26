@@ -51,7 +51,8 @@ agg_Studiesbyconditions <-
 #import recruiting data
 #mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 5000, stringsAsFactors = FALSE)
 mv_studies_recruiting <- readRDS("data/mv_studies_recruiting.rds")
-mv_studies_recruiting <- subset.data.frame(mv_studies_recruiting) %>%
+mv_studies_recruiting <-
+  subset.data.frame(mv_studies_recruiting) %>%
   sample_frac(0.1, replace = FALSE)
 
 #recruiting data without ID
@@ -85,42 +86,59 @@ mv_studies_recruiting_table <-
   )
 
 #recruiting data at study level
-mv_recruiting_studylevel<-data.table(mv_studies_recruiting)[,list( 
-  totalFacilities = unique(CntSites),
-  cnt_cities=length(unique(city)),
-  cnt_countries=length(unique(country)),
-  cnt_recFacilities=length(unique(Facility)),
-  Condition = unique(Condition),
-  Title = unique(Title),
-  DataMonitoring = unique(DataMonitoring),
-  RareDisease = unique(RareDisease),
-  StudyPhase = unique(StudyPhase),
-  Sponsor = unique(Sponsor),
-  StudyType = unique(StudyType),
-  PostedYrMon = unique(PostedYrMon),
-  StartYrMon = unique(StartYrMon),
-  RegToStartDays = unique(RegToStartDays),
-  AgencyClass = unique(AgencyClass),
-  SponsorType = unique(SponsorType),
-  CntConditions = unique(CntConditions),
-  InterventionType = unique(InterventionType)
-), by='nct_id']
+mv_recruiting_studylevel <-
+  data.table(mv_studies_recruiting)[, list(
+    totalFacilities = unique(CntSites),
+    cnt_cities = length(unique(city)),
+    cnt_countries = length(unique(country)),
+    cnt_recFacilities = length(unique(Facility)),
+    Condition = unique(Condition),
+    Title = unique(Title),
+    DataMonitoring = unique(DataMonitoring),
+    RareDisease = unique(RareDisease),
+    StudyPhase = unique(StudyPhase),
+    Sponsor = unique(Sponsor),
+    StudyType = unique(StudyType),
+    PostedYrMon = unique(PostedYrMon),
+    StartYrMon = unique(StartYrMon),
+    RegToStartDays = unique(RegToStartDays),
+    AgencyClass = unique(AgencyClass),
+    SponsorType = unique(SponsorType),
+    CntConditions = unique(CntConditions),
+    InterventionType = unique(InterventionType)
+  ), by = 'nct_id']
 
 #recruiting data at sponsor level
 rec_sponsors <- mv_studies_recruiting %>%
   group_by(Sponsor) %>%
-  summarise(AgencyClass = unique(AgencyClass),
-            SponsorType = unique(SponsorType),
-            cnt_studies = length(unique(nct_id)),
-            cnt_dataMonitor = sum(ifelse(DataMonitoring=="Yes",1,0)),
-            cnt_rareDisease = sum(ifelse(RareDisease=="Yes",1,0)),
-            median_regToStartDays = median(RegToStartDays),
-            cnt_cities=length(unique(city)),
-            cnt_countries=length(unique(country)),
-            cnt_conditions = sum(unique(CntConditions)),
-            cnt_recFacilities=length(unique(Facility)),
-            TotalFacilities = sum(unique(CntSites))
+  summarise(
+    AgencyClass = unique(AgencyClass),
+    SponsorType = unique(SponsorType),
+    cnt_studies = length(unique(nct_id)),
+    cnt_dataMonitor = sum(ifelse(DataMonitoring == "Yes", 1, 0)),
+    cnt_rareDisease = sum(ifelse(RareDisease == "Yes", 1, 0)),
+    median_regToStartDays = median(RegToStartDays),
+    cnt_cities = length(unique(city)),
+    cnt_countries = length(unique(country)),
+    cnt_conditions = sum(unique(CntConditions)),
+    cnt_recFacilities = length(unique(Facility)),
+    TotalFacilities = sum(unique(CntSites))
   )
+
+#Read patient observation log data
+patient_observation_log <-
+  read.csv(
+    "data/patient_observations_log.txt",
+    header = TRUE,
+    sep = "|",
+    na.strings = "NA",
+    nrows = -100
+  )
+patient_observation_log <- data.frame(patient_observation_log)
+var_measurement_name <-
+  unique(patient_observation_log$measurement_name)
+var_random_name <-
+  unique(patient_observation_log$random)
 
 
 ui <- navbarPage(
@@ -233,7 +251,8 @@ ui <- navbarPage(
                        plotlyOutput("plot_1008_41")
                      )
                    )
-                 ),#Summary tab 2 ends here
+                 ),
+                 #Summary tab 2 ends here
                  #summary tab ends here
                  tabPanel("Data",
                           fluidRow(DT::dataTableOutput("dt_recruitment")))
@@ -346,58 +365,62 @@ ui <- navbarPage(
                
              )),
     tabPanel("Sponsor",
-      mainPanel(width = 12,
-        tabsetPanel(type = "tabs",
-                    tabPanel("Summary",
-                             fluidRow(
-                               style = "height:50px;background-color: orange; padding: 5px; border-style: solid; border-width: 1px;",
-                               column(
-                                 12,
-                                 shinydashboard::valueBoxOutput("box_studies1", width = 2),
-                                 shinydashboard::valueBoxOutput("box_sponsors1", width = 2),
-                                 shinydashboard::valueBoxOutput("box_countries1", width = 2),
-                                 shinydashboard::valueBoxOutput("box_cities1", width = 2),
-                                 shinydashboard::valueBoxOutput("box_facilities1", width = 2)
-                               )
-                             ),
-                             
-                             fluidRow(
-                               style = "padding: 5px; border-style: solid; border-width: 1px;",
-                               column(
-                                 6,
-                                 align = "left",
-                                 style = "border-right: 1px solid",
-                                 plotlyOutput("plot_1030_1")
-                               ),
-                               column(
-                                 6,
-                                 align = "left",
-                                 style = "border-left: 1px solid;",
-                                 plotlyOutput("plot_1030_3")
-                               )
-                             ),
-                             fluidRow(
-                               style = "padding: 5px; border-style: solid; border-width: 1px;",
-                               column(
-                                 6,
-                                 align = "left",
-                                 style = "border-right: 1px solid",
-                                 plotlyOutput("plot_1030_4")
-                               ),
-                               column(
-                                 6,
-                                 align = "left",
-                                 style = "border-left: 1px solid;",
-                                 plotlyOutput("plot_1030_2")
-                               )
-                             )
-                    
-                             ),
-                    tabPanel("Sponsor Data",
-                             fluidRow(DT::dataTableOutput("dt_sponsor_recruitment")))
-        )
-      )
-    ),
+             mainPanel(
+               width = 12,
+               tabsetPanel(
+                 type = "tabs",
+                 tabPanel(
+                   "Summary",
+                   fluidRow(
+                     style = "height:50px;background-color: orange; padding: 5px; border-style: solid; border-width: 1px;",
+                     column(
+                       12,
+                       shinydashboard::valueBoxOutput("box_studies1", width = 2),
+                       shinydashboard::valueBoxOutput("box_sponsors1", width = 2),
+                       shinydashboard::valueBoxOutput("box_countries1", width = 2),
+                       shinydashboard::valueBoxOutput("box_cities1", width = 2),
+                       shinydashboard::valueBoxOutput("box_facilities1", width = 2)
+                     )
+                   ),
+                   
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     column(
+                       6,
+                       align = "left",
+                       style = "border-right: 1px solid",
+                       plotlyOutput("plot_1030_1")
+                     ),
+                     column(
+                       6,
+                       align = "left",
+                       style = "border-left: 1px solid;",
+                       plotlyOutput("plot_1030_3")
+                     )
+                   ),
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     column(
+                       6,
+                       align = "left",
+                       style = "border-right: 1px solid",
+                       plotlyOutput("plot_1030_4")
+                     ),
+                     column(
+                       6,
+                       align = "left",
+                       style = "border-left: 1px solid;",
+                       plotlyOutput("plot_1030_2")
+                     )
+                   )
+                   
+                 ),
+                 tabPanel("Sponsor Data",
+                          fluidRow(
+                            DT::dataTableOutput("dt_sponsor_recruitment")
+                          ))
+               )
+             )),
     tabPanel("Conditions",
              mainPanel(
                width = 12,
@@ -424,48 +447,113 @@ ui <- navbarPage(
                box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
              )
            )),
-  tabPanel("Summary",
-           sidebarLayout(
-             sidebarPanel(
-               width = 2,
-               menuItem(
-                 "Dashboard",
-                 tabName = "dashboard",
-                 icon = icon("dashboard")
-               ),
-               menuItem("Widgets", tabName = "widgets", icon = icon("th")),
-               checkboxInput("checkbox", "Choice A", value = TRUE),
-               radioButtons(
-                 "radio",
-                 h3("Radio buttons"),
-                 choices = list(
-                   "Choice 1" = 1,
-                   "Choice 2" = 2,
-                   "Choice 3" = 3
-                 ),
-                 selected = 1
-               )
-             ),
-             mainPanel(fluidRow(
-               box(plotlyOutput("plot_10051", height = 200), title = "Studies Registered"),
-               box(plotlyOutput("plot_10061", height = 200), title = "Studies Started")
-             ),
-             #create box for plot 1001
-             fluidRow(
-               box(plotlyOutput("plot_10071", height = 200), title = "Studies Completed"),
-               box(plotlyOutput("plot_10081", height = 200), title = "Results Posted")
-             ))
-           )),
-  navbarMenu("Sponsor",
-             tabPanel("Sponsor1"),
-             tabPanel("Sponsor2"))
+  #Outcome dashboard
+  navbarMenu("Outcome",
+               tabPanel("Summary",
+                        tabsetPanel(type="tabs",
+                                    tabPanel("Summary",
+                                             column(3,
+                                                    selectInput(
+                                                      inputId = "in_var_measurement_name",
+                                                      label = "Measurement Name",
+                                                      choices = var_measurement_name),
+                                                    selectInput(
+                                                      inputId = "in_var_random_name",
+                                                      label = "Group Name",
+                                                      choices = var_random_name),
+                                                    numericInput(inputId = "select_var_confidence",
+                                                              label = "Enter Confidence Level",
+                                                              value = 0.95,
+                                                              min=0.8, max=0.99)
+                                                    ),
+                                             column(9,
+                                                    fluidRow(
+                                                      box(plotlyOutput("plot_outcome_1001", height = 200), title = "Box Plot"),
+                                                      box(plotOutput("plot_outcome_1002", height = 200), title = "QQ Plot")
+                                                    ),
+                                                    fluidRow(
+                                                      box(plotlyOutput("plot_outcome_1003", height = 200), title = "Box Plot")
+                                                      
+                                                    ),
+                                                    fluidRow(
+                                                      verbatimTextOutput("T_Test_Paired")
+                                                    )
+                                                    )
+                                             ),
+                                    tabPanel("Data",
+                                             DT::dataTableOutput("dt_patient_observation_log")
+                                             )
+                                    )
+                        ),
+               tabPanel("Sponsor2")
+             )
+  
+  #ending main bracket
 )
 
-
+############################################################################################################
+#Server function begins
+###########################################################################################################
 
 server <- function(input, output) {
+  #reactive data set for a measurement
+  observation_set1_agg<- reactive({
+    patient_observation_log %>%
+      filter(measurement_name==input$in_var_measurement_name) %>%
+      select(
+        patient_id,
+        gender,
+        age,
+        random,
+        obsSeq,
+        measurement_unit,
+        actual_value
+      ) %>%
+    group_by(patient_id) %>%
+    summarise(
+      "random"=unique(random),
+      "gender" = unique(gender),
+      "before_value" = max(if_else(obsSeq==as.numeric(min(obsSeq)),actual_value,0)),
+      "after_value" = max(if_else(obsSeq==as.numeric(max(obsSeq)),actual_value,0)),
+      "diff" = after_value-before_value
+    ) %>%
+      filter(random==input$in_var_random_name)
+  })
+  
+  #box plot to visualize the normal distribution
+  output$plot_outcome_1001 <- renderPlotly({
+    plot_ly() %>%
+      add_trace(y=~before_value, type="box", data = observation_set1_agg(), name="Before",
+                boxpoints = "all", jitter = 0.3,pointpos = -1.8) %>%
+      add_trace(y=~after_value, type="box", name="After",
+                boxpoints = "all", jitter = 0.3,pointpos = -1.8)
+  })
+  
+  output$plot_outcome_1003 <- renderPlotly({
+    plot_ly(data = observation_set1_agg(), x=~diff, type = "histogram")
+  })
+  
+  #QQ plot to visualize the normal distribution
+  output$plot_outcome_1002 <- renderPlot({
+    qqnorm(observation_set1_agg()$diff)
+    qqline(observation_set1_agg()$diff)
+  })
+  
+  #T-Test (Paired, one sample and dependent)
+  output$T_Test_Paired <- renderPrint({ 
+    t.test(observation_set1_agg()$after_value, observation_set1_agg()$before_value, 
+           mu=0, alternative = "two.sided", paired = TRUE, 
+           conf.level = input$select_var_confidence)
+  })
+  
+  #display observation log data
+  output$dt_patient_observation_log <-
+    renderDataTable(DT::datatable(observation_set1_agg()))
+  
+  
   #display recruitment data
-  output$dt_recruitment <- renderDataTable(DT::datatable(mv_studies_recruiting_table, filter = 'top'))
+  output$dt_recruitment <-
+    renderDataTable(DT::datatable(mv_studies_recruiting_table, filter = 'top'))
   
   #reactive dataset for maps with reduced columns
   mv_studies_recruiting_map <- reactive({
@@ -815,31 +903,38 @@ server <- function(input, output) {
   #Recruitment - Summary2
   #create plot 1008_5
   output$plot_1008_5 <- renderPlotly({
-    plot_ly(data=mv_recruiting_studylevel,
-            x = ~RegToStartDays,
-            type = "histogram",
-            histfunc="count",
-            histnorm = "")
+    plot_ly(
+      data = mv_recruiting_studylevel,
+      x = ~ RegToStartDays,
+      type = "histogram",
+      histfunc = "count",
+      histnorm = ""
+    )
   })
   
   #create plot 1008_6
   output$plot_1008_6 <- renderPlotly({
     plot_ly() %>%
-      add_trace(data=mv_recruiting_studylevel,x=~RegToStartDays,y=~totalFacilities, type="scatter", 
-                mode="markers",
-                color = ~StudyType,
-                text = ~ paste(
-                  paste("Study ID:", nct_id),
-                  paste("Sponsor:", Sponsor),
-                  paste("Num of Sites:", totalFacilities),
-                  paste("Lead Time:", RegToStartDays),
-                  sep = "<br />"
-                ),
-                hoverinfo = 'text'
+      add_trace(
+        data = mv_recruiting_studylevel,
+        x =  ~ RegToStartDays,
+        y =  ~ totalFacilities,
+        type = "scatter",
+        mode = "markers",
+        color = ~ StudyType,
+        text = ~ paste(
+          paste("Study ID:", nct_id),
+          paste("Sponsor:", Sponsor),
+          paste("Num of Sites:", totalFacilities),
+          paste("Lead Time:", RegToStartDays),
+          sep = "<br />"
+        ),
+        hoverinfo = 'text'
       ) %>%
       layout(
-        xaxis= list(title="Days (Reg to Study Start)", showgrid=TRUE),
-        yaxis= list(title="Number of Sites", showgrid=TRUE))
+        xaxis = list(title = "Days (Reg to Study Start)", showgrid = TRUE),
+        yaxis = list(title = "Number of Sites", showgrid = TRUE)
+      )
   })
   
   
@@ -872,40 +967,49 @@ server <- function(input, output) {
       layout(title = "Sponsors by Class",
              legend = list(orientation = "h"))
   })
-
+  
   #create plot 1030_3
   output$plot_1030_3 <- renderPlotly({
     plot_ly() %>%
-      add_trace(data=rec_sponsors,x=~cnt_countries,y=~cnt_recFacilities, type="scatter", 
-                mode="markers",
-                color = ~AgencyClass, 
-                hoverinfo = 'text',
-                text = ~ paste(
-                  paste("Sponsor:", Sponsor),
-                  paste("Countries:", cnt_countries),
-                  paste("Facilities:", cnt_recFacilities),
-                  sep = "<br />"
-                )
-                ) %>%
+      add_trace(
+        data = rec_sponsors,
+        x =  ~ cnt_countries,
+        y =  ~ cnt_recFacilities,
+        type = "scatter",
+        mode = "markers",
+        color = ~ AgencyClass,
+        hoverinfo = 'text',
+        text = ~ paste(
+          paste("Sponsor:", Sponsor),
+          paste("Countries:", cnt_countries),
+          paste("Facilities:", cnt_recFacilities),
+          sep = "<br />"
+        )
+      ) %>%
       layout(
-        xaxis= list(title="Countries Recruiting", showgrid=TRUE),
-        yaxis= list(title="Facilities Recruiting", showgrid=TRUE))
-        })
+        xaxis = list(title = "Countries Recruiting", showgrid = TRUE),
+        yaxis = list(title = "Facilities Recruiting", showgrid = TRUE)
+      )
+  })
   
   #create plot 1030_4
   output$plot_1030_4 <- renderPlotly({
     plot_ly() %>%
-      add_trace(data=rec_sponsors,y=~cnt_rareDisease, x = ~SponsorType, 
-                type="bar"
+      add_trace(
+        data = rec_sponsors,
+        y =  ~ cnt_rareDisease,
+        x = ~ SponsorType,
+        type = "bar"
       ) %>%
       layout(
-        xaxis= list(title="Type of Sponsor", showgrid=TRUE),
-        yaxis= list(title="Studies with Rare Condition", showgrid=TRUE)
+        xaxis = list(title = "Type of Sponsor", showgrid = TRUE),
+        yaxis = list(title = "Studies with Rare Condition", showgrid = TRUE)
       )
   })
   
   #display sponsor recruiting summary data
-  output$dt_sponsor_recruitment <- renderDataTable(DT::datatable(rec_sponsors, filter = 'top'))
+  output$dt_sponsor_recruitment <-
+    renderDataTable(DT::datatable(rec_sponsors, filter = 'top'))
   
   #create plot 1006
   output$plot_1006 <- renderPlotly({

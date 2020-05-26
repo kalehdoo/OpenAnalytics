@@ -184,6 +184,11 @@ patient_observation_log<-left_join(observation_log,patient_obs, by="row_id")
 #write to csv file
 write.table(patient_observation_log,paste(var_DIR_HOME, "apps/app03/data/patient_observations_log.txt", sep=""), sep = "|", row.names = FALSE)
 
+#copy individual files from other folders to apps
+var_path_obs_log<-paste(var_DIR_HOME, "apps/app03/data/patient_observations_log.txt", sep="")
 
+var_EXTRACT_TOAPP01_DIR<-paste(var_DIR_HOME, "apps/app01/data", sep="")
+#copy the files
+file.copy(var_path_obs_log,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 
 
