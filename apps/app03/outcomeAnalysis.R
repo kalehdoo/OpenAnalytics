@@ -49,6 +49,7 @@ obs_set1_agg_treatment<-observation_set1_agg %>%
 #the distribution or before and after values
 boxplot(obs_set1_agg_treatment$before_value, obs_set1_agg_treatment$after_value)
 
+
 plot_ly() %>%
   add_trace(y=~before_value, type="box", data = obs_set1_agg_treatment, name="Before",
             boxpoints = "all", jitter = 0.3,pointpos = -1.8) %>%
@@ -150,8 +151,8 @@ plot_ly() %>%
 #The p-value of F-test is p = 0.1713596. 
 #It’s greater than the significance level alpha = 0.05. 
 #In conclusion, there is no significant difference between the variances of the two sets of data. 
-#Therefore, we can use the classic t-test witch assume equality of the two variances.
-res_ftest <- var.test(diff ~ random, data = observation_set1_agg)
+#Therefore, we can use the classic t-test which assumes equality of the two variances.
+res_ftest <- var.test(diff, random, data = observation_set1_agg())
 res_ftest
 
 #Is there any significant difference between women and men difference?

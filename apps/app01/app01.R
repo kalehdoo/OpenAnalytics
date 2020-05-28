@@ -140,6 +140,10 @@ var_measurement_name <-
 var_random_name <-
   unique(patient_observation_log$random)
 
+#var_obs_col_name<-colnames(patient_observation_log)
+#list of ANOVA Groups
+var_obs_col_name<-c("gender","ethnicity")
+var_obs_metric_col_name<-c("before_value","after_value","diff")
 
 ui <- navbarPage(
   title = "Oakbloc",
@@ -448,45 +452,188 @@ ui <- navbarPage(
              )
            )),
   #Outcome dashboard
-  navbarMenu("Outcome",
-               tabPanel("Summary",
-                        tabsetPanel(type="tabs",
-                                    tabPanel("Summary",
-                                             column(3,
-                                                    selectInput(
-                                                      inputId = "in_var_measurement_name",
-                                                      label = "Measurement Name",
-                                                      choices = var_measurement_name),
-                                                    selectInput(
-                                                      inputId = "in_var_random_name",
-                                                      label = "Group Name",
-                                                      choices = var_random_name),
-                                                    numericInput(inputId = "select_var_confidence",
-                                                              label = "Enter Confidence Level",
-                                                              value = 0.95,
-                                                              min=0.8, max=0.99)
-                                                    ),
-                                             column(9,
-                                                    fluidRow(
-                                                      box(plotlyOutput("plot_outcome_1001", height = 200), title = "Box Plot"),
-                                                      box(plotOutput("plot_outcome_1002", height = 200), title = "QQ Plot")
-                                                    ),
-                                                    fluidRow(
-                                                      box(plotlyOutput("plot_outcome_1003", height = 200), title = "Box Plot")
-                                                      
-                                                    ),
-                                                    fluidRow(
-                                                      verbatimTextOutput("T_Test_Paired")
-                                                    )
-                                                    )
-                                             ),
-                                    tabPanel("Data",
-                                             DT::dataTableOutput("dt_patient_observation_log")
-                                             )
-                                    )
-                        ),
-               tabPanel("Sponsor2")
-             )
+  navbarMenu(
+    "Outcome",
+    tabPanel(
+      "Results",
+      tabsetPanel(
+        type = "tabs",
+        tabPanel(
+          "Paired",
+          column(
+            3,
+            align = "left",
+            style = "border-width: 1px solid",
+            selectInput(
+              inputId = "in_var_measurement_name",
+              label = "Measurement Name",
+              choices = var_measurement_name
+            ),
+            selectInput(
+              inputId = "in_var_random_name",
+              label = "Group Name",
+              choices = var_random_name
+            ),
+            numericInput(
+              inputId = "select_var_confidence",
+              label = "Enter Confidence Level(0.8-0.99)",
+              value = 0.95,
+              min = 0.8,
+              max = 0.99
+            ),
+            sliderInput(
+              inputId = "in_var_binsize",
+              label = "Histogram Bins",
+              min = 1,
+              max = 50,
+              value = 10
+            )
+          ),
+          column(
+            9,
+            align = "left",
+            style = "border-width: 1px solid",
+            fluidRow(
+              style = "padding: 5px; border-style: solid; border-width: 1px;",
+              box(plotlyOutput("plot_outcome_1001", height = 200), title = "Box Plot"),
+              box(plotOutput("plot_outcome_1002", height = 200), title = "Q-Q Plot")
+            ),
+            fluidRow(
+              style = "padding: 5px; border-style: solid; border-width: 1px;",
+              box(plotlyOutput("plot_outcome_1003", height = 200), title = "Histogram"),
+              p(
+                "p-values greater than the significance level imply that the distribution of the data is not significantly different from the normal distribution."
+              ),
+              verbatimTextOutput("ShapiroTest_set1")
+            ),
+            fluidRow(
+              style = "padding: 5px; border-style: solid; border-width: 1px;",
+              p(
+                "Paired T-Test: Is there any significant difference between means of two pairs(before and after treatment) of one sample?
+                p-values less than the significance level imply that the means of the pairs are significantly different."
+              ),
+              verbatimTextOutput("T_Test_Paired")
+            )
+          )
+        ),
+        tabPanel("ANOVA",
+                 column(
+                   3,
+                   align = "left",
+                   style = "border-width: 1px solid",
+                   selectInput(
+                     inputId = "in_var_measurement_name3",
+                     label = "Measurement Name",
+                     choices = var_measurement_name
+                   ),
+                   selectInput(
+                     inputId = "in_var_random_name3",
+                     label = "Group Name",
+                     choices = var_random_name
+                   ),
+                   selectInput(
+                     inputId = "in_var_obs_col_name",
+                     label = "ANOVA Group",
+                     choices = var_obs_col_name
+                   ),
+                   selectInput(
+                     inputId = "in_var_obs_metric_col_name3",
+                     label = "Metric",
+                     choices = var_obs_metric_col_name
+                   ),
+                   numericInput(
+                     inputId = "select_var_confidence3",
+                     label = "Enter Confidence Level",
+                     value = 0.95,
+                     min = 0.8,
+                     max = 0.99
+                   )
+                 ),
+                 column(
+                   9,
+                   align = "left",
+                   style = "border-width: 1px solid",
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     plotlyOutput("boxplot_outcome_1003")
+                   ),
+                   fluidRow(style = "padding: 5px; border-style: solid; border-width: 1px;",
+                            p(
+                              "Summary Statistics"
+                            ),
+                            verbatimTextOutput("summary3")
+                   ),
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     p(
+                       "ANOVA: Is there any significant difference between means of two samples?
+                p-values less than the significance level imply that the means of the two samples are significantly different."
+                     ),
+                     verbatimTextOutput("ANOVA1")
+                   ),
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     p(
+                       "TuKey Post Hoc test for pairwise comparison: which group pair has a different mean?
+                p-values less than the significance level imply that the means of the two samples are significantly different."
+                     ),
+                     verbatimTextOutput("ANOVA_PostHoc3")
+                   )
+                 )
+        ),
+        tabPanel(
+          "UnPaired",
+          column(
+            3,
+            align = "left",
+            style = "border-width: 1px solid",
+            selectInput(
+              inputId = "in_var_measurement_name2",
+              label = "Measurement Name",
+              choices = var_measurement_name
+            ),
+            numericInput(
+              inputId = "select_var_confidence2",
+              label = "Enter Confidence Level",
+              value = 0.95,
+              min = 0.8,
+              max = 0.99
+            )
+          ),
+          column(
+            9,
+            align = "left",
+            style = "border-width: 1px solid",
+            fluidRow(
+              style = "padding: 5px; border-style: solid; border-width: 1px;",
+              box(plotlyOutput("plot_outcome_1001_2", height = 200), title = "Box Plot"),
+              box(plotlyOutput("plot_outcome_1003_2", height = 200), title = "Before Vs After Treatment")
+            ),
+            fluidRow(style = "padding: 5px; border-style: solid; border-width: 1px;",
+              p(
+                "F-Test: Do the two populations have the same variances?
+                p-values greater than the significance level imply that there is no significant difference between the variances of the two sets of data.
+                Therefore, we can use the classic t-test which assumes equality of the two variances."
+              ),
+              verbatimTextOutput("FTest_set2")
+            ),
+            fluidRow(
+              style = "padding: 5px; border-style: solid; border-width: 1px;",
+              p(
+                "Unpaired T-Test: Is there any significant difference between means of two samples?
+                p-values less than the significance level imply that the means of the two samples are significantly different."
+              ),
+              verbatimTextOutput("T_Test_UnPaired_2")
+            )
+          )
+        ),
+        tabPanel("Data",
+                 DT::dataTableOutput("dt_patient_observation_log")
+                 )
+      )
+    ),
+    tabPanel("Sponsor2")
+  )
   
   #ending main bracket
 )
@@ -497,40 +644,70 @@ ui <- navbarPage(
 
 server <- function(input, output) {
   #reactive data set for a measurement
-  observation_set1_agg<- reactive({
+  observation_set1_agg <- reactive({
     patient_observation_log %>%
-      filter(measurement_name==input$in_var_measurement_name) %>%
-      select(
-        patient_id,
-        gender,
-        age,
-        random,
-        obsSeq,
-        measurement_unit,
-        actual_value
+      filter(measurement_name == input$in_var_measurement_name) %>%
+      select(patient_id,
+             gender,
+             ethnicity,
+             age,
+             random,
+             obsSeq,
+             measurement_unit,
+             actual_value) %>%
+      group_by(patient_id) %>%
+      summarise(
+        "random" = unique(random),
+        "gender" = unique(gender),
+        "ethnicity" = unique(ethnicity),
+        "before_value" = max(if_else(
+          obsSeq == as.numeric(min(obsSeq)), actual_value, 0
+        )),
+        "after_value" = max(if_else(
+          obsSeq == as.numeric(max(obsSeq)), actual_value, 0
+        )),
+        "diff" = after_value - before_value
       ) %>%
-    group_by(patient_id) %>%
-    summarise(
-      "random"=unique(random),
-      "gender" = unique(gender),
-      "before_value" = max(if_else(obsSeq==as.numeric(min(obsSeq)),actual_value,0)),
-      "after_value" = max(if_else(obsSeq==as.numeric(max(obsSeq)),actual_value,0)),
-      "diff" = after_value-before_value
-    ) %>%
-      filter(random==input$in_var_random_name)
+      filter(random == input$in_var_random_name)
   })
   
   #box plot to visualize the normal distribution
   output$plot_outcome_1001 <- renderPlotly({
     plot_ly() %>%
-      add_trace(y=~before_value, type="box", data = observation_set1_agg(), name="Before",
-                boxpoints = "all", jitter = 0.3,pointpos = -1.8) %>%
-      add_trace(y=~after_value, type="box", name="After",
-                boxpoints = "all", jitter = 0.3,pointpos = -1.8)
+      add_trace(
+        y =  ~ before_value,
+        type = "box",
+        data = observation_set1_agg(),
+        name = "Before",
+        boxpoints = "all",
+        jitter = 0.3,
+        pointpos = -1.8,
+        showlegend = FALSE
+      ) %>%
+      add_trace(
+        y =  ~ after_value,
+        type = "box",
+        data = observation_set1_agg(),
+        name = "After",
+        boxpoints = "all",
+        jitter = 0.3,
+        pointpos = -1.8,
+        showlegend = FALSE
+      )
   })
   
+  #histogram set 1
   output$plot_outcome_1003 <- renderPlotly({
-    plot_ly(data = observation_set1_agg(), x=~diff, type = "histogram")
+    plot_ly(
+      data = observation_set1_agg(),
+      x =  ~ diff,
+      type = "histogram",
+      nbinsx = input$in_var_binsize
+    )
+  })
+  
+  output$ShapiroTest_set1 <- renderPrint({
+    with(observation_set1_agg(), shapiro.test(diff))
   })
   
   #QQ plot to visualize the normal distribution
@@ -539,18 +716,157 @@ server <- function(input, output) {
     qqline(observation_set1_agg()$diff)
   })
   
-  #T-Test (Paired, one sample and dependent)
-  output$T_Test_Paired <- renderPrint({ 
-    t.test(observation_set1_agg()$after_value, observation_set1_agg()$before_value, 
-           mu=0, alternative = "two.sided", paired = TRUE, 
-           conf.level = input$select_var_confidence)
+  #T-Test (Paired: After-Before for same sample)
+  output$T_Test_Paired <- renderPrint({
+    t.test(
+      observation_set1_agg()$after_value,
+      observation_set1_agg()$before_value,
+      mu = 0,
+      alternative = "two.sided",
+      paired = TRUE,
+      conf.level = input$select_var_confidence
+    )
   })
   
+##############################################################
+  #reactive data set 3 for ANOVA
+  observation_set3_agg <- reactive({
+    patient_observation_log %>%
+      filter(measurement_name == input$in_var_measurement_name3) %>%
+      select(patient_id,
+             gender,
+             ethnicity,
+             age,
+             random,
+             obsSeq,
+             measurement_unit,
+             actual_value) %>%
+      group_by(patient_id) %>%
+      summarise(
+        "random" = unique(random),
+        "gender" = unique(gender),
+        "ethnicity" = unique(ethnicity),
+        "before_value" = max(if_else(
+          obsSeq == as.numeric(min(obsSeq)), actual_value, 0
+        )),
+        "after_value" = max(if_else(
+          obsSeq == as.numeric(max(obsSeq)), actual_value, 0
+        )),
+        "diff" = after_value - before_value
+      ) %>%
+      filter(random == input$in_var_random_name3)
+  })
+  
+  #box plot to visualize the normal distribution
+  output$boxplot_outcome_1003 <- renderPlotly({
+    plot_ly(data=observation_set3_agg(), y=as.formula(paste('~',input$in_var_obs_metric_col_name3)), color=as.formula(paste('~',input$in_var_obs_col_name)), type="box", showlegend=FALSE, boxpoints = "all")
+  })
+  
+  #summary statistics
+  output$summary3<- renderPrint({
+    observation_set3_agg() %>%
+      group_by(!! rlang::sym(input$in_var_obs_col_name)) %>%
+      summarise(
+        record_count=n(),
+        mean = mean((!! rlang::sym(input$in_var_obs_metric_col_name3)), na.rm = TRUE),
+        standardDeviation = sd((!! rlang::sym(input$in_var_obs_metric_col_name3)), na.rm = TRUE)
+      )
+  })
+  
+  #ANOVA 1
+  output$ANOVA1 <- renderPrint({
+    #model_anova<-lm(as.formula(paste('diff ~', input$in_var_obs_col_name)), data = observation_set3_agg())
+    model_anova<-aov(as.formula(paste(input$in_var_obs_metric_col_name3,'~', input$in_var_obs_col_name)), 
+                     data = observation_set3_agg())
+    anova(model_anova)
+    #summary(model_anova)
+  })
+  
+  #ANOVA Post-hoc test - Which of the different groups have different means
+  output$ANOVA_PostHoc3 <- renderPrint({
+    model_anova<-aov(as.formula(paste(input$in_var_obs_metric_col_name3,'~', input$in_var_obs_col_name)), 
+                     data = observation_set3_agg())
+    TukeyHSD(model_anova, conf.level = input$select_var_confidence3)
+  })
+  
+#######################################################################  
+  #reactive data set 2 for a measurement
+  observation_set2_agg <- reactive({
+    patient_observation_log %>%
+      filter(measurement_name == input$in_var_measurement_name2) %>%
+      select(patient_id,
+             gender,
+             ethnicity,
+             age,
+             random,
+             obsSeq,
+             measurement_unit,
+             actual_value) %>%
+      group_by(patient_id) %>%
+      summarise(
+        "random" = unique(random),
+        "gender" = unique(gender),
+        "ethnicity" = unique(ethnicity),
+        "before_value" = max(if_else(
+          obsSeq == as.numeric(min(obsSeq)), actual_value, 0
+        )),
+        "after_value" = max(if_else(
+          obsSeq == as.numeric(max(obsSeq)), actual_value, 0
+        )),
+        "diff" = after_value - before_value
+      )
+  })
+  
+  #box plot to visualize the normal distribution
+  output$plot_outcome_1001_2 <- renderPlotly({
+    plot_ly() %>%
+      add_trace(
+        y =  ~ diff,
+        color =  ~ random,
+        type = "box",
+        data = observation_set2_agg(),
+        boxpoints = "all",
+        jitter = 0.3,
+        pointpos = -1.8,
+        showlegend=FALSE
+      )
+  })
+  
+  #Chart to compare increase in actual value
+  output$plot_outcome_1003_2 <- renderPlotly({
+    plot_ly(data=observation_set2_agg()) %>%
+      add_trace(x=~before_value, y=~after_value, 
+                type="scatter", 
+                color=~random)
+  })
+  
+  #F-Test: Do the two populations have the same variances?
+  output$FTest_set2 <- renderPrint({
+    var.test(diff ~ random, 
+             data = observation_set2_agg(),
+             alternative = "two.sided",
+             conf.level = input$select_var_confidence2
+             )
+  })
+ 
+  #T-Test (UnPaired: two samples (Control and Treatment))
+  output$T_Test_UnPaired_2 <- renderPrint({
+    t.test(
+      diff ~ random,
+      data = observation_set2_agg(),
+      mu = 0,
+      alternative = "two.sided",
+      paired = FALSE,
+      conf.level = input$select_var_confidence2
+    )
+  })
+  
+########################################################################################### 
   #display observation log data
   output$dt_patient_observation_log <-
-    renderDataTable(DT::datatable(observation_set1_agg()))
-  
-  
+    renderDataTable(DT::datatable(patient_observation_log, filter="top"))
+#############################################################################################  
+ 
   #display recruitment data
   output$dt_recruitment <-
     renderDataTable(DT::datatable(mv_studies_recruiting_table, filter = 'top'))
@@ -632,11 +948,11 @@ server <- function(input, output) {
               zoom = 2.2) %>%
       addProviderTiles(providers$CartoDB.Positron,
                        options = providerTileOptions(noWrap = TRUE)) %>%
-      addMarkers( ~ longitude,
-                  ~ latitude,
-                  popup = f_labels_1014(),
-                  #label = f_labels_1014(),
-                  clusterOptions = markerClusterOptions())
+      addMarkers(~ longitude,
+                 ~ latitude,
+                 popup = f_labels_1014(),
+                 #label = f_labels_1014(),
+                 clusterOptions = markerClusterOptions())
   })
   
   #create choropleth plot 1016 world map
@@ -718,10 +1034,10 @@ server <- function(input, output) {
               zoom = 2) %>%
       addProviderTiles(providers$CartoDB.Positron,
                        options = providerTileOptions(noWrap = TRUE)) %>%
-      addMarkers( ~ longitude,
-                  ~ latitude,
-                  label = labels_1013,
-                  clusterOptions = markerClusterOptions())
+      addMarkers(~ longitude,
+                 ~ latitude,
+                 label = labels_1013,
+                 clusterOptions = markerClusterOptions())
   })
   
   #createleaflet only US plot 1012
@@ -741,10 +1057,10 @@ server <- function(input, output) {
               zoom = 4.4) %>%
       addProviderTiles(providers$CartoDB.Positron,
                        options = providerTileOptions(noWrap = TRUE)) %>%
-      addMarkers( ~ longitude,
-                  ~ latitude,
-                  label = labels_1012,
-                  clusterOptions = markerClusterOptions())
+      addMarkers(~ longitude,
+                 ~ latitude,
+                 label = labels_1012,
+                 clusterOptions = markerClusterOptions())
   })
   
   

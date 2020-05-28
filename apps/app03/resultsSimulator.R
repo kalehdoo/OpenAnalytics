@@ -15,6 +15,7 @@ df_patient<-data.frame(
   patient_id=paste0("P_",seq(from=var_patid_st+1,to=var_patid_st+var_pat_size,by=1)),
   #gender=sample(0:1,var_pat_size, replace=TRUE),
   gender=sample(c("M","F"),var_pat_size, replace=TRUE),
+  ethnicity=sample(c("Asian","Latino","Native American","African","White"),var_pat_size, replace=TRUE),
   age=sample(var_age_min:var_age_max, var_pat_size, replace=TRUE),
   stringsAsFactors=FALSE
 )
