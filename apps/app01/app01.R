@@ -143,6 +143,7 @@ var_random_name <-
 #var_obs_col_name<-colnames(patient_observation_log)
 #list of ANOVA Groups
 var_obs_col_name<-c("gender","ethnicity")
+var_obs_col_name2<-c("gender","ethnicity")
 var_obs_metric_col_name<-c("before_value","after_value","diff")
 
 ui <- navbarPage(
@@ -529,17 +530,26 @@ ui <- navbarPage(
                    selectInput(
                      inputId = "in_var_random_name3",
                      label = "Group Name",
-                     choices = var_random_name
+                     choices = var_random_name,
+                     selected = "Treatment"
                    ),
                    selectInput(
                      inputId = "in_var_obs_col_name",
                      label = "ANOVA Group",
-                     choices = var_obs_col_name
+                     choices = var_obs_col_name,
+                     selected = "gender"
+                   ),
+                   selectInput(
+                     inputId = "in_var_obs_col_name24",
+                     label = "ANOVA Group 2",
+                     choices = var_obs_col_name2,
+                     selected = "ethnicity"
                    ),
                    selectInput(
                      inputId = "in_var_obs_metric_col_name3",
                      label = "Metric",
-                     choices = var_obs_metric_col_name
+                     choices = var_obs_metric_col_name,
+                     selected = "diff"
                    ),
                    numericInput(
                      inputId = "select_var_confidence3",
@@ -578,6 +588,22 @@ ui <- navbarPage(
                 p-values less than the significance level imply that the means of the two samples are significantly different."
                      ),
                      verbatimTextOutput("ANOVA_PostHoc3")
+                   ),
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     p(
+                       "Two Way ANOVA: H0: The means are equal for both variables.
+                p-values less than the significance level imply that the means of the two samples are significantly different."
+                     ),
+                     verbatimTextOutput("TwoWayANOVA")
+                   ),
+                   fluidRow(
+                     style = "padding: 5px; border-style: solid; border-width: 1px;",
+                     p(
+                       "2-Way ANOVA TuKey Post Hoc test for pairwise comparison
+                p-values less than the significance level imply that the means of the two samples are significantly different."
+                     ),
+                     verbatimTextOutput("TwoWayANOVA_PostHoc3")
                    )
                  )
         ),
@@ -591,6 +617,11 @@ ui <- navbarPage(
               inputId = "in_var_measurement_name2",
               label = "Measurement Name",
               choices = var_measurement_name
+            ),
+            selectInput(
+              inputId = "in_var_obs_metric_col_name23",
+              label = "Metric",
+              choices = var_obs_metric_col_name
             ),
             numericInput(
               inputId = "select_var_confidence2",
@@ -624,6 +655,22 @@ ui <- navbarPage(
                 p-values less than the significance level imply that the means of the two samples are significantly different."
               ),
               verbatimTextOutput("T_Test_UnPaired_2")
+            ),
+            fluidRow(
+              style = "padding: 5px; border-style: solid; border-width: 1px;",
+              p(
+                "ANOVA: Is there any significant difference between means of two samples?
+                p-values less than the significance level imply that the means of the two samples are significantly different."
+              ),
+              verbatimTextOutput("ANOVA2")
+            ),
+            fluidRow(
+              style = "padding: 5px; border-style: solid; border-width: 1px;",
+              p(
+                "TuKey Post Hoc test for pairwise comparison: which group pair has a different mean?
+                p-values less than the significance level imply that the means of the two samples are significantly different."
+              ),
+              verbatimTextOutput("ANOVA_PostHoc2")
             )
           )
         ),
@@ -729,7 +776,7 @@ server <- function(input, output) {
   })
   
 ##############################################################
-  #reactive data set 3 for ANOVA
+  #ANOVA - reactive data set 3 for ANOVA
   observation_set3_agg <- reactive({
     patient_observation_log %>%
       filter(measurement_name == input$in_var_measurement_name3) %>%
@@ -754,7 +801,7 @@ server <- function(input, output) {
         )),
         "diff" = after_value - before_value
       ) %>%
-      filter(random == input$in_var_random_name3)
+      filter(random == (input$in_var_random_name3))
   })
   
   #box plot to visualize the normal distribution
@@ -789,8 +836,22 @@ server <- function(input, output) {
     TukeyHSD(model_anova, conf.level = input$select_var_confidence3)
   })
   
+  #Two-Way ANOVA
+  output$TwoWayANOVA <- renderPrint({
+    model_twowayanova<-aov(as.formula(paste(input$in_var_obs_metric_col_name3,'~',input$in_var_obs_col_name24,'+', input$in_var_obs_col_name)), 
+                           data = observation_set3_agg())
+    anova(model_twowayanova)
+  })
+  
+  #Two-Way ANOVA Post-hoc test
+  output$TwoWayANOVA_PostHoc3 <- renderPrint({
+    model_twowayanova<-aov(as.formula(paste(input$in_var_obs_metric_col_name3,'~',input$in_var_obs_col_name24,'+', input$in_var_obs_col_name)), 
+                           data = observation_set3_agg())
+    TukeyHSD(model_twowayanova, conf.level = input$select_var_confidence3)
+  })
+  
 #######################################################################  
-  #reactive data set 2 for a measurement
+  #UNPAIRED - reactive data set 2 for a measurement
   observation_set2_agg <- reactive({
     patient_observation_log %>%
       filter(measurement_name == input$in_var_measurement_name2) %>%
@@ -821,7 +882,7 @@ server <- function(input, output) {
   output$plot_outcome_1001_2 <- renderPlotly({
     plot_ly() %>%
       add_trace(
-        y =  ~ diff,
+        y =  as.formula(paste('~',input$in_var_obs_metric_col_name23)),
         color =  ~ random,
         type = "box",
         data = observation_set2_agg(),
@@ -842,7 +903,7 @@ server <- function(input, output) {
   
   #F-Test: Do the two populations have the same variances?
   output$FTest_set2 <- renderPrint({
-    var.test(diff ~ random, 
+    var.test(as.formula(paste(input$in_var_obs_metric_col_name23,'~ random')), 
              data = observation_set2_agg(),
              alternative = "two.sided",
              conf.level = input$select_var_confidence2
@@ -852,13 +913,29 @@ server <- function(input, output) {
   #T-Test (UnPaired: two samples (Control and Treatment))
   output$T_Test_UnPaired_2 <- renderPrint({
     t.test(
-      diff ~ random,
+      as.formula(paste(input$in_var_obs_metric_col_name23,'~ random')),
       data = observation_set2_agg(),
       mu = 0,
       alternative = "two.sided",
       paired = FALSE,
       conf.level = input$select_var_confidence2
     )
+  })
+  
+  #ANOVA 2
+  output$ANOVA2 <- renderPrint({
+    #model_anova<-lm(as.formula(paste('diff ~', input$in_var_obs_col_name)), data = observation_set3_agg())
+    model_anova2<-aov(as.formula(paste(input$in_var_obs_metric_col_name23,'~ random')), 
+                     data = observation_set2_agg())
+    anova(model_anova2)
+    #summary(model_anova)
+  })
+  
+  #ANOVA Post-hoc test - Which of the different groups have different means
+  output$ANOVA_PostHoc2 <- renderPrint({
+    model_anova2<-aov(as.formula(paste(input$in_var_obs_metric_col_name23,'~ random')), 
+                     data = observation_set2_agg())
+    TukeyHSD(model_anova2, conf.level = input$select_var_confidence2)
   })
   
 ########################################################################################### 
