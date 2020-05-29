@@ -71,6 +71,9 @@ if(!file.exists(out_path)) {
   write(paste("measure_id","measurement_name","total_readings","obsSeq","obs_date","obs_id","measurement_unit","lower_limit","upper_limit","variance_normal", sep="|"),out_path, append = TRUE)
 }
 
+col_names<-c("measure_id","measurement_name","total_readings","obsSeq","obs_date","obs_id","measurement_unit","lower_limit","upper_limit","variance_normal","standard_threshold","increase_good")
+df_observations = read.table(text="", col.names = col_names)
+
 for (i in 1:nrow(df_measurement)) {
   begin <- 1
   total_readings<-df_measurement$total_readings[i]
@@ -81,6 +84,8 @@ for (i in 1:nrow(df_measurement)) {
   upper_limit<-df_measurement$upper_limit[i]
   variance_normal<-df_measurement$variance_normal[i]
   obs_frequency<-df_measurement$obs_frequency[i]
+  standard_threshold<-df_measurement$standard_threshold[i]
+  increase_good<-df_measurement$increase_good[i]
   while(begin <= total_readings) {
     obs_id=paste(measure_id,"_",begin, sep="")
     obs_date=if_else(obs_frequency=="Daily",Sys.time() + days(begin-1),
@@ -92,8 +97,15 @@ for (i in 1:nrow(df_measurement)) {
                                                              if_else(obs_frequency=="Daily-3" && begin>=1, Sys.time()+ hours((begin-1)*8),
                      Sys.time()
                      )))))))
-    cat(paste(measure_id,measurement_name,total_readings,begin,obs_date,obs_id,measurement_unit,lower_limit,upper_limit,variance_normal, sep="|"),fill =TRUE,file=out_path, append = TRUE)
+    #cat(paste(measure_id,measurement_name,total_readings,begin,obs_date,obs_id,measurement_unit,lower_limit,upper_limit,variance_normal,standard_threshold,increase_good, sep="|"),fill =TRUE,file=out_path, append = TRUE)
+    row_1<-paste(measure_id,measurement_name,total_readings,begin,obs_date,obs_id,measurement_unit,lower_limit,upper_limit,variance_normal,standard_threshold,increase_good, sep="|")
+    new_row<-as.list(strsplit(row_1,split='|', fixed=TRUE))[[1]]
+    
+    row_df<-as.data.frame(t(new_row))
+    names(row_df)<-c("measure_id","measurement_name","total_readings","obsSeq","obs_date","obs_id","measurement_unit","lower_limit","upper_limit","variance_normal","standard_threshold","increase_good")
+    df_observations <- rbind.data.frame(df_observations,row_df)
     begin<-begin+1
+    
   }
 }
 

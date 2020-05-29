@@ -12,6 +12,8 @@ library(htmltools)
 library(data.table)
 library(wordcloud)
 library(shinythemes)
+library(rsample)
+library(lubridate)
 
 #read data
 mv_year_Lst10Yr <-
@@ -124,6 +126,18 @@ rec_sponsors <- mv_studies_recruiting %>%
     cnt_recFacilities = length(unique(Facility)),
     TotalFacilities = sum(unique(CntSites))
   )
+
+##Design Experiment
+#Read measurements
+measurements <-
+  read.csv(
+    "data/measurement.csv",
+    header = TRUE,
+    sep = ",",
+    na.strings = "NA",
+    nrows = -100
+  )
+#####################
 
 #Read patient observation log data
 patient_observation_log <-
@@ -455,6 +469,64 @@ ui <- navbarPage(
   #Outcome dashboard
   navbarMenu(
     "Outcome",
+    tabPanel("Design",
+             tabsetPanel(
+               type = "tabs",
+               tabPanel("Measurement",
+                        fluidRow(
+                          DTOutput('x1')
+                        )
+                        ),
+               tabPanel("dataview",
+                 #verbatimTextOutput("printlog")
+                 DT::dataTableOutput("dt_observation_log")
+               ),
+               tabPanel("ViewMeasurement",
+                        column(3,
+                               align = "left",
+                               style = "border-width: 1px solid",
+                               numericInput(
+                                 inputId = "in_var_pat_size",
+                                 label = "Patients (30-2000)",
+                                 value = 100,
+                                 min = 30,
+                                 max = 1000
+                                      ),
+                               sliderInput(
+                                 inputId = "in_var_age_min",
+                                 label = "Min Age",
+                                 value = 30,
+                                 min = 1,
+                                 max = 100
+                               ),
+                               sliderInput(
+                                 inputId = "in_var_age_max",
+                                 label = "Max Age",
+                                 value = 60,
+                                 min = 1,
+                                 max = 100
+                               ),
+                               numericInput(
+                                 inputId = "in_var_random_ratio",
+                                 label = "Randomization Ratio",
+                                 value = 0.6,
+                                 min = 0.20,
+                                 max = 0.99
+                               ),
+                               numericInput(
+                                 inputId = "in_var_seed",
+                                 label = "Seed",
+                                 value = 123
+                               )
+                               ),
+                        column(9,
+                               fluidRow(
+                                 DT::dataTableOutput("dt_patient")
+                               )
+                               )
+               )
+             )
+             ),
     tabPanel(
       "Results",
       tabsetPanel(
@@ -690,6 +762,113 @@ ui <- navbarPage(
 ###########################################################################################################
 
 server <- function(input, output) {
+  
+  #Begin experiment design
+  #Create editable data table for Measurements
+  ###################################
+  x_measure = reactiveValues(df_measurement = NULL)
+  
+  observe({
+    df_measurement <- measurements
+    x_measure$df_measurement <- df_measurement
+  })
+  
+  output$x1 = renderDT(x_measure$df_measurement, selection = 'none', editable = TRUE)
+  proxy = dataTableProxy('x1')
+  observeEvent(input$x1_cell_edit, {
+    info = input$x1_cell_edit
+    str(info)
+    i = info$row
+    j = info$col
+    v = info$value
+    
+    # problem starts here
+    x_measure$df_measurement[i, j] <- isolate(DT::coerceValue(v, x_measure$df_measurement[i, j]))
+  })
+  
+  output$print <- renderPrint({
+    x_measure$df_measurement
+  })
+###############################
+  #create patient table
+  #Create dataframe for patients
+  df_patient<- reactive({
+    patient<-data.frame(
+    row_id=seq(from=1000+1, to=1000+input$in_var_pat_size, by=1),
+    patient_id=paste0("P_",seq(from=1000+1,to=1000+input$in_var_pat_size,by=1)),
+    gender=sample(c("M","F"),input$in_var_pat_size, replace=TRUE),
+    ethnicity=sample(c("Asian","Latino","Native American","African","White"),input$in_var_pat_size, replace=TRUE),
+    age=sample(input$in_var_age_min:input$in_var_age_max, input$in_var_pat_size, replace=TRUE),
+    stringsAsFactors=FALSE
+  )
+  })
+  
+  df_patient_sample<- reactive({
+    set.seed(input$in_var_seed)
+    index<-initial_split(df_patient(), prop=input$in_var_random_ratio, strata = "gender")
+    patient_treatment<-training(index) %>%
+      mutate(random="Treatment")
+    patient_control<-testing(index) %>%
+      mutate(random="Control")
+    df_patient<-union_all(patient_treatment,patient_control)
+  })
+
+  
+  output$dt_patient <-
+    renderDataTable(DT::datatable(df_patient_sample(), filter="top"))
+  ######################################patient data ends
+
+  #measurement_observations
+    observation_log<- reactive({
+      df_measurement1<-as.data.frame(x_measure$df_measurement)
+      col_names<-c("measure_id","measurement_name","total_readings","obsSeq","obs_date","obs_id","measurement_unit","lower_limit","upper_limit","variance_normal","standard_threshold","increase_good")
+      df_observations = read.table(text="", col.names = col_names)
+      
+      for (i in 1:nrow(df_measurement1)) {
+        begin <- 1
+        total_readings<-df_measurement1$total_readings[i]
+        measure_id<-df_measurement1$measure_id[i]
+        measurement_name<-df_measurement1$measurement_name[i]
+        measurement_unit<-df_measurement1$measurement_unit[i]
+        lower_limit<-df_measurement1$lower_limit[i]
+        upper_limit<-df_measurement1$upper_limit[i]
+        variance_normal<-df_measurement1$variance_normal[i]
+        obs_frequency<-df_measurement1$obs_frequency[i]
+        standard_threshold<-df_measurement1$standard_threshold[i]
+        increase_good<-df_measurement1$increase_good[i]
+        while(begin <= total_readings) {
+          obs_id=paste(measure_id,"_",begin, sep="")
+          obs_date=if_else(obs_frequency=="Daily",Sys.time() + days(begin-1),
+                           if_else(obs_frequency=="Weekly" && begin==1,Sys.time(),
+                                   if_else(obs_frequency=="Weekly" && begin>=1,Sys.time()+ days((begin-1)*7),
+                                           if_else(obs_frequency=="Daily-2" && begin==1,Sys.time(),
+                                                   if_else(obs_frequency=="Daily-2" && begin>=1, Sys.time()+ hours((begin-1)*12),
+                                                           if_else(obs_frequency=="Daily-3" && begin==1,Sys.time(),
+                                                                   if_else(obs_frequency=="Daily-3" && begin>=1, Sys.time()+ hours((begin-1)*8),
+                                                                           Sys.time()
+                                                                   )))))))
+          #cat(paste(measure_id,measurement_name,total_readings,begin,obs_date,obs_id,measurement_unit,lower_limit,upper_limit,variance_normal,standard_threshold,increase_good, sep="|"),fill =TRUE,file=out_path, append = TRUE)
+          row_1<-paste(measure_id,measurement_name,total_readings,begin,obs_date,obs_id,measurement_unit,lower_limit,upper_limit,variance_normal,standard_threshold,increase_good, sep="|")
+          new_row<-as.list(strsplit(row_1,split='|', fixed=TRUE))[[1]]
+          
+          row_df<-as.data.frame(t(new_row))
+          names(row_df)<-c("measure_id","measurement_name","total_readings","obsSeq","obs_date","obs_id","measurement_unit","lower_limit","upper_limit","variance_normal","standard_threshold","increase_good")
+          df_observations <- rbind.data.frame(df_observations,row_df)
+          begin<-begin+1
+          
+        }
+      }
+      df_observations<-df_observations
+  })
+  
+    output$printlog <- renderPrint({
+      x_observation_log$df_observation_log
+    })
+    
+  output$dt_observation_log <-
+    renderDataTable(DT::datatable(observation_log(), filter="top"))
+  ####################################################
+  
   #reactive data set for a measurement
   observation_set1_agg <- reactive({
     patient_observation_log %>%
