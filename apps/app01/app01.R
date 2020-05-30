@@ -892,9 +892,9 @@ server <- function(input, output) {
         row_id=observation_log_treatment$row_id[i]
         lower_limit<-observation_log_treatment$lower_limit[i]
         upper_limit<-observation_log_treatment$upper_limit[i]
-        variance_normal<-observation_log_treatment$variance_normal[i]
-        obsSeq<-observation_log_treatment$obsSeq[i]
-        actual_value=(log(obsSeq))+(sample(lower_limit:upper_limit, 1, replace = TRUE))
+        variance_normal<-as.numeric(observation_log_treatment$variance_normal[i])
+        obsSeq<-as.numeric(observation_log_treatment$obsSeq[i])
+        actual_value=(variance_normal*log(obsSeq))+as.numeric(sample(lower_limit:upper_limit, 1, replace = TRUE))
         
         row_1_tr<-paste(row_id,actual_value, sep="|")
         new_row_tr<-as.list(strsplit(row_1_tr,split='|', fixed=TRUE))[[1]]
@@ -905,7 +905,10 @@ server <- function(input, output) {
       df_observations_treatment<-df_observations_treatment
       #Union control and treatment group observations patient_logs
       patient_obs<-union_all(df_observations_treatment,df_observations_control)
-      
+      #stich patient log to observation log
+      df_observations$row_id<-as.numeric(df_observations$row_id)
+      patient_obs$row_id<-as.numeric(patient_obs$row_id)
+      patient_observation_log<-left_join(df_observations,patient_obs, by="row_id")
   })
   
     output$printlog <- renderPrint({
@@ -918,7 +921,7 @@ server <- function(input, output) {
   
   #reactive data set for a measurement
   observation_set1_agg <- reactive({
-    patient_observation_log %>%
+    observation_log() %>%
       filter(measurement_name == input$in_var_measurement_name) %>%
       select(patient_id,
              gender,
