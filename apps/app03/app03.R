@@ -19,7 +19,8 @@ measurements <-
         header = TRUE,
         sep = ",",
         na.strings = "NA",
-        nrows = -100
+        nrows = -100,
+        stringsAsFactors = FALSE
     )
 #####################
 
@@ -92,7 +93,7 @@ ui <- navbarPage(
                                      numericInput(
                                          inputId = "in_var_pat_size",
                                          label = "Patients (30-2000)",
-                                         value = 100,
+                                         value = 30,
                                          min = 30,
                                          max = 1000
                                      ),
@@ -472,6 +473,9 @@ server <- function(input, output) {
         observation_log_treatment<-df_observations %>%
             filter(df_observations$random=="Treatment")
         
+        observation_log_control$lower_limit<-as.numeric(levels(observation_log_control$lower_limit))[observation_log_control$lower_limit]
+        observation_log_control$upper_limit<-as.numeric(levels(observation_log_control$upper_limit))[observation_log_control$upper_limit]
+        
         col_names<-c("row_id","actual_value")
         df_observations_control = read.table(text="", col.names = col_names)
         
@@ -479,15 +483,20 @@ server <- function(input, output) {
             row_id=observation_log_control$row_id[i]
             lower_limit<-observation_log_control$lower_limit[i]
             upper_limit<-observation_log_control$upper_limit[i]
-            actual_value=sample(lower_limit:upper_limit, 1, replace = TRUE)
+            actual_value=round(sample(lower_limit:upper_limit, 1, replace = TRUE), digits = 2)
             
             row_1<-paste(row_id,actual_value, sep="|")
             new_row<-as.list(strsplit(row_1,split='|', fixed=TRUE))[[1]]
             row_df<-as.data.frame(t(new_row))
             names(row_df)<-c("row_id","actual_value")
-            df_observations_control <- rbind.data.frame(df_observations_control,row_df)
+            
+        df_observations_control <- rbind.data.frame(df_observations_control,row_df)
         }
-        df_observations_control<-df_observations_control
+        
+        observation_log_treatment$lower_limit<-as.numeric(levels(observation_log_treatment$lower_limit))[observation_log_treatment$lower_limit]
+        observation_log_treatment$upper_limit<-as.numeric(levels(observation_log_treatment$upper_limit))[observation_log_treatment$upper_limit]
+        observation_log_treatment$variance_normal<-as.numeric(levels(observation_log_treatment$variance_normal))[observation_log_treatment$variance_normal]
+        observation_log_treatment$obsSeq<-as.integer(levels(observation_log_treatment$obsSeq))[observation_log_treatment$obsSeq]
         
         col_names<-c("row_id","actual_value")
         df_observations_treatment = read.table(text="", col.names = col_names)
@@ -496,9 +505,12 @@ server <- function(input, output) {
             row_id=observation_log_treatment$row_id[i]
             lower_limit<-observation_log_treatment$lower_limit[i]
             upper_limit<-observation_log_treatment$upper_limit[i]
-            variance_normal<-as.numeric(observation_log_treatment$variance_normal[i])
-            obsSeq<-as.numeric(observation_log_treatment$obsSeq[i])
-            actual_value=(variance_normal*log(obsSeq))+as.numeric(sample(lower_limit:upper_limit, 1, replace = TRUE))
+            variance_normal<-observation_log_treatment$variance_normal[i]
+            obsSeq<-observation_log_treatment$obsSeq[i]
+            actual_value=round((
+                (variance_normal*log(obsSeq))+
+                sample(lower_limit:upper_limit, 1, replace = TRUE)
+            ),digits = 2)
             
             row_1_tr<-paste(row_id,actual_value, sep="|")
             new_row_tr<-as.list(strsplit(row_1_tr,split='|', fixed=TRUE))[[1]]
@@ -506,7 +518,9 @@ server <- function(input, output) {
             names(row_df_tr)<-c("row_id","actual_value")
             df_observations_treatment <- rbind.data.frame(df_observations_treatment,row_df_tr)
         }
+        
         df_observations_treatment<-df_observations_treatment
+        
         #Union control and treatment group observations patient_logs
         patient_obs<-union_all(df_observations_treatment,df_observations_control)
         #stich patient log to observation log
@@ -514,9 +528,10 @@ server <- function(input, output) {
         patient_obs$row_id<-as.numeric(patient_obs$row_id)
         patient_observation_log<-left_join(df_observations,patient_obs, by="row_id")
         patient_observation_log$actual_value<-as.numeric(patient_observation_log$actual_value)
-        
-        patient_observation_log<-data.frame(patient_observation_log, stringsAsFactors = FALSE)
+        patient_observation_log$obsSeq<-as.integer(patient_observation_log$obsSeq)
+        patient_observation_log<-as_tibble(patient_observation_log)
     })
+    
     
     output$printlog <- renderPrint({
         str(observation_log())
@@ -614,7 +629,7 @@ server <- function(input, output) {
     ##############################################################
     #ANOVA - reactive data set 3 for ANOVA
     observation_set3_agg <- reactive({
-        patient_observation_log %>%
+        observation_log() %>%
             filter(measurement_name == input$in_var_measurement_name3) %>%
             select(patient_id,
                    gender,
@@ -647,7 +662,7 @@ server <- function(input, output) {
     
     #summary statistics
     output$summary3<- renderPrint({
-        observation_set3_agg() %>%
+        observation_log() %>%
             group_by(!! rlang::sym(input$in_var_obs_col_name)) %>%
             summarise(
                 record_count=n(),
@@ -689,7 +704,7 @@ server <- function(input, output) {
     #######################################################################  
     #UNPAIRED - reactive data set 2 for a measurement
     observation_set2_agg <- reactive({
-        patient_observation_log %>%
+        observation_log() %>%
             filter(measurement_name == input$in_var_measurement_name2) %>%
             select(patient_id,
                    gender,
@@ -777,7 +792,7 @@ server <- function(input, output) {
     ########################################################################################### 
     #display observation log data
     output$dt_patient_observation_log <-
-        renderDataTable(DT::datatable(patient_observation_log, filter="top"))
+        renderDataTable(DT::datatable(observation_log(), filter="top"))
     #############################################################################################  
     
     
