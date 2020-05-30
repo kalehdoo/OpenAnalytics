@@ -481,7 +481,7 @@ ui <- navbarPage(
                  #verbatimTextOutput("printlog")
                  DT::dataTableOutput("dt_observation_log")
                ),
-               tabPanel("ViewMeasurement",
+               tabPanel("Patient",
                         column(3,
                                align = "left",
                                style = "border-width: 1px solid",
@@ -859,6 +859,53 @@ server <- function(input, output) {
         }
       }
       df_observations<-df_observations
+      df_observations<-merge.data.frame(df_patient_sample(),df_observations, by=NULL, sort = TRUE)
+      df_observations<-arrange(df_observations,(patient_id)) %>%
+        mutate(row_id=seq(from=1, to=nrow(df_observations), by=1))
+      
+      observation_log_control<-df_observations %>%
+        filter(random=="Control")
+      observation_log_treatment<-df_observations %>%
+        filter(df_observations$random=="Treatment")
+      
+      col_names<-c("row_id","actual_value")
+      df_observations_control = read.table(text="", col.names = col_names)
+      
+      for (i in 1:nrow(observation_log_control)) {
+        row_id=observation_log_control$row_id[i]
+        lower_limit<-observation_log_control$lower_limit[i]
+        upper_limit<-observation_log_control$upper_limit[i]
+        actual_value=sample(lower_limit:upper_limit, 1, replace = TRUE)
+        
+        row_1<-paste(row_id,actual_value, sep="|")
+        new_row<-as.list(strsplit(row_1,split='|', fixed=TRUE))[[1]]
+        row_df<-as.data.frame(t(new_row))
+        names(row_df)<-c("row_id","actual_value")
+        df_observations_control <- rbind.data.frame(df_observations_control,row_df)
+      }
+      df_observations_control<-df_observations_control
+      
+      col_names<-c("row_id","actual_value")
+      df_observations_treatment = read.table(text="", col.names = col_names)
+      
+      for (i in 1:nrow(observation_log_treatment)) {
+        row_id=observation_log_treatment$row_id[i]
+        lower_limit<-observation_log_treatment$lower_limit[i]
+        upper_limit<-observation_log_treatment$upper_limit[i]
+        variance_normal<-observation_log_treatment$variance_normal[i]
+        obsSeq<-observation_log_treatment$obsSeq[i]
+        actual_value=(log(obsSeq))+(sample(lower_limit:upper_limit, 1, replace = TRUE))
+        
+        row_1_tr<-paste(row_id,actual_value, sep="|")
+        new_row_tr<-as.list(strsplit(row_1_tr,split='|', fixed=TRUE))[[1]]
+        row_df_tr<-as.data.frame(t(new_row_tr))
+        names(row_df_tr)<-c("row_id","actual_value")
+        df_observations_treatment <- rbind.data.frame(df_observations_treatment,row_df_tr)
+      }
+      df_observations_treatment<-df_observations_treatment
+      #Union control and treatment group observations patient_logs
+      patient_obs<-union_all(df_observations_treatment,df_observations_control)
+      
   })
   
     output$printlog <- renderPrint({

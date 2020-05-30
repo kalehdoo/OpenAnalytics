@@ -109,12 +109,12 @@ for (i in 1:nrow(df_measurement)) {
   }
 }
 
-
+observation_log<-df_observations
 #set paths for data files
-in_observations<-paste(var_DIR_HOME, "apps/app03/data/observations_log.txt", sep="")
+#in_observations<-paste(var_DIR_HOME, "apps/app03/data/observations_log.txt", sep="")
 
 #reads the data files into dataframes
-observation_log<-read.csv(in_observations, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
+#observation_log<-read.csv(in_observations, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
 
 observation_log<-merge.data.frame(df_patient,observation_log, by=NULL, sort = TRUE)
 observation_log<-arrange(observation_log,(patient_id))
@@ -143,18 +143,33 @@ if(!file.exists(out_path_patient_control)) {
   write(paste("row_id","actual_value", sep="|"),out_path_patient_control, append = TRUE)
 }
 
+
+observation_log_control$lower_limit<-as.numeric(levels(observation_log_control$lower_limit))[observation_log_control1$lower_limit]
+observation_log_control$upper_limit<-as.numeric(levels(observation_log_control$upper_limit))[observation_log_control1$upper_limit]
+
+
+col_names<-c("row_id","actual_value")
+df_observations_control = read.table(text="", col.names = col_names)
+
+
 for (i in 1:nrow(observation_log_control)) {
   row_id=observation_log_control$row_id[i]
-  actual_value=sample(observation_log_control$lower_limit[i]:observation_log_control$upper_limit[i], 1, replace = TRUE)
-  cat(paste(row_id,actual_value, sep="|"),fill =TRUE,file=out_path_patient_control, append = TRUE)
-  
+  lower_limit<-observation_log_control$lower_limit[i]
+  upper_limit<-observation_log_control$upper_limit[i]
+  actual_value=sample(lower_limit:upper_limit, 1, replace = TRUE)
+  #cat(paste(row_id,actual_value, sep="|"),fill =TRUE,file=out_path_patient_control, append = TRUE)
+  row_1<-paste(row_id,actual_value, sep="|")
+  new_row<-as.list(strsplit(row_1,split='|', fixed=TRUE))[[1]]
+  row_df<-as.data.frame(t(new_row))
+  names(row_df)<-c("row_id","actual_value")
+  df_observations_control <- rbind.data.frame(df_observations_control,row_df)
 }
 
 #set paths for data files
-in_pat_obs_control<-paste(var_DIR_HOME, "apps/app03/data/patients_control_log.txt", sep="")
+#in_pat_obs_control<-paste(var_DIR_HOME, "apps/app03/data/patients_control_log.txt", sep="")
 
 #reads the data files into dataframes
-patient_obs_control<-read.csv(in_pat_obs_control, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
+#patient_obs_control<-read.csv(in_pat_obs_control, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
 
 
 ##################################################################
@@ -173,21 +188,45 @@ if(!file.exists(out_path_patient_treatment)) {
   write(paste("row_id","actual_value", sep="|"),out_path_patient_treatment, append = TRUE)
 }
 
+observation_log_treatment$lower_limit<-as.numeric(levels(observation_log_treatment$lower_limit))[observation_log_treatment$lower_limit]
+observation_log_treatment$upper_limit<-as.numeric(levels(observation_log_treatment$upper_limit))[observation_log_treatment$upper_limit]
+observation_log_treatment$variance_normal<-as.numeric(levels(observation_log_treatment$variance_normal))[observation_log_treatment$variance_normal]
+observation_log_treatment$obsSeq<-as.numeric(levels(observation_log_treatment$obsSeq))[observation_log_treatment$obsSeq]
+
+col_names<-c("row_id","actual_value")
+df_observations_treatment = read.table(text="", col.names = col_names)
+
 for (i in 1:nrow(observation_log_treatment)) {
   row_id=observation_log_treatment$row_id[i]
-  actual_value=(observation_log_treatment$variance_normal[i]*log(observation_log_treatment$obsSeq[i]))+(sample(observation_log_treatment$lower_limit[i]:observation_log_treatment$upper_limit[i], 1, replace = TRUE))
-  cat(paste(row_id,actual_value, sep="|"),fill =TRUE,file=out_path_patient_treatment, append = TRUE)
+  lower_limit<-observation_log_treatment$lower_limit[i]
+  upper_limit<-observation_log_treatment$upper_limit[i]
+  variance_normal<-observation_log_treatment$variance_normal[i]
+  obsSeq<-observation_log_treatment$obsSeq[i]
+  actual_value=(variance_normal*log(obsSeq))+(sample(lower_limit:upper_limit, 1, replace = TRUE))
+  #cat(paste(row_id,actual_value, sep="|"),fill =TRUE,file=out_path_patient_treatment, append = TRUE)
   
+  row_1_tr<-paste(row_id,actual_value, sep="|")
+  new_row_tr<-as.list(strsplit(row_1_tr,split='|', fixed=TRUE))[[1]]
+  row_df_tr<-as.data.frame(t(new_row_tr))
+  names(row_df_tr)<-c("row_id","actual_value")
+  df_observations_treatment <- rbind.data.frame(df_observations_treatment,row_df_tr)
 }
 
 #set paths for data files
-in_pat_obs_treatment<-paste(var_DIR_HOME, "apps/app03/data/patients_treatment_log.txt", sep="")
+#in_pat_obs_treatment<-paste(var_DIR_HOME, "apps/app03/data/patients_treatment_log.txt", sep="")
 
 #reads the data files into dataframes
-patient_obs_treatment<-read.csv(in_pat_obs_treatment, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
+#patient_obs_treatment<-read.csv(in_pat_obs_treatment, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
+
+df_observations_treatment$row_id<-as.numeric(levels(df_observations_treatment$row_id))[df_observations_treatment$row_id]
+df_observations_control$row_id<-as.numeric(levels(df_observations_control$row_id))[df_observations_control$row_id]
+df_observations_treatment$actual_value<-as.numeric(levels(df_observations_treatment$actual_value))[df_observations_treatment$actual_value]
+df_observations_control$actual_value<-as.numeric(levels(df_observations_control$actual_value))[df_observations_control$actual_value]
+
 
 #Union control and treatment group observations patient_logs
-patient_obs<-union_all(patient_obs_control,patient_obs_treatment)
+patient_obs<-union_all(df_observations_treatment,df_observations_control)
+
 
 #stich patient log to observation log
 patient_observation_log<-left_join(observation_log,patient_obs, by="row_id")
