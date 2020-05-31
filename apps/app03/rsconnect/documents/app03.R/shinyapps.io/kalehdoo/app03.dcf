@@ -1,0 +1,12 @@
+name: app03
+title: app03
+username:
+account: kalehdoo
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2383558
+bundleId: 3209510
+url: https://kalehdoo.shinyapps.io/app03/
+when: 1590891021.72734
+asMultiple: FALSE
+asStatic: FALSE
