@@ -127,16 +127,6 @@ rec_sponsors <- mv_studies_recruiting %>%
     TotalFacilities = sum(unique(CntSites))
   )
 
-##Design Experiment
-#Read measurements
-measurements <-
-  read.csv(
-    "data/measurement.csv",
-    header = TRUE,
-    sep = ",",
-    na.strings = "NA",
-    nrows = -100
-  )
 #####################
 
 #Read patient observation log data
@@ -161,25 +151,32 @@ var_obs_col_name2<-c("gender","ethnicity")
 var_obs_metric_col_name<-c("before_value","after_value","diff")
 
 ui <- navbarPage(
-  title = "Oakbloc",
-  windowTitle = "Oakbloc Analytics",
+  title = "Kalehdoo",
+  windowTitle = "Kalehdoo Analytics",
   theme = shinytheme("united"),
   collapsible = TRUE,
   #Landing Home page starts
   tabPanel(title = "Home",
            fluidRow((
-             h4("Open Clinical Analytics Platform (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+             h4("Clinical Analytics Platform (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
            )),
+           fluidRow(
+             p(
+               "Follow on twitter for regular updates",
+               tags$a(href = "https://twitter.com/kalehdoo", "Kalehdoo", target =
+                        "_blank"),
+               style = "margin-top:0px;margin-left:1%; margin-right:1%"
+             )
+           ),
+           fluidRow(style = "margin-top:0px;margin-left:1%; margin-right:1%",
+             p("Clinical Analytics provides insights into the clinical research industry. 
+               The market and competitive intelligence gained from the insights can help Sponsors, CROs, Industry Analysts, non-profit and specisl interest public organizations explore avenues for future growth"
+             )
+           ),
            fluidRow((
              p(
-               "Making Clinical Intelligence accessible to all patients and organizations such as Pharmaceuticals, CROs, public interest groups, independent consultants, and non-profits contributing to improve clinical research and life sciences for the larger benefit to the entire community. The source code is available on ",
-               tags$a(
-                 href = "https://github.com/kalehdoo/OpenAnalytics",
-                 "Github.",
-                 class = "externallink",
-                 target = "_blank"
-               ),
-               "The source data used is available to public at ",
+               "The source data is downloaded from CTTI."
+               ,
                tags$a(href = "https://aact.ctti-clinicaltrials.org", "ACCT-CTTI.", target =
                         "_blank"),
                style = "margin-top:0px;margin-left:1%; margin-right:1%"
@@ -469,64 +466,6 @@ ui <- navbarPage(
   #Outcome dashboard
   navbarMenu(
     "Outcome",
-    tabPanel("Design",
-             tabsetPanel(
-               type = "tabs",
-               tabPanel("Measurement",
-                        fluidRow(
-                          DTOutput('x1')
-                        )
-                        ),
-               tabPanel("dataview",
-                 #verbatimTextOutput("printlog")
-                 DT::dataTableOutput("dt_observation_log")
-               ),
-               tabPanel("Patient",
-                        column(3,
-                               align = "left",
-                               style = "border-width: 1px solid",
-                               numericInput(
-                                 inputId = "in_var_pat_size",
-                                 label = "Patients (30-2000)",
-                                 value = 100,
-                                 min = 30,
-                                 max = 1000
-                                      ),
-                               sliderInput(
-                                 inputId = "in_var_age_min",
-                                 label = "Min Age",
-                                 value = 30,
-                                 min = 1,
-                                 max = 100
-                               ),
-                               sliderInput(
-                                 inputId = "in_var_age_max",
-                                 label = "Max Age",
-                                 value = 60,
-                                 min = 1,
-                                 max = 100
-                               ),
-                               numericInput(
-                                 inputId = "in_var_random_ratio",
-                                 label = "Randomization Ratio",
-                                 value = 0.6,
-                                 min = 0.20,
-                                 max = 0.99
-                               ),
-                               numericInput(
-                                 inputId = "in_var_seed",
-                                 label = "Seed",
-                                 value = 123
-                               )
-                               ),
-                        column(9,
-                               fluidRow(
-                                 DT::dataTableOutput("dt_patient")
-                               )
-                               )
-               )
-             )
-             ),
     tabPanel(
       "Results",
       tabsetPanel(
@@ -750,8 +689,7 @@ ui <- navbarPage(
                  DT::dataTableOutput("dt_patient_observation_log")
                  )
       )
-    ),
-    tabPanel("Sponsor2")
+    )
   )
   
   #ending main bracket
@@ -763,165 +701,11 @@ ui <- navbarPage(
 
 server <- function(input, output) {
   
-  #Begin experiment design
-  #Create editable data table for Measurements
-  ###################################
-  x_measure = reactiveValues(df_measurement = NULL)
-  
-  observe({
-    df_measurement <- measurements
-    x_measure$df_measurement <- df_measurement
-  })
-  
-  output$x1 = renderDT(x_measure$df_measurement, selection = 'none', editable = TRUE)
-  proxy = dataTableProxy('x1')
-  observeEvent(input$x1_cell_edit, {
-    info = input$x1_cell_edit
-    str(info)
-    i = info$row
-    j = info$col
-    v = info$value
-    
-    # problem starts here
-    x_measure$df_measurement[i, j] <- isolate(DT::coerceValue(v, x_measure$df_measurement[i, j]))
-  })
-  
-  output$print <- renderPrint({
-    x_measure$df_measurement
-  })
-###############################
-  #create patient table
-  #Create dataframe for patients
-  df_patient<- reactive({
-    patient<-data.frame(
-    row_id=seq(from=1000+1, to=1000+input$in_var_pat_size, by=1),
-    patient_id=paste0("P_",seq(from=1000+1,to=1000+input$in_var_pat_size,by=1)),
-    gender=sample(c("M","F"),input$in_var_pat_size, replace=TRUE),
-    ethnicity=sample(c("Asian","Latino","Native American","African","White"),input$in_var_pat_size, replace=TRUE),
-    age=sample(input$in_var_age_min:input$in_var_age_max, input$in_var_pat_size, replace=TRUE),
-    stringsAsFactors=FALSE
-  )
-  })
-  
-  df_patient_sample<- reactive({
-    set.seed(input$in_var_seed)
-    index<-initial_split(df_patient(), prop=input$in_var_random_ratio, strata = "gender")
-    patient_treatment<-training(index) %>%
-      mutate(random="Treatment")
-    patient_control<-testing(index) %>%
-      mutate(random="Control")
-    df_patient<-union_all(patient_treatment,patient_control)
-  })
-
-  
-  output$dt_patient <-
-    renderDataTable(DT::datatable(df_patient_sample(), filter="top"))
-  ######################################patient data ends
-
-  #measurement_observations
-    observation_log<- reactive({
-      df_measurement1<-as.data.frame(x_measure$df_measurement)
-      col_names<-c("measure_id","measurement_name","total_readings","obsSeq","obs_date","obs_id","measurement_unit","lower_limit","upper_limit","variance_normal","standard_threshold","increase_good")
-      df_observations = read.table(text="", col.names = col_names)
-      
-      for (i in 1:nrow(df_measurement1)) {
-        begin <- 1
-        total_readings<-df_measurement1$total_readings[i]
-        measure_id<-df_measurement1$measure_id[i]
-        measurement_name<-df_measurement1$measurement_name[i]
-        measurement_unit<-df_measurement1$measurement_unit[i]
-        lower_limit<-df_measurement1$lower_limit[i]
-        upper_limit<-df_measurement1$upper_limit[i]
-        variance_normal<-df_measurement1$variance_normal[i]
-        obs_frequency<-df_measurement1$obs_frequency[i]
-        standard_threshold<-df_measurement1$standard_threshold[i]
-        increase_good<-df_measurement1$increase_good[i]
-        while(begin <= total_readings) {
-          obs_id=paste(measure_id,"_",begin, sep="")
-          obs_date=if_else(obs_frequency=="Daily",Sys.time() + days(begin-1),
-                           if_else(obs_frequency=="Weekly" && begin==1,Sys.time(),
-                                   if_else(obs_frequency=="Weekly" && begin>=1,Sys.time()+ days((begin-1)*7),
-                                           if_else(obs_frequency=="Daily-2" && begin==1,Sys.time(),
-                                                   if_else(obs_frequency=="Daily-2" && begin>=1, Sys.time()+ hours((begin-1)*12),
-                                                           if_else(obs_frequency=="Daily-3" && begin==1,Sys.time(),
-                                                                   if_else(obs_frequency=="Daily-3" && begin>=1, Sys.time()+ hours((begin-1)*8),
-                                                                           Sys.time()
-                                                                   )))))))
-          #cat(paste(measure_id,measurement_name,total_readings,begin,obs_date,obs_id,measurement_unit,lower_limit,upper_limit,variance_normal,standard_threshold,increase_good, sep="|"),fill =TRUE,file=out_path, append = TRUE)
-          row_1<-paste(measure_id,measurement_name,total_readings,begin,obs_date,obs_id,measurement_unit,lower_limit,upper_limit,variance_normal,standard_threshold,increase_good, sep="|")
-          new_row<-as.list(strsplit(row_1,split='|', fixed=TRUE))[[1]]
-          
-          row_df<-as.data.frame(t(new_row))
-          names(row_df)<-c("measure_id","measurement_name","total_readings","obsSeq","obs_date","obs_id","measurement_unit","lower_limit","upper_limit","variance_normal","standard_threshold","increase_good")
-          df_observations <- rbind.data.frame(df_observations,row_df)
-          begin<-begin+1
-          
-        }
-      }
-      df_observations<-df_observations
-      df_observations<-merge.data.frame(df_patient_sample(),df_observations, by=NULL, sort = TRUE)
-      df_observations<-arrange(df_observations,(patient_id)) %>%
-        mutate(row_id=seq(from=1, to=nrow(df_observations), by=1))
-      
-      observation_log_control<-df_observations %>%
-        filter(random=="Control")
-      observation_log_treatment<-df_observations %>%
-        filter(df_observations$random=="Treatment")
-      
-      col_names<-c("row_id","actual_value")
-      df_observations_control = read.table(text="", col.names = col_names)
-      
-      for (i in 1:nrow(observation_log_control)) {
-        row_id=observation_log_control$row_id[i]
-        lower_limit<-observation_log_control$lower_limit[i]
-        upper_limit<-observation_log_control$upper_limit[i]
-        actual_value=sample(lower_limit:upper_limit, 1, replace = TRUE)
-        
-        row_1<-paste(row_id,actual_value, sep="|")
-        new_row<-as.list(strsplit(row_1,split='|', fixed=TRUE))[[1]]
-        row_df<-as.data.frame(t(new_row))
-        names(row_df)<-c("row_id","actual_value")
-        df_observations_control <- rbind.data.frame(df_observations_control,row_df)
-      }
-      df_observations_control<-df_observations_control
-      
-      col_names<-c("row_id","actual_value")
-      df_observations_treatment = read.table(text="", col.names = col_names)
-      
-      for (i in 1:nrow(observation_log_treatment)) {
-        row_id=observation_log_treatment$row_id[i]
-        lower_limit<-observation_log_treatment$lower_limit[i]
-        upper_limit<-observation_log_treatment$upper_limit[i]
-        variance_normal<-as.numeric(observation_log_treatment$variance_normal[i])
-        obsSeq<-as.numeric(observation_log_treatment$obsSeq[i])
-        actual_value=(variance_normal*log(obsSeq))+as.numeric(sample(lower_limit:upper_limit, 1, replace = TRUE))
-        
-        row_1_tr<-paste(row_id,actual_value, sep="|")
-        new_row_tr<-as.list(strsplit(row_1_tr,split='|', fixed=TRUE))[[1]]
-        row_df_tr<-as.data.frame(t(new_row_tr))
-        names(row_df_tr)<-c("row_id","actual_value")
-        df_observations_treatment <- rbind.data.frame(df_observations_treatment,row_df_tr)
-      }
-      df_observations_treatment<-df_observations_treatment
-      #Union control and treatment group observations patient_logs
-      patient_obs<-union_all(df_observations_treatment,df_observations_control)
-      #stich patient log to observation log
-      df_observations$row_id<-as.numeric(df_observations$row_id)
-      patient_obs$row_id<-as.numeric(patient_obs$row_id)
-      patient_observation_log<-left_join(df_observations,patient_obs, by="row_id")
-  })
-  
-    output$printlog <- renderPrint({
-      x_observation_log$df_observation_log
-    })
-    
-  output$dt_observation_log <-
-    renderDataTable(DT::datatable(observation_log(), filter="top"))
-  ####################################################
+    ####################################################
   
   #reactive data set for a measurement
   observation_set1_agg <- reactive({
-    observation_log() %>%
+    patient_observation_log %>%
       filter(measurement_name == input$in_var_measurement_name) %>%
       select(patient_id,
              gender,

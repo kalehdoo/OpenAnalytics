@@ -32,6 +32,8 @@ var_obs_col_name2 <- c("gender", "ethnicity")
 var_obs_metric_col_name <- c("before_value", "after_value", "diff")
 var_random_name <- c("Treatment", "Control")
 var_measurement_name <- unique(measurements$measurement_name)
+var_patient_id <- "P_1001"
+var_patient_id_2 <- "P_1002"
 
 
 ui <- navbarPage(
@@ -48,13 +50,7 @@ ui <- navbarPage(
                  p(
                      "Making Clinical Intelligence accessible to all patients and organizations such as Pharmaceuticals,
                      CROs, public interest groups, independent consultants, and non-profits contributing to improve clinical research
-                     and life sciences for the larger benefit to the entire community. The source code is available on ",
-                     tags$a(
-                         href = "https://github.com/kalehdoo/OpenAnalytics",
-                         "Github.",
-                         class = "externallink",
-                         target = "_blank"
-                     )
+                     and life sciences for the larger benefit to the entire community.",
                  )
              ))),
     
@@ -347,7 +343,48 @@ ui <- navbarPage(
                          )
             )
         ),
-        tabPanel("Sponsor2")
+        tabPanel("Monitoring",
+            tabsetPanel(type = "tabs",
+                        tabPanel("Investigator",
+                                 column(
+                                     3,
+                                     align = "left",
+                                     style = "border-width: 1px solid",
+                                     selectInput(
+                                         inputId = "in_var_measurement_name4",
+                                         label = "Measurement Name",
+                                         choices = var_measurement_name
+                                     ),
+                                     selectInput(
+                                         inputId = "in_var_patient_id",
+                                         label = "Patient ID",
+                                         choices = var_patient_id
+                                     ),
+                                     selectInput(
+                                         inputId = "in_var_patient_id_2",
+                                         label = "Patient ID 2",
+                                         choices = var_patient_id_2
+                                     )
+                                 ),
+                                 column(
+                                     9,
+                                     align = "left",
+                                     style = "border-width: 1px solid",
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 1px;",
+                                         #plotlyOutput("inv_plot_1")
+                                         box(plotlyOutput("inv_plot_1", height = 200, width = 600)),
+                                     )
+                                 )
+                        ),
+                        tabPanel("Summary",
+                                 verbatimTextOutput("observation_log_mon_summ")
+                        ),
+                        tabPanel("DataView",
+                                 DT::dataTableOutput("dt_observation_log_mon")
+                        )
+            )
+        )
     )
     
     #ending main bracket
@@ -662,6 +699,11 @@ server <- function(input, output, session) {
             'in_var_measurement_name3',
             choices = unique(x_measure$df_measurement$measurement_name)
         )
+        updateSelectInput(
+            session,
+            'in_var_measurement_name4',
+            choices = unique(x_measure$df_measurement$measurement_name)
+        )
     })
     
     #display table summary
@@ -672,9 +714,10 @@ server <- function(input, output, session) {
     #display table data
     output$dt_observation_log <-
         renderDataTable(DT::datatable(observation_log(), filter = "top"))
+    
     ####################################################
     
-    #reactive data set for a measurement
+    #reactive data set for PAIRED
     observation_set1_agg <- reactive({
         observation_set1_agg_tmp<-subset.data.frame(observation_log(), subset=(observation_log()$measurement_name == input$in_var_measurement_name & observation_log()$random == input$in_var_random_name)
         )
@@ -990,6 +1033,46 @@ server <- function(input, output, session) {
     #display table summary
     output$tabsummaryagg <- renderPrint({
         skim(observation_set4_agg())
+    })
+    
+    ###################################################
+    #Monitoring
+    observe({
+        updateSelectInput(
+            session,
+            'in_var_patient_id',
+            choices = unique(df_patient_sample()$patient_id)
+        )
+        updateSelectInput(
+            session,
+            'in_var_patient_id_2',
+            choices = unique(df_patient_sample()$patient_id)
+        )
+    })
+    #reactive data set
+    observation_log_mon <- reactive({
+        subset.data.frame(observation_log(),
+                          subset=(observation_log()$measurement_name == input$in_var_measurement_name4
+                                  & (observation_log()$patient_id == input$in_var_patient_id
+                                  | observation_log()$patient_id == input$in_var_patient_id_2)
+                                    )
+        )
+    })
+    #display monitoring
+    output$dt_observation_log_mon <-
+        renderDataTable(DT::datatable(observation_log_mon(), filter = "top"))
+    
+    #display table summary
+    output$observation_log_mon_summ <- renderPrint({
+        skim(observation_log_mon())
+    })
+    
+    #Chart to compare increase in actual value
+    output$inv_plot_1 <- renderPlotly({
+        plot_ly(data = observation_log_mon()) %>%
+            add_trace(x=~obsSeq, y=~actual_value, 
+                      type="scatter",mode="lines",
+                      color=~patient_id)
     })
     
     #############################################################################################

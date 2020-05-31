@@ -50,22 +50,33 @@ mv_studies_recruiting_africa<-mv_studies_recruiting %>%
 
 
 ui <- navbarPage(
-                 title = "Oakbloc",
-                 windowTitle = "StudyFinder",
+                 title = "Kalehdoo",
+                 windowTitle = "Kalehdoo Analytics",
                  theme = shinytheme("united"),
                  tabPanel(title = "Home",
                           fluidRow((
-                            h4("Open Clinical Study Finder App (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+                            h4("Open Clinical Study Finder", style = "margin-top:0px;margin-left:5%; margin-right:5%")
                           )),
+                          fluidRow(style = "margin-top:0px;margin-left:1%; margin-right:1%",
+                            p("The Clinical Study Finder App is an interactive application that helps in finding clinical studies that are currently recruiting patients globally.
+                              The patients can search based on the condition name, sponsor, site, or location, and the results will appear on a geographic map. Once a study is located, the details of the study and contact details of the site can be viewed by navigating to clinicaltrials.gov by simply clicking on the hyperlink. 
+                              The application can also be very useful for sponsors, CROs, physicians, public and private interest group organizations."),
+                            p(
+                              "The application is built using open-source Openstreet Maps, R and Shiny.
+                              Currently, the app is deployed on the free tier of shiny apps with limited data."
+                            )
+                          ),
+                          fluidRow(
+                            p(
+                              "Follow on twitter for regular updates",
+                              tags$a(href = "https://twitter.com/kalehdoo", "Kalehdoo", target =
+                                       "_blank"),
+                              style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                            )
+                          ),
                           fluidRow((
                             p(
-                              "Enhancing user experience for all patients and organizations such as Pharmaceuticals, CROs, public interest groups, independent consultants, and non-profits contributing to find the recruiting studies. The source code is available on ",
-                              tags$a(
-                                href = "https://github.com/kalehdoo/OpenAnalytics",
-                                "Github.",
-                                class = "externallink",
-                                target = "_blank"
-                              ),
+                              "Enhancing user experience for all patients and organizations such as Pharmaceuticals, CROs, public interest groups, independent consultants, and non-profits contributing to find the recruiting studies.",
                               "The source data used is available to public at ",
                               tags$a(href = "https://aact.ctti-clinicaltrials.org", "ACCT-CTTI.", target =
                                        "_blank"),
