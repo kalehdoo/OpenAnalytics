@@ -43,16 +43,16 @@ ui <- navbarPage(
     collapsible = TRUE,
     #Landing Home page starts
     tabPanel(title = "Home",
-             fluidRow((
-                 h4("Clinical Study Designer (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
-             )),
-             fluidRow((
+             fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
+                 h4("Study Experiment Simulator (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+             ),
+             fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
                  p(
                      "Making Clinical Intelligence accessible to all patients and organizations such as Pharmaceuticals,
                      CROs, public interest groups, independent consultants, and non-profits contributing to improve clinical research
                      and life sciences for the larger benefit to the entire community.",
                  )
-             ))),
+             )),
     
     #Experiment dashboard
     navbarMenu(
@@ -345,20 +345,20 @@ ui <- navbarPage(
         ),
         tabPanel("Monitoring",
             tabsetPanel(type = "tabs",
-                        tabPanel("Investigator",
+                        tabPanel("Patient",
                                  column(
                                      3,
                                      align = "left",
                                      style = "border-width: 1px solid",
                                      selectInput(
-                                         inputId = "in_var_measurement_name4",
-                                         label = "Measurement Name",
-                                         choices = var_measurement_name
-                                     ),
-                                     selectInput(
                                          inputId = "in_var_patient_id",
                                          label = "Patient ID",
                                          choices = var_patient_id
+                                     ),
+                                     selectInput(
+                                         inputId = "in_var_measurement_name4",
+                                         label = "Measurement Name",
+                                         choices = var_measurement_name
                                      )
                                  ),
                                  column(
@@ -371,7 +371,7 @@ ui <- navbarPage(
                                      ),
                                      fluidRow(
                                          style = "padding: 5px; border-style: solid; border-width: 1px;",
-                                         box(plotlyOutput("inv_plot_1", height = 200, width = 600)),
+                                         plotlyOutput("inv_plot_1")
                                      )
                                  )
                         ),
@@ -1060,30 +1060,39 @@ server <- function(input, output, session) {
         skim(observation_log_mon())
     })
     
-    #Chart to compare increase in actual value
+    #Patient Observation Chart
     output$inv_plot_1 <- renderPlotly({
         observation_log_mon() %>%
             filter(measurement_name == input$in_var_measurement_name4
                 & patient_id == input$in_var_patient_id) %>%
-            plot_ly(x=~obsSeq, y=~actual_value, 
-                      type="scatter",mode="lines"
-                    )
+            plot_ly() %>%
+            add_trace(x=~obsSeq, y=~actual_value, 
+                      type="bar", name = "Actual"
+                    ) %>%
+            add_trace(x=~obsSeq, y=~upper_limit, 
+                      type="scatter",mode="lines", name = "Upper Limit") %>%
+            add_trace(x=~obsSeq, y=~standard_threshold, 
+                      type="scatter",mode="lines", name = "Standard",line=list(color="green")) %>%
+            add_trace(x=~obsSeq, y=~lower_limit, 
+                      type="scatter",mode="lines", name = "Lower Limit")
+            
     })
     
     #Summary - patient
     patient_summary <- reactive({
         observation_log_mon() %>%
-            group_by(patient_id) %>%
+            filter(patient_id == input$in_var_patient_id) %>%
+            group_by(patient_id, measurement_name, total_readings) %>%
             summarise(
-                total_readings=max(as.integer(total_readings)),
-                observations=length(unique(obsSeq)),
-                measurements=length(unique(measure_id))
+                observations=length(unique(obsSeq))
             )
     })
     
     #display monitoring
     output$dt_patient_summary <-
-        renderDataTable(DT::datatable(patient_summary()))
+        renderDataTable(DT::datatable(patient_summary(), rownames=FALSE,
+                                      options = list(filter="none")
+                                      ))
     
     #############################################################################################
     
