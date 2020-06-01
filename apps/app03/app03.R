@@ -359,11 +359,6 @@ ui <- navbarPage(
                                          inputId = "in_var_patient_id",
                                          label = "Patient ID",
                                          choices = var_patient_id
-                                     ),
-                                     selectInput(
-                                         inputId = "in_var_patient_id_2",
-                                         label = "Patient ID 2",
-                                         choices = var_patient_id_2
                                      )
                                  ),
                                  column(
@@ -372,7 +367,10 @@ ui <- navbarPage(
                                      style = "border-width: 1px solid",
                                      fluidRow(
                                          style = "padding: 5px; border-style: solid; border-width: 1px;",
-                                         #plotlyOutput("inv_plot_1")
+                                         DT::dataTableOutput("dt_patient_summary")
+                                     ),
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 1px;",
                                          box(plotlyOutput("inv_plot_1", height = 200, width = 600)),
                                      )
                                  )
@@ -1051,12 +1049,7 @@ server <- function(input, output, session) {
     })
     #reactive data set
     observation_log_mon <- reactive({
-        subset.data.frame(observation_log(),
-                          subset=(observation_log()$measurement_name == input$in_var_measurement_name4
-                                  & (observation_log()$patient_id == input$in_var_patient_id
-                                  | observation_log()$patient_id == input$in_var_patient_id_2)
-                                    )
-        )
+        observation_log()
     })
     #display monitoring
     output$dt_observation_log_mon <-
@@ -1069,11 +1062,28 @@ server <- function(input, output, session) {
     
     #Chart to compare increase in actual value
     output$inv_plot_1 <- renderPlotly({
-        plot_ly(data = observation_log_mon()) %>%
-            add_trace(x=~obsSeq, y=~actual_value, 
-                      type="scatter",mode="lines",
-                      color=~patient_id)
+        observation_log_mon() %>%
+            filter(measurement_name == input$in_var_measurement_name4
+                & patient_id == input$in_var_patient_id) %>%
+            plot_ly(x=~obsSeq, y=~actual_value, 
+                      type="scatter",mode="lines"
+                    )
     })
+    
+    #Summary - patient
+    patient_summary <- reactive({
+        observation_log_mon() %>%
+            group_by(patient_id) %>%
+            summarise(
+                total_readings=max(as.integer(total_readings)),
+                observations=length(unique(obsSeq)),
+                measurements=length(unique(measure_id))
+            )
+    })
+    
+    #display monitoring
+    output$dt_patient_summary <-
+        renderDataTable(DT::datatable(patient_summary()))
     
     #############################################################################################
     
