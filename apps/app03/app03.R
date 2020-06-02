@@ -44,7 +44,7 @@ ui <- navbarPage(
     #Landing Home page starts
     tabPanel(title = "Home",
              fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
-                 h4("Study Experiment Simulator (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+                 h4("Study Experiment Simulator", style = "margin-top:0px;margin-left:5%; margin-right:5%")
              ),
              fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
                  p(
@@ -375,6 +375,28 @@ ui <- navbarPage(
                                      )
                                  )
                         ),
+                        tabPanel("Physician",
+                                 column(
+                                     3,
+                                     align = "left",
+                                     style = "border-width: 1px solid",
+                                     selectInput(
+                                         inputId = "in_var_measurement_name5",
+                                         label = "Measurement Name",
+                                         choices = var_measurement_name
+                                     )
+                                 ),
+                                 column(
+                                     9,
+                                     align = "left",
+                                     style = "border-width: 1px solid",
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 1px;",
+                                         plotlyOutput("inv_plot_2")
+                                     )
+                                     
+                                 )
+                        ),
                         tabPanel("Summary",
                                  verbatimTextOutput("observation_log_mon_summ")
                         ),
@@ -702,6 +724,11 @@ server <- function(input, output, session) {
             'in_var_measurement_name4',
             choices = unique(x_measure$df_measurement$measurement_name)
         )
+        updateSelectInput(
+            session,
+            'in_var_measurement_name5',
+            choices = unique(x_measure$df_measurement$measurement_name)
+        )
     })
     
     #display table summary
@@ -1004,12 +1031,12 @@ server <- function(input, output, session) {
     })
     
     ###########################################################################################
-    #Full data set
+    #Full aggregate data set
     observation_set4_agg <- reactive({
         observation_set4_agg_tmp<-subset.data.frame(observation_log()
         )
         observation_set4_agg_tmp<- observation_set4_agg_tmp %>%
-            group_by(patient_id) %>%
+            group_by(patient_id,measurement_name) %>%
             summarise(
                 "random" = unique(random),
                 "gender" = unique(gender),
@@ -1092,7 +1119,32 @@ server <- function(input, output, session) {
     output$dt_patient_summary <-
         renderDataTable(DT::datatable(patient_summary(), rownames=FALSE,
                                       options = list(filter="none")
-                                      ))
+        ))
+    
+    #Physician Observation Chart
+    output$inv_plot_2 <- renderPlotly({
+        observation_log_mon() %>%
+            filter(measurement_name == input$in_var_measurement_name5) %>%
+            plot_ly() %>%
+            add_trace(x=~obsSeq, y=~actual_value, 
+                      type="scatter",mode = "markers", color=~random,
+                      text = ~ paste(
+                          paste("Patient ID:", patient_id),
+                          paste("Gender:", gender),
+                          paste("Ethnicity:", ethnicity),
+                          paste("Observation:", obsSeq),
+                          paste("Value:", paste(actual_value,measurement_unit,sep = " ")),
+                          sep = "<br />"
+                      ),
+                      hoverinfo = 'text'
+            ) %>%
+            add_trace(x=~obsSeq, y=~upper_limit, 
+                      type="scatter",mode="lines", name = "Upper",line=list(color="red")) %>%
+            add_trace(x=~obsSeq, y=~standard_threshold, 
+                      type="scatter",mode="lines", name = "Standard",line=list(color="green")) %>%
+            add_trace(x=~obsSeq, y=~lower_limit, 
+                      type="scatter",mode="lines", name = "Lower",line=list(color="orange"))
+    })
     
     #############################################################################################
     

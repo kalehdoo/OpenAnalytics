@@ -25,6 +25,17 @@ mv_year_Lst10Yr <-
     nrows = -100,
     stringsAsFactors = FALSE
   )
+
+mv_month <-
+  read.csv(
+    "data/agg_month.txt",
+    header = TRUE,
+    sep = "|",
+    na.strings = "NA",
+    nrows = -100,
+    stringsAsFactors = FALSE
+  )
+
 mv_studies_recruiting_loc <-
   read.csv(
     "data/mv_studies_recruiting_loc.txt",
@@ -175,7 +186,7 @@ ui <- navbarPage(
            ),
            fluidRow((
              p(
-               "The source data is downloaded from CTTI."
+               "The source data is downloaded from "
                ,
                tags$a(href = "https://aact.ctti-clinicaltrials.org", "ACCT-CTTI.", target =
                         "_blank"),
@@ -449,20 +460,42 @@ ui <- navbarPage(
              ))
   )
   ,
-  tabPanel("Trends",
-           mainPanel(
-             width = 12,
-             fluidRow(tags$h4("Historical trend for last 10 years")),
-             fluidRow(
-               box(plotlyOutput("plot_1001", height = 200), title = "Studies Registered"),
-               box(plotlyOutput("plot_1002", height = 200), title = "Studies Started")
-             ),
-             #create box for plot 1001
-             fluidRow(
-               box(plotlyOutput("plot_1003", height = 200), title = "Studies Completed"),
-               box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
-             )
-           )),
+  navbarMenu(
+    "Trends",
+    tabPanel(
+      "Study",
+      tabsetPanel(
+        type = "tabs",
+        tabPanel("Yearly",
+                 mainPanel(
+                   width = 12,
+                   fluidRow(tags$h4("Previous vs Current Year Trends")),
+                   fluidRow(
+                     box(plotlyOutput("plot_1001", height = 200), title = "Studies Registered"),
+                     box(plotlyOutput("plot_1002", height = 200), title = "Studies Started")
+                   ),
+                   #create box for plot 1001
+                   fluidRow(
+                     box(plotlyOutput("plot_1003", height = 200), title = "Studies Completed"),
+                     box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
+                   )
+                 )),
+        tabPanel("Monthly",
+                 mainPanel(
+                   width = 12,
+                   fluidRow(tags$h4("Historical trend for last 10 years")),
+                   fluidRow(
+                     box(plotlyOutput("plot_month_1001", height = 200), title = "Studies Registered"),
+                     box(plotlyOutput("plot_month_1002", height = 200), title = "Studies Started")
+                   ),
+                   #create box for plot 1001
+                   fluidRow(
+                     box(plotlyOutput("plot_month_1003", height = 200), title = "Studies Completed"),
+                     box(plotlyOutput("plot_month_1004", height = 200), title = "Results Posted")
+                   )
+                 ))
+      ))
+    ),
   #Outcome dashboard
   navbarMenu(
     "Outcome",
@@ -1541,6 +1574,77 @@ server <- function(input, output) {
       textposition = 'auto'
     )
   })
+  
+  mv_month$month_name <-
+    factor(mv_month$month_name,
+           levels = unique(mv_month$month_name)[order(mv_month$common_month, decreasing = FALSE)])
+  
+  #cteate plot month_1001
+  output$plot_month_1001 <- renderPlotly({
+    mv_month %>%
+      plot_ly(
+      x =  ~ month_name,
+      y =  ~ cnt_reg_lstYr,
+      type = 'bar',
+      text =  ~ cnt_reg_lstYr,
+      textposition = 'auto',
+      name="Previous",
+      showlegend = FALSE) %>%
+      add_trace(y =  ~ cnt_reg_CurrYr, text =  ~ cnt_reg_CurrYr, name="Current") %>%
+      layout(xaxis=list(title="")) %>%
+      layout(yaxis=list(title=""))
+  })
+  
+  #cteate plot month_1002
+  output$plot_month_1002 <- renderPlotly({
+    mv_month %>%
+    plot_ly(
+      x =  ~ month_name,
+      y =  ~ cnt_started_lstYr,
+      type = 'bar',
+      text =  ~ cnt_started_lstYr,
+      textposition = 'auto',
+      name="Previous",
+      showlegend = FALSE) %>%
+      add_trace(y =  ~ cnt_started_CurrYr, text =  ~ cnt_started_CurrYr, name="Current") %>%
+      layout(xaxis=list(title="")) %>%
+      layout(yaxis=list(title=""))
+  })
+  
+  #cteate plot month_1003
+  output$plot_month_1003 <- renderPlotly({
+    mv_month %>%
+      plot_ly(
+        x =  ~ month_name,
+        y =  ~ cnt_completed_lstYr,
+        type = 'bar',
+        text =  ~ cnt_completed_lstYr,
+        textposition = 'auto',
+        name="Previous",
+        showlegend = FALSE) %>%
+      add_trace(y =  ~ cnt_completed_CurrYr, text =  ~ cnt_completed_CurrYr, name="Current") %>%
+      layout(xaxis=list(title="")) %>%
+      layout(yaxis=list(title=""))
+  })
+  
+  #cteate plot month_1004
+  output$plot_month_1004 <- renderPlotly({
+    mv_month %>%
+      plot_ly(
+        x =  ~ month_name,
+        y =  ~ cnt_posted_lstYr,
+        type = 'bar',
+        text =  ~ cnt_posted_lstYr,
+        textposition = 'auto',
+        name="Previous",
+        showlegend = FALSE) %>%
+      add_trace(y =  ~ cnt_posted_CurrYr, text =  ~ cnt_posted_CurrYr, name="Current") %>%
+      layout(xaxis=list(title="")) %>%
+      layout(yaxis=list(title=""))
+  })
+  
+  ####################server ends###########################
+  
 }
 
 shinyApp(ui, server)
