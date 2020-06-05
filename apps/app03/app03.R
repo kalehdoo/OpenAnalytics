@@ -9,8 +9,7 @@ library(data.table)
 library(shinythemes)
 library(rsample)
 library(lubridate)
-library(skimr)
-library(mongolite)
+library(Hmisc)
 
 
 ##Design Experiment
@@ -55,7 +54,21 @@ ui <- navbarPage(
                      CROs, public interest groups, independent consultants, and non-profits contributing to improve clinical research
                      and life sciences for the larger benefit to the entire community.",
                  )
-             )),
+             ),
+             fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
+                      p(
+                          "Study Experiment Simulator can design a virtual study and generate observation data programmatically based on various study design parameters.",
+                      )
+             ),
+             fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
+                      p(
+                          "Follow on twitter for regular updates",
+                          tags$a(href = "https://twitter.com/kalehdoo", "Kalehdoo", target =
+                                     "_blank"),
+                          style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                      )
+             )
+             ),
     
     #Experiment dashboard
     navbarMenu(
@@ -111,12 +124,18 @@ ui <- navbarPage(
                          fluidRow(DTOutput('x1'))
                          ),
                 tabPanel(
-                    "Summary",
+                    "Detail Summary",
                     fluidRow(verbatimTextOutput("tabsummary"))
                 ),
                 tabPanel(
-                    "dataview",
+                    "Detail dataview",
                     fluidRow(DT::dataTableOutput("dt_observation_log"))
+                ),
+                tabPanel("Agg Summary",
+                         verbatimTextOutput("tabsummaryagg")
+                ),
+                tabPanel(" Agg DataView",
+                         DT::dataTableOutput("dt_observation_set4_agg")
                 )
             )
         ),
@@ -337,13 +356,7 @@ ui <- navbarPage(
                             verbatimTextOutput("ANOVA_PostHoc2")
                         )
                     )
-                ),
-                tabPanel("Summary",
-                         verbatimTextOutput("tabsummaryagg")
-                ),
-                tabPanel("Data",
-                         DT::dataTableOutput("dt_observation_set4_agg")
-                         )
+                )
             )
         ),
         tabPanel("Monitoring",
@@ -399,12 +412,6 @@ ui <- navbarPage(
                                      )
                                      
                                  )
-                        ),
-                        tabPanel("Summary",
-                                 verbatimTextOutput("observation_log_mon_summ")
-                        ),
-                        tabPanel("DataView",
-                                 DT::dataTableOutput("dt_observation_log_mon")
                         )
             )
         )
@@ -727,35 +734,13 @@ server <- function(input, output, session) {
         )
     })
     
-    #display table summary
-    output$tabsummary <- renderPrint({
-        skim(observation_log())
-    })
-    
-    #display table data
-    output$dt_observation_log <-
-        renderDataTable(DT::datatable(observation_log(), filter = "top"))
     
     ####################################################
     
     #reactive data set for PAIRED
     observation_set1_agg <- reactive({
-        observation_set1_agg_tmp<-subset.data.frame(observation_log(), subset=(observation_log()$measurement_name == input$in_var_measurement_name & observation_log()$random == input$in_var_random_name)
+        observation_set1_agg_tmp<-subset.data.frame(observation_set4_agg(), subset=(measurement_name == input$in_var_measurement_name & random == input$in_var_random_name)
         )
-        observation_set1_agg_tmp<- observation_set1_agg_tmp %>%
-            group_by(patient_id) %>%
-            summarise(
-                "random" = unique(random),
-                "gender" = unique(gender),
-                "ethnicity" = unique(ethnicity),
-                "before_value" = max(if_else(
-                    obsSeq == as.numeric(min(obsSeq)), actual_value, 0
-                )),
-                "after_value" = max(if_else(
-                    obsSeq == as.numeric(max(obsSeq)), actual_value, 0
-                )),
-                "diff" = after_value - before_value
-            )
     })
     
     #box plot to visualize the normal distribution
@@ -818,22 +803,9 @@ server <- function(input, output, session) {
     ##############################################################
     #ANOVA - reactive data set 3 for ANOVA
     observation_set3_agg <- reactive({
-        observation_set3_agg_tmp<-subset.data.frame(observation_log(), (observation_log()$measurement_name == input$in_var_measurement_name3 & observation_log()$random == input$in_var_random_name3)
+        observation_set3_agg_tmp<-subset.data.frame(observation_set4_agg(), (measurement_name == input$in_var_measurement_name3 & random == input$in_var_random_name3)
         )
-        observation_set3_agg_tmp<- observation_set3_agg_tmp %>%
-            group_by(patient_id) %>%
-            summarise(
-                "random" = unique(random),
-                "gender" = unique(gender),
-                "ethnicity" = unique(ethnicity),
-                "before_value" = max(if_else(
-                    obsSeq == as.numeric(min(obsSeq)), actual_value, 0
-                )),
-                "after_value" = max(if_else(
-                    obsSeq == as.numeric(max(obsSeq)), actual_value, 0
-                )),
-                "diff" = after_value - before_value
-            )
+        
     })
     
     
@@ -932,22 +904,8 @@ server <- function(input, output, session) {
     #######################################################################
     #UNPAIRED - reactive data set 2 for a measurement
     observation_set2_agg <- reactive({
-        observation_set2_agg_tmp<-subset.data.frame(observation_log(), (observation_log()$measurement_name == input$in_var_measurement_name2)
+        observation_set2_agg_tmp<-subset.data.frame(observation_set4_agg(), (measurement_name == input$in_var_measurement_name2)
         )
-        observation_set2_agg_tmp<- observation_set2_agg_tmp %>%
-            group_by(patient_id) %>%
-            summarise(
-                "random" = unique(random),
-                "gender" = unique(gender),
-                "ethnicity" = unique(ethnicity),
-                "before_value" = max(if_else(
-                    obsSeq == as.numeric(min(obsSeq)), actual_value, 0
-                )),
-                "after_value" = max(if_else(
-                    obsSeq == as.numeric(max(obsSeq)), actual_value, 0
-                )),
-                "diff" = after_value - before_value
-            )
     })
     
     #box plot to visualize the normal distribution
@@ -1041,23 +999,25 @@ server <- function(input, output, session) {
                     obsSeq == as.numeric(min(obsSeq)), actual_value, 0
                 )),
                 "after_value" = max(if_else(
-                    obsSeq == as.numeric(max(obsSeq)), actual_value, 0
+                    obsSeq == as.numeric(max(obsSeq)), round(actual_value,digits = 3), 0
                 )),
-                "diff" = after_value - before_value
+                "diff" = round((after_value - before_value),digits = 3),
+                "diff_pc" = round((((after_value - before_value)/after_value)*100),digits = 3),
+                "previous_value" = max(if_else(
+                    obsSeq == (as.numeric(max(obsSeq)-1)), round(actual_value,digits = 3), 0
+                )),
+                "change" = round((after_value - previous_value),digits = 3),
+                "change_pc" = round(((after_value - previous_value)/after_value)*100,digits=3),
+                "increase_good"=max(increase_good),
+                "ind_diff"=unique(if_else((diff>0 & increase_good==1) | (diff<0 & increase_good==0),"Good","Bad")),
+                "ind_change"=unique(if_else((change>0 & increase_good==1) | (diff<0 & increase_good==0),"Good","Bad")),
+                
             )
     })
-    ##################################################
-    #display observation log data
-    output$dt_observation_set4_agg <-
-        renderDataTable(DT::datatable(observation_set4_agg(), filter = "top"))
     
-    #display table summary
-    output$tabsummaryagg <- renderPrint({
-        skim(observation_set4_agg())
-    })
     
     ###################################################
-    #Monitoring
+    #Patient Monitoring
     observe({
         updateSelectInput(
             session,
@@ -1070,22 +1030,10 @@ server <- function(input, output, session) {
             choices = unique(df_patient_sample()$patient_id)
         )
     })
-    #reactive data set
-    observation_log_mon <- reactive({
-        observation_log()
-    })
-    #display monitoring
-    output$dt_observation_log_mon <-
-        renderDataTable(DT::datatable(observation_log_mon(), filter = "top"))
-    
-    #display table summary
-    output$observation_log_mon_summ <- renderPrint({
-        skim(observation_log_mon())
-    })
     
     #Patient Observation Chart
     output$inv_plot_1 <- renderPlotly({
-        observation_log_mon() %>%
+        observation_log() %>%
             filter(measurement_name == input$in_var_measurement_name4
                 & patient_id == input$in_var_patient_id) %>%
             plot_ly() %>%
@@ -1101,25 +1049,11 @@ server <- function(input, output, session) {
             
     })
     
-    #Summary - patient
-    patient_summary <- reactive({
-        observation_log_mon() %>%
-            filter(patient_id == input$in_var_patient_id) %>%
-            group_by(patient_id, measurement_name, total_readings) %>%
-            summarise(
-                observations=length(unique(obsSeq))
-            )
-    })
     
-    #display monitoring
-    output$dt_patient_summary <-
-        renderDataTable(DT::datatable(patient_summary(), rownames=FALSE,
-                                      options = list(filter="none")
-        ))
     
     #Physician Observation Chart
     output$inv_plot_2 <- renderPlotly({
-        observation_log_mon() %>%
+        observation_log() %>%
             filter(measurement_name == input$in_var_measurement_name5) %>%
             plot_ly() %>%
             add_trace(x=~obsSeq, y=~actual_value, 
@@ -1141,6 +1075,53 @@ server <- function(input, output, session) {
             add_trace(x=~obsSeq, y=~lower_limit, 
                       type="scatter",mode="lines", name = "Lower",line=list(color="orange"))
     })
+    
+    ################################
+    #######datatables and summary############
+    ##################################################
+    #display table data
+    output$dt_observation_log <-
+        renderDataTable(DT::datatable(observation_log(), filter = "top"))
+    
+    #display table summary
+    output$tabsummary <- renderPrint({
+        Hmisc::describe(observation_log())
+    })
+    
+    
+    #display observation log data
+    output$dt_observation_set4_agg <-
+        renderDataTable(DT::datatable(observation_set4_agg(), filter = "top"))
+    
+    #display table summary
+    output$tabsummaryagg <- renderPrint({
+        Hmisc::describe(observation_set4_agg())
+    })
+    
+    #Summary - patient
+    patient_summary <- reactive({
+        patient_summary<-subset.data.frame(observation_set4_agg(), subset=(patient_id == input$in_var_patient_id),
+                                           select = c("measurement_name", "before_value", "after_value","diff", "diff_pc","previous_value","change","change_pc","ind_diff", "ind_change"))
+        
+        patient_summary %>%
+            rename("Start"="before_value", "last"="after_value","previous"="previous_value")
+    })
+    #display monitoring patient agg summ with hide 2 columns
+    output$dt_patient_summary <-
+        renderDataTable(DT::datatable(patient_summary(), rownames=FALSE,
+                                      extensions = 'FixedColumns',
+                                      options=list(
+                                          columnDefs = list(list(targets = c(8,9), visible = FALSE)),
+                                          dom = 't',
+                                          scrollX = TRUE,
+                                          fixedColumns = TRUE
+                                      )
+        ) %>%
+            formatStyle("diff","ind_diff",
+                        backgroundColor = styleEqual(c("Good","Bad"), c('green','orange'))) %>%
+            formatStyle("change","ind_change",
+                        backgroundColor = styleEqual(c("Good","Bad"), c('green','orange')))
+        )
     
     ###############################################################
     #SERVER ENDS

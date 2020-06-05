@@ -9,8 +9,9 @@ library(data.table)
 library(shinythemes)
 library(rsample)
 library(lubridate)
-library(skimr)
 library(mongolite)
+library(Hmisc)
+
 
 
 #create connection to cloud database
@@ -49,7 +50,33 @@ ui <- navbarPage(
                      CROs, public interest groups, independent consultants, and non-profits contributing to improve clinical research
                      and life sciences for the larger benefit to the entire community.",
                       )
-             )),
+             ),
+             fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
+                      p(
+                          "Patient Analysis and Monitoring enables the patients and physicians to analyse the results of a virtual study experiment on a real time.
+                          The data used in this application is a sample test data generated programatically using the Study Experiment Simulator App.
+                          This application connects to real-time data on MongoDB cloud server to mimic real-time analysis.
+                          The analysis tab allows data scientists and Biostatisticians to analyse the results.
+                          The monitoring tab is for physicians and study investigators to monitor the patients health.",
+                      )
+             ),
+             fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
+                 p(
+                     "Visit the Study Experiment Simulator App to design a virtual study.",
+                     tags$a(href = "https://kalehdoo.shinyapps.io/app03", "Study Experiment Simulator", target =
+                                "_blank"),
+                     style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                 )
+             ),
+             fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
+                 p(
+                     "Follow on twitter for regular updates",
+                     tags$a(href = "https://twitter.com/kalehdoo", "Kalehdoo", target =
+                                "_blank"),
+                     style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                 )
+             )
+             ),
     
     #Patient dashboard
     navbarMenu(
@@ -272,10 +299,16 @@ ui <- navbarPage(
                         )
                     )
                 ),
-                tabPanel("Summary",
+                tabPanel("Detail Summary",
+                         verbatimTextOutput("observation_log_mon_summ")
+                ),
+                tabPanel("Detail DataView",
+                         DT::dataTableOutput("dt_observation_log_mon")
+                ),
+                tabPanel("Agg Summary",
                          verbatimTextOutput("tabsummaryagg")
                 ),
-                tabPanel("Data",
+                tabPanel("Agg DataView",
                          DT::dataTableOutput("dt_observation_set4_agg")
                 )
             )
@@ -334,12 +367,6 @@ ui <- navbarPage(
                                           )
                                           
                                       )
-                             ),
-                             tabPanel("Summary",
-                                      verbatimTextOutput("observation_log_mon_summ")
-                             ),
-                             tabPanel("DataView",
-                                      DT::dataTableOutput("dt_observation_log_mon")
                              )
                  )
         )
@@ -679,19 +706,48 @@ server <- function(input, output, session) {
     ##################################################
     #display observation log data
     output$dt_observation_set4_agg <-
-        renderDataTable(DT::datatable(observation_set4_agg(), filter = "top",
-                                      extensions = "FixedColumns",
-                                      options=list(
-                                          dom = 't',
-                                          scrollX = TRUE,
-                                          fixedColumns = list(leftColumns = 1, rightColumns = 0)
-                                      )
+        renderDataTable(DT::datatable(observation_set4_agg(), filter = "top"
                                       ))
     
     #display table summary
     output$tabsummaryagg <- renderPrint({
-        skim(observation_set4_agg())
+        Hmisc::describe(observation_set4_agg())
     })
+    
+    #display monitoring
+    output$dt_observation_log_mon <-
+      renderDataTable(DT::datatable(observation_log(), filter = "top"
+      ))
+    
+    #display table summary
+    output$observation_log_mon_summ <- renderPrint({
+      Hmisc::describe(observation_log())
+    })
+    
+    #Summary - patient
+    patient_summary <- reactive({
+      patient_summary<-subset.data.frame(observation_set4_agg(), subset=(patient_id == input$in_var_patient_id),
+                                         select = c("measurement_name", "before_value", "after_value","diff", "diff_pc","previous_value","change","change_pc","ind_diff", "ind_change"))
+      
+      patient_summary %>%
+        rename("Start"="before_value", "last"="after_value","previous"="previous_value")
+    })
+    #display monitoring patient agg summ with hide 2 columns
+    output$dt_patient_summary <-
+      renderDataTable(DT::datatable(patient_summary(), rownames=FALSE,
+                                    extensions = 'FixedColumns',
+                                    options=list(
+                                      columnDefs = list(list(targets = c(8,9), visible = FALSE)),
+                                      dom = 't',
+                                      scrollX = TRUE,
+                                      fixedColumns = TRUE
+                                    )
+      ) %>%
+        formatStyle("diff","ind_diff",
+                    backgroundColor = styleEqual(c("Good","Bad"), c('green','orange'))) %>%
+        formatStyle("change","ind_change",
+                    backgroundColor = styleEqual(c("Good","Bad"), c('green','orange')))
+      )
     
     ###################################################
     #Monitoring
@@ -708,22 +764,6 @@ server <- function(input, output, session) {
         )
     })
     
-    #display monitoring
-    output$dt_observation_log_mon <-
-        renderDataTable(DT::datatable(observation_log(), filter = "top",
-                                      extensions = "FixedColumns",
-                                      options=list(
-                                          dom = 't',
-                                          scrollX = TRUE,
-                                          fixedColumns = list(leftColumns = 1, rightColumns = 0)
-                                      )
-                                      ))
-    
-    #display table summary
-    output$observation_log_mon_summ <- renderPrint({
-        skim(observation_log())
-    })
-    
     #Patient Observation Chart
     output$inv_plot_1 <- renderPlotly({
         observation_log() %>%
@@ -731,7 +771,15 @@ server <- function(input, output, session) {
                    & patient_id == input$in_var_patient_id) %>%
             plot_ly() %>%
             add_trace(x=~obsSeq, y=~actual_value, 
-                      type="bar", name = "Actual"
+                      type="bar", name = "Actual",
+                      text = ~ paste(
+                          paste("Patient ID:", patient_id),
+                          paste("Observation:", obsSeq),
+                          paste("Date:", obs_date),
+                          paste("Value:", paste(round(actual_value, digits = 2),measurement_unit,sep = " ")),
+                          sep = "<br />"
+                      ),
+                      hoverinfo = 'text'
             ) %>%
             add_trace(x=~obsSeq, y=~upper_limit, 
                       type="scatter",mode="lines", name = "Upper Limit") %>%
@@ -741,32 +789,6 @@ server <- function(input, output, session) {
                       type="scatter",mode="lines", name = "Lower Limit")
         
     })
-    
-    #Summary - patient
-    patient_summary <- reactive({
-        patient_summary<-subset.data.frame(observation_set4_agg(), subset=(patient_id == input$in_var_patient_id),
-                                           select = c("measurement_name", "before_value", "after_value","diff", "diff_pc","previous_value","change","change_pc","ind_diff", "ind_change"))
-            
-        patient_summary %>%
-            rename("Start"="before_value", "last"="after_value","previous"="previous_value")
-    })
-    #display monitoring patient agg summ with hide 2 columns
-    output$dt_patient_summary <-
-        renderDataTable(DT::datatable(patient_summary(), rownames=FALSE,
-                                      extensions = "FixedColumns",
-                                      options=list(
-                                          columnDefs = list(list(targets = c(8,9), visible = FALSE)),
-                                          filter="none",
-                                          dom = 't',
-                                          scrollX = TRUE,
-                                          fixedColumns = list(leftColumns = 1, rightColumns = 0)
-                                      )
-                    ) %>%
-                        formatStyle("diff","ind_diff",
-                                    backgroundColor = styleEqual(c("Good","Bad"), c('green','orange'))) %>%
-                        formatStyle("change","ind_change",
-                                    backgroundColor = styleEqual(c("Good","Bad"), c('green','orange')))
-        )
     
     #Physician Observation Chart
     output$inv_plot_2 <- renderPlotly({

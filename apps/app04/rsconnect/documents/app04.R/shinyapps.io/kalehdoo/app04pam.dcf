@@ -1,0 +1,12 @@
+name: app04pam
+title: app04pam
+username:
+account: kalehdoo
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2410727
+bundleId: 3230319
+url: https://kalehdoo.shinyapps.io/app04pam/
+when: 1591314506.15781
+asMultiple: FALSE
+asStatic: FALSE
