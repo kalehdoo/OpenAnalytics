@@ -367,6 +367,18 @@ ui <- navbarPage(
                                           )
                                           
                                       )
+                             ),
+                             tabPanel("RealTime",
+                                      column(
+                                        12,
+                                        align = "left",
+                                        style = "border-width: 1px solid",
+                                        fluidRow(
+                                          style = "padding: 5px; border-style: solid; border-width: 1px;",
+                                          plotlyOutput("inv_plot_4")
+                                        )
+                                        
+                                      )
                              )
                  )
         )
@@ -385,10 +397,20 @@ server <- function(input, output, session) {
     
     
     ######################################patient data ends
+    
+    
     #observation data
     observation_log <- reactive({
+        
         read_observation_log<-conn_obs_log$find('{}')
         read_observation_log<-as_tibble(read_observation_log)
+    })
+    
+    #seperate observation log for real time refresh every 30 sec
+    observation_log_RT <- reactive({
+      invalidateLater(30000, session)
+      read_observation_log<-conn_obs_log$find('{}')
+      read_observation_log<-as_tibble(read_observation_log)
     })
     
     #update select inputs
@@ -438,12 +460,12 @@ server <- function(input, output, session) {
                     obsSeq == as.numeric(max(obsSeq)), round(actual_value,digits = 3), 0
                 )),
                 "diff" = round((after_value - before_value),digits = 3),
-                "diff_pc" = round((((after_value - before_value)/after_value)*100),digits = 3),
+                "diff_pc" = round((((after_value - before_value)/before_value)*100),digits = 2),
                 "previous_value" = max(if_else(
                     obsSeq == (as.numeric(max(obsSeq)-1)), round(actual_value,digits = 3), 0
                 )),
                 "change" = round((after_value - previous_value),digits = 3),
-                "change_pc" = round(((after_value - previous_value)/after_value)*100,digits=3),
+                "change_pc" = round(((after_value - previous_value)/previous_value)*100,digits=2),
                 "increase_good"=max(increase_good),
                 "ind_diff"=unique(if_else((diff>0 & increase_good==1) | (diff<0 & increase_good==0),"Good","Bad")),
                 "ind_change"=unique(if_else((change>0 & increase_good==1) | (diff<0 & increase_good==0),"Good","Bad")),
@@ -766,6 +788,7 @@ server <- function(input, output, session) {
     
     #Patient Observation Chart
     output$inv_plot_1 <- renderPlotly({
+        
         observation_log() %>%
             filter(measurement_name == input$in_var_measurement_name4
                    & patient_id == input$in_var_patient_id) %>%
@@ -813,6 +836,56 @@ server <- function(input, output, session) {
                       type="scatter",mode="lines", name = "Standard",line=list(color="green")) %>%
             add_trace(x=~obsSeq, y=~lower_limit, 
                       type="scatter",mode="lines", name = "Lower",line=list(color="orange"))
+    })
+    
+   
+    #Full aggregate data for realTime
+    observation_set5_agg_RT <- reactive({
+      observation_set5_agg_tmp<-subset.data.frame(observation_log_RT()
+      )
+      observation_set5_agg_tmp<- observation_set5_agg_tmp %>%
+        group_by(patient_id,measurement_name) %>%
+        summarise(
+          "random" = unique(random),
+          "gender" = unique(gender),
+          "ethnicity" = unique(ethnicity),
+          "before_value" = max(if_else(
+            obsSeq == as.numeric(min(obsSeq)), actual_value, 0
+          )),
+          "after_value" = max(if_else(
+            obsSeq == as.numeric(max(obsSeq)), round(actual_value,digits = 3), 0
+          )),
+          "diff" = round((after_value - before_value),digits = 3),
+          "diff_pc" = round((((after_value - before_value)/before_value)*100),digits = 2),
+          "previous_value" = max(if_else(
+            obsSeq == (as.numeric(max(obsSeq)-1)), round(actual_value,digits = 3), 0
+          )),
+          "change" = round((after_value - previous_value),digits = 3),
+          "change_pc" = round(((after_value - previous_value)/previous_value)*100,digits=2),
+          "increase_good"=max(increase_good),
+          "ind_diff"=unique(if_else((diff>0 & increase_good==1) | (diff<0 & increase_good==0),"Good","Bad")),
+          "ind_change"=unique(if_else((change>0 & increase_good==1) | (diff<0 & increase_good==0),"Good","Bad")),
+          
+        )
+    })
+    
+    output$inv_plot_4 <- renderPlotly({
+      observation_set5_agg_RT() %>%
+      plot_ly(x = ~patient_id, y = ~change_pc, color = ~measurement_name, colors = "Dark2",
+              text = ~ paste(
+                paste("Patient ID:", patient_id),
+                paste("Gender:", gender),
+                paste("Ethnicity:", ethnicity),
+                paste("Measurement:", measurement_name),
+                paste("Old Value:", previous_value),
+                paste("New Value:", after_value),
+                paste("%age Change:", change_pc),
+                sep = "<br />"
+              ),
+              hoverinfo = 'text',
+              showlegend = FALSE) %>%
+        subplot(nrows=5, shareX=T)
+      
     })
     
     ###############################################################
