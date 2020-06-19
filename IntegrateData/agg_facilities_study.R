@@ -16,8 +16,8 @@ agg_facilities_study1<-data.table(agg_facilities)[,list(
   state_name  = paste(state, collapse =", "),
   city_name  = paste(city, collapse =", "),
   cnt_sites = length(facility_id),
-  cnt_site_recruiting = sum(flag_site_recruiting, na.rm = TRUE),
-  flag_study_us_only = if_else(sum(flag_site_US, na.rm = TRUE)>=1,1,0)
+  cnt_site_recruiting = sum(as.integer(flag_site_recruiting), na.rm = TRUE),
+  flag_study_us_only = if_else(sum(as.integer(flag_site_US), na.rm = TRUE)>=1,1,0)
 ), by='nct_id']
 
 agg_facilities_study2<-sqldf("select nct_id, count(distinct country) as cnt_site_countries,
@@ -29,13 +29,13 @@ agg_facilities_study<-left_join(agg_facilities_study1, agg_facilities_study2, by
 
 
 #write to txt file
-write.table(agg_facilities_study, paste(var_DIR_ACCT_HOME, "DATA/warehouse/agg_facilities_study.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(agg_facilities_study, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities_study.txt", sep=""), sep = "|", row.names = FALSE)
 
 #agg facilities at site level
 agg_facilities_site1<-data.table(agg_facilities)[,list( 
   cnt_studies = length(nct_id),
-  cnt_site_recruiting = sum(flag_site_recruiting, na.rm = TRUE),
-  flag_study_us_only = if_else(sum(flag_site_US, na.rm = TRUE)>=1,1,0)
+  cnt_site_recruiting = sum(as.integer(flag_site_recruiting), na.rm = TRUE),
+  flag_study_us_only = if_else(sum(as.integer(flag_site_US), na.rm = TRUE)>=1,1,0)
 ), by='facility_name']
 
 agg_facilities_site2<-sqldf("select facility_name, count(distinct country) as cnt_site_countries,

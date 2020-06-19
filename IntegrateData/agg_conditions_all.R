@@ -25,13 +25,13 @@ conditions_study<-mutate(conditions_study,
 
 #aggregate recruiting conditions
 agg_condition_study<-data.table(conditions_study)[,list( 
-  flag_rarecondition = mean(flag_rare_disease, na.rm = TRUE),
+  flag_rarecondition = mean(as.numeric(flag_rare_disease), na.rm = TRUE),
   cnt_recruitingstudies = length(unique(nct_id)),
   cnt_sponsors = length(unique(lead_sponsor_name)),
-  cnt_sponsors_ind = sum(ifelse(agency_class=="Industry",1,0)),
-  cnt_sponsors_nonind = sum(ifelse(agency_class!="Industry",1,0)),
-  cnt_sponsors_academic = sum(ifelse(sponsor_type=="Academic",1,0)),
-  cnt_sponsors_hospital = sum(ifelse(sponsor_type=="Hospital",1,0)),
+  cnt_sponsors_ind = sum(if_else(agency_class=="Industry",1,0)),
+  cnt_sponsors_nonind = sum(if_else(agency_class!="Industry",1,0)),
+  cnt_sponsors_academic = sum(if_else(sponsor_type=="Academic",1,0)),
+  cnt_sponsors_hospital = sum(if_else(sponsor_type=="Hospital",1,0)),
   cnt_anti_enrollment = sum(anticipated_study_enrollment, na.rm = TRUE),
   median_register_to_start_days = as.double(median(register_to_start_days))
 ), by='condition_name']

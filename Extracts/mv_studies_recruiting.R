@@ -32,7 +32,7 @@ mv_studies_recruiting<-subset.data.frame(agg_studies,
                                      "has_dmc",
                                      "lead_sponsor_name",
                                      "condition_name",
-                                     "flag_rare_condition",
+                                     "cnt_match_rare_condition",
                                      "study_type",
                                      "study_first_posted_yrmonth",
                                      "start_yrmonth",
@@ -82,7 +82,7 @@ mv_studies_recruiting<-sqldf("Select urlid as 'ID',
                                  official_title as 'Title', 
                                  start_date as 'StartDate',
                                  case when has_dmc='t' THEN 'Yes' when has_dmc='f' THEN 'No' ELSE 'NA' END as 'DataMonitoring',
-                                 case when flag_rare_condition=1 THEN 'Yes' when flag_rare_condition=0 THEN 'No' ELSE 'NA' END as 'RareDisease',
+                                 case when cnt_match_rare_condition>0 THEN 'Yes' when cnt_match_rare_condition=0 THEN 'No' ELSE 'NA' END as 'RareDisease',
                                  city,
                                  state,
                                  country,
@@ -104,7 +104,8 @@ mv_studies_recruiting<-sqldf("Select urlid as 'ID',
                                   sponsor_type as 'SponsorType',
                                   cnt_conditions as 'CntConditions',
                                   cnt_sites as 'CntSites',
-                                  intervention_type as 'InterventionType'
+                                  intervention_type as 'InterventionType',
+                                  cnt_match_rare_condition
                               from mv_studies_recruiting
                              where nct_id is not null")
 

@@ -140,7 +140,7 @@ agg_sponsors1 <- setDT(agg_studies)[, list(
   
   cnt_conditions = sum(cnt_conditions, na.rm = TRUE),
   cnt_rare_condition_match = sum(cnt_match_rare_condition, na.rm = TRUE),
-  cnt_rare_condition_studies = sum(flag_rare_condition, na.rm = TRUE)
+  cnt_rare_condition_studies = sum(if_else(cnt_match_rare_condition>0,1,0), na.rm = TRUE)
   
 ), by = 'lead_sponsor_name']
 

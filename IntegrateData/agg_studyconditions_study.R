@@ -3,8 +3,8 @@
 library(dplyr)
 library(stringr)
 library(data.table)
-library(tm)
-library("SnowballC")
+#library(tm)
+#library("SnowballC")
 
 #set paths for data files
 in_path_x_conditions<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_conditions.txt", sep="")

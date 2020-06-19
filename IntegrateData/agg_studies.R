@@ -27,7 +27,7 @@ agg_studies_sponsors$nct_id<-as.character(agg_studies_sponsors$nct_id)
 agg_study_conditions$nct_id<-as.character(agg_study_conditions$nct_id)
 agg_studies_conditions<-left_join(agg_studies_sponsors,agg_study_conditions,by="nct_id")
 
-#stitch facilities at study level
+#stitch conditions at study level
 agg_study_facilities$nct_id<-as.character(agg_study_facilities$nct_id)
 agg_studies_facilities<-left_join(agg_studies_conditions,agg_study_facilities,by="nct_id")
 
