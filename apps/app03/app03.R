@@ -57,7 +57,7 @@ ui <- navbarPage(
              ),
              fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
                       p(
-                          "Study Experiment Simulator can design a virtual study and generate observation data programmatically based on various study design parameters.",
+                          "Design a virtual clinical study experiment and analyze the results. Choose parameters of a study such as a study population size, randomization, study outcomes, and measurement frequency. Visualize the results and run various statistical tests (T-Tests and ANOVA) to measure the study results.",
                       )
              ),
              fluidRow(style = "margin-top:0px;margin-left:2%; margin-right:2%",
@@ -83,12 +83,12 @@ ui <- navbarPage(
                         3,
                         align = "left",
                         style = "border-width: 1px solid",
-                        numericInput(
+                        sliderInput(
                             inputId = "in_var_pat_size",
-                            label = "Patients (30-2000)",
+                            label = "Patients (30-100)",
                             value = 30,
                             min = 30,
-                            max = 1000
+                            max = 100
                         ),
                         sliderInput(
                             inputId = "in_var_age_min",
@@ -104,12 +104,12 @@ ui <- navbarPage(
                             min = 1,
                             max = 100
                         ),
-                        numericInput(
+                        sliderInput(
                             inputId = "in_var_random_ratio",
-                            label = "Randomization Ratio",
+                            label = "Ratio (Treatment:Control)",
                             value = 0.6,
-                            min = 0.20,
-                            max = 0.99
+                            min = 0.3,
+                            max = 0.7
                         ),
                         numericInput(
                             inputId = "in_var_seed",
@@ -118,9 +118,20 @@ ui <- navbarPage(
                         )
                     ),
                     column(9,
-                           fluidRow(DT::dataTableOutput("dt_patient")))
+                           fluidRow(style = "margin:1%",
+                               h5("Select patient size, age group and randamization ratio. Thereafter, move on to the measurement tab.")
+                           ),
+                           fluidRow(DT::dataTableOutput("dt_patient"))
+                           )
                 ),
                 tabPanel("Measurement",
+                         fluidRow(style = "margin:1%",
+                                  h5("The table below displays 5 measurements that you can edit. You can edit any measurement by double click on the cell. You may not want to edit measurement ID"),
+                                  p("obs_frequency - Values are case sensitive and can be changed to any of these (Daily, Weekly, Daily-2, Daily-3). Daily-3 would mean that 3 observations per day for a patient.
+                                    lower_limit and upper_limits are the threshold values that a control group patient would observe.
+                                    Variance_normal means the variance that you expect to see after the treatment. standard_threshold means the reading that would be considered normal for any patient."),
+                                  p("Once done with changes, you can navigate to other tabs to view the summary statistics and view the analysis. Once you move away from measurement tab, it may take some time to view the results based on the number of observations it will generate. Once loaded, the rest of tabs should be responsive unless you change the design parameters again.")
+                         ),
                          fluidRow(DTOutput('x1'))
                          ),
                 tabPanel(
@@ -159,9 +170,9 @@ ui <- navbarPage(
                             label = "Group Name",
                             choices = var_random_name
                         ),
-                        numericInput(
+                        sliderInput(
                             inputId = "select_var_confidence",
-                            label = "Enter Confidence Level(0.8-0.99)",
+                            label = "Enter Confidence Level",
                             value = 0.95,
                             min = 0.8,
                             max = 0.99
