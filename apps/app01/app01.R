@@ -161,7 +161,7 @@ ui <- navbarPage(
            ),
            fluidRow(style = "margin-top:0px;margin-left:1%; margin-right:1%",
              p("Clinical Analytics provides insights into the clinical research industry. 
-               The market and competitive intelligence gained from the insights can help Sponsors, CROs, Industry Analysts, non-profit and specisl interest public organizations explore avenues for future growth"
+               The market and competitive intelligence gained from the insights can help Sponsors, CROs, Industry Analysts, non-profit and special interest public organizations explore avenues for future growth"
              )
            ),
            fluidRow((

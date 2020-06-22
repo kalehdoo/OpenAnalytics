@@ -3,6 +3,7 @@ library(shiny)
 library(shinydashboard)
 library(dplyr)
 library(plotly)
+library(ggplot2)
 library(DT)
 #library(RColorBrewer)
 library(data.table)
@@ -870,21 +871,11 @@ server <- function(input, output, session) {
     })
     
     output$inv_plot_4 <- renderPlotly({
-      observation_set5_agg_RT() %>%
-      plot_ly(x = ~patient_id, y = ~change_pc, color = ~measurement_name, colors = "Dark2",
-              text = ~ paste(
-                paste("Patient ID:", patient_id),
-                paste("Gender:", gender),
-                paste("Ethnicity:", ethnicity),
-                paste("Measurement:", measurement_name),
-                paste("Old Value:", previous_value),
-                paste("New Value:", after_value),
-                paste("%age Change:", change_pc),
-                sep = "<br />"
-              ),
-              hoverinfo = 'text',
-              showlegend = FALSE) %>%
-        subplot(nrows=5, shareX=T)
+      
+      plot_4<- ggplot(observation_set5_agg_RT(), aes(x=patient_id, y=change_pc)) + geom_point()+
+        facet_grid(rows = vars(measurement_name),scales = "free",space = "free",shrink = TRUE)
+      ggplotly(plot_4)
+        
       
     })
     
