@@ -5,7 +5,7 @@
   library(stringr)
 
   #HOME to store path of home dir
-  assign("var_DIR_HOME", "C:/Users/ranamanohar/Documents/GitHub/OpenAnalytics/", envir = .GlobalEnv)
+  assign("var_DIR_HOME", "C:/msrana/projects/github/OpenAnalytics/", envir = .GlobalEnv)
   
   
   #set paths for data files
@@ -127,5 +127,16 @@ saveRDS(mv_studies_recruiting, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_
 
 write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_loc.txt", sep=""), sep = "|", row.names = FALSE)
 
+#write to mongodb
+library(mongolite)
+#create connection to mongodb cloud
+conn_mongo_mv_recruiting_studies <- mongo(collection = "mv_studies_recruiting", 
+                      db="openanalytics",
+                      url = "mongodb+srv://kalehdoo_user:Aquano139182@kalehdoo-gx7df.mongodb.net/test"
+)
+
+
+conn_mongo_mv_recruiting_studies$drop()
+conn_mongo_mv_recruiting_studies$insert(mv_studies_recruiting)
 
 rm(list = c("mv_studies_recruiting_loc","mv_studies_recruiting","mv_facilities_recruiting","agg_studies","agg_facilities"))

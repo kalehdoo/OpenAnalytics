@@ -14,6 +14,7 @@ library(wordcloud)
 library(shinythemes)
 library(rsample)
 library(lubridate)
+library(mongolite)
 
 #read data
 mv_year_Lst10Yr <-
@@ -53,7 +54,7 @@ mv_studies_recruiting_loc_US <-
                                                            length(latitude) > 0))
 agg_Studiesbyconditions <-
   read.csv(
-    "data/agg_Studiesbyconditions.txt",
+    "data/agg_conditions_recruiting.txt",
     header = TRUE,
     sep = "|",
     na.strings = "NA",
@@ -61,9 +62,19 @@ agg_Studiesbyconditions <-
     stringsAsFactors = FALSE
   )
 
+#create connection to cloud database
+#conn_mv_studies_recruiting <- mongo(collection = "mv_studies_recruiting", 
+#                      db="openanalytics",
+#                      url = "mongodb+srv://kalehdoo_user:Aquano139182@kalehdoo-gx7df.mongodb.net/test"
+#)
+
 #import recruiting data
 #mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 5000, stringsAsFactors = FALSE)
 mv_studies_recruiting <- readRDS("data/mv_studies_recruiting.rds")
+
+#mv_studies_recruiting<-conn_mv_studies_recruiting$find('{}')
+#mv_studies_recruiting<-as_tibble(mv_studies_recruiting)
+
 mv_studies_recruiting <-
   subset.data.frame(mv_studies_recruiting) %>%
   sample_frac(0.1, replace = FALSE)
@@ -149,26 +160,48 @@ ui <- navbarPage(
   #Landing Home page starts
   tabPanel(title = "Home",
            fluidRow((
-             h4("Clinical Analytics Platform (In Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+             h4("Clinical Analytics Platform", style = "margin-top:0px;margin-left:5%; margin-right:5%")
            )),
-           fluidRow(
-             p(
-               "Follow on twitter for regular updates",
-               tags$a(href = "https://twitter.com/kalehdoo", "Kalehdoo", target =
-                        "_blank"),
-               style = "margin-top:0px;margin-left:1%; margin-right:1%"
-             )
-           ),
            fluidRow(style = "margin-top:0px;margin-left:1%; margin-right:1%",
              p("Clinical Analytics provides insights into the clinical research industry. 
-               The market and competitive intelligence gained from the insights can help Sponsors, CROs, Industry Analysts, non-profit and special interest public organizations explore avenues for future growth"
+               The market and competitive intelligence gained from the insights can benefit Sponsors, CROs, Industry Analysts, Non-Profit, Government and Special Interest Organizations explore avenues for future growth"
+             ),
+             p("Sponsors",
+               tags$ul(
+                 tags$li("Design Clinical Study"),
+                 tags$li("Reduce Redundant Studies"),
+                 tags$li("Clinical Site Selection"),
+                 tags$li("Design Study Endpoints"),
+                 tags$li("Explore Collaboration Opportunities"),
+                 tags$li("Competitive Intelligence"),
+                 tags$li("Clinical Trends"),
+                 tags$li("Clinical Industry Landscape")
+               )
+             ),
+             p("Physicians & Patients",
+               tags$ul(
+                 tags$li("Participation Opportunities"),
+                 tags$li("Recruiting Studies")
+               )
+             ),
+             p("Market & Industry Analysts",
+               tags$ul(
+                 tags$li("Current Trends"),
+                 tags$li("Market Intelligence")
+               )
+             ),
+             p("Special Interest Organizations",
+               tags$ul(
+                 tags$li("Global Clinical Activity"),
+                 tags$li("Demographics")
+               )
              )
            ),
            fluidRow((
              p(
-               "The source data is downloaded from "
+               "For any queries, feel free to visit  "
                ,
-               tags$a(href = "https://aact.ctti-clinicaltrials.org", "ACCT-CTTI.", target =
+               tags$a(href = "https://oakbloc.com", "Oakbloc Technologies", target =
                         "_blank"),
                style = "margin-top:0px;margin-left:1%; margin-right:1%"
              )

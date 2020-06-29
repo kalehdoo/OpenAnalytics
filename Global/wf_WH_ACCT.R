@@ -5,7 +5,7 @@ library(sqldf)
 #create global parameters
 
 #HOME to store path of home dir
-assign("var_DIR_HOME", "C:/Users/ranamanohar/Documents/GitHub/OpenAnalytics/", envir = .GlobalEnv)
+assign("var_DIR_HOME", "C:/msrana/projects/github/OpenAnalytics/", envir = .GlobalEnv)
 
 #set paths for data files
 in_path_batch<-paste(var_DIR_HOME, "Global/BatchMaster.txt", sep="")
@@ -44,7 +44,6 @@ if(!file.exists(dest_whlogfile)) {
   write(paste("BatchId","EventName","EventTime", sep="|"),dest_whlogfile, append = TRUE)
 }
 
-
 ####################################################################
 #execute to create extract summary tables in extract folder
 write(paste(NextBatchId,"DataMartStart",now(), sep="|"), dest_whlogfile, append=TRUE)
@@ -68,15 +67,18 @@ var_EXTRACT_TOAPP02_DIR<-paste(var_DIR_HOME, "apps/app02/data/", sep="")
 #get the list of files present in dir
 files_list<-list.files(var_EXTRACT_FROM_DIR)
 
-#copy all the files in the extract folder
+#copy all the files in the extract folder for APP01
 file.copy(file.path(var_EXTRACT_FROM_DIR,files_list),var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 
 #copy individual files from other folders to apps
 var_path_agg_year<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_year_Lst10Yr.txt", sep="")
 var_path_agg_month<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_month.txt", sep="")
+var_path_agg_conditions_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_recruiting.txt", sep="")
+
 #copy the files
 file.copy(var_path_agg_year,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_path_agg_month,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_agg_conditions_recruiting,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 
 ##################################################################
 #remove data in the memory and quit the session without saving the session

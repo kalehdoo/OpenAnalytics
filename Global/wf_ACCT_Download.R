@@ -4,7 +4,7 @@ library(sqldf)
 #create global parameters
 
 #ACCT_HOME to store path of home dir
-assign("var_DIR_HOME", "C:/Users/ranamanohar/Documents/GitHub/OpenAnalytics/", envir = .GlobalEnv)
+assign("var_DIR_HOME", "C:/msrana/projects/github/OpenAnalytics/", envir = .GlobalEnv)
 
 
 #create parameters for year period
@@ -19,6 +19,14 @@ assign("var_last_year_10", (var_current_year-10), envir = .GlobalEnv)
 
 #execute script to download ACCT zip file from web and extract
 path_ACCT_downloadLog<-paste(var_DIR_HOME, "Data/ACCT/DATA/logs/log_acct_download.txt", sep="")
+
+#create file if does not exists and initialize
+if(!file.exists(path_ACCT_downloadLog)) {
+  file.create(path_ACCT_downloadLog)
+  write(paste("EventName","EventValue", sep="|"),path_ACCT_downloadLog, append = TRUE)
+  write(paste("UnzipComplete_ACCT",Sys.time()-86400, sep = "|"),path_ACCT_downloadLog, append = TRUE)
+}
+
 ACCT_downloadLog<-read.csv(path_ACCT_downloadLog, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
 
 #get max date when file downloaded

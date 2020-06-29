@@ -5,7 +5,7 @@ library(sqldf)
 #create global parameters
 
 #HOME to store path of home dir
-assign("var_DIR_HOME", "C:/Users/ranamanohar/Documents/GitHub/OpenAnalytics/", envir = .GlobalEnv)
+assign("var_DIR_HOME", "C:/msrana/projects/github/OpenAnalytics/", envir = .GlobalEnv)
 
 #set paths for data files
 in_path_batch<-paste(var_DIR_HOME, "Global/BatchMaster.txt", sep="")

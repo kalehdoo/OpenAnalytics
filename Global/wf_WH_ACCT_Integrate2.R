@@ -5,7 +5,7 @@ library(sqldf)
 #create global parameters
 
 #HOME to store path of home dir
-assign("var_DIR_HOME", "C:/Users/ranamanohar/Documents/GitHub/OpenAnalytics/", envir = .GlobalEnv)
+assign("var_DIR_HOME", "C:/msrana/projects/github/OpenAnalytics/", envir = .GlobalEnv)
 
 #set paths for data files
 in_path_batch<-paste(var_DIR_HOME, "Global/BatchMaster.txt", sep="")
@@ -49,9 +49,9 @@ if(!file.exists(dest_whlogfile)) {
 #execute to create integrated aggregate tables in warehouse
 write(paste(NextBatchId,"IntegrationStart",now(), sep="|"), dest_whlogfile, append=TRUE)
 
-write(paste(NextBatchId,"start_agg_studyconditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
-source(paste0(var_DIR_HOME,"IntegrateData/agg_studyconditions_study.R"))
-write(paste(NextBatchId,"end_agg_studyconditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
+write(paste(NextBatchId,"start_agg_conditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_conditions_study.R"))
+write(paste(NextBatchId,"end_agg_conditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 write(paste(NextBatchId,"start_agg_studyfacilities",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_studyfacilities.R"))
@@ -65,6 +65,14 @@ write(paste(NextBatchId,"start_agg_interventions_study",now(), sep="|"), dest_wh
 source(paste0(var_DIR_HOME,"IntegrateData/agg_interventions_study.R"))
 write(paste(NextBatchId,"end_agg_interventions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
 
+write(paste(NextBatchId,"start_agg_studies",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_studies.R"))
+write(paste(NextBatchId,"end_agg_studies",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_studyconditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_studyconditions_study.R"))
+write(paste(NextBatchId,"end_agg_studyconditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
+
 write(paste(NextBatchId,"start_agg_conditions_all",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_conditions_all.R"))
 write(paste(NextBatchId,"end_agg_studyconditions_facilities",now(), sep="|"), dest_whlogfile, append=TRUE)
@@ -76,14 +84,6 @@ write(paste(NextBatchId,"end_agg_conditions_recruiting",now(), sep="|"), dest_wh
 write(paste(NextBatchId,"start_agg_studyconditions_facilities",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_studyconditions_facilities.R"))
 write(paste(NextBatchId,"end_agg_studyconditions_facilities",now(), sep="|"), dest_whlogfile, append=TRUE)
-
-write(paste(NextBatchId,"start_agg_conditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
-source(paste0(var_DIR_HOME,"IntegrateData/agg_conditions_study.R"))
-write(paste(NextBatchId,"end_agg_conditions_study",now(), sep="|"), dest_whlogfile, append=TRUE)
-
-write(paste(NextBatchId,"start_agg_studies",now(), sep="|"), dest_whlogfile, append=TRUE)
-source(paste0(var_DIR_HOME,"IntegrateData/agg_studies.R"))
-write(paste(NextBatchId,"end_agg_studies",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 write(paste(NextBatchId,"start_agg_sponsors",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_sponsors.R"))
