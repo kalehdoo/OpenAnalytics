@@ -160,13 +160,14 @@ ui <- navbarPage(
   #Landing Home page starts
   tabPanel(title = "Home",
            fluidRow((
-             h4("Clinical Analytics Platform", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+             h3("Clinical Analytics Platform", style = "margin-top:0px;margin-left:5%; margin-right:5%")
            )),
            fluidRow(style = "margin-top:0px;margin-left:1%; margin-right:1%",
              p("Clinical Analytics provides insights into the clinical research industry. 
-               The market and competitive intelligence gained from the insights can benefit Sponsors, CROs, Industry Analysts, Non-Profit, Government and Special Interest Organizations explore avenues for future growth"
+               The market and competitive intelligence gained from the insights can benefit Sponsors, CROs, Industry Analysts, Non-Profit, Government and Special Interest Organizations explore avenues for future growth."
              ),
-             p("Sponsors",
+             p(
+              tags$h4("Sponsors:"),
                tags$ul(
                  tags$li("Design Clinical Study"),
                  tags$li("Reduce Redundant Studies"),
@@ -178,19 +179,22 @@ ui <- navbarPage(
                  tags$li("Clinical Industry Landscape")
                )
              ),
-             p("Physicians & Patients",
+             p(
+               tags$h4("Physicians & Patients:"),
                tags$ul(
                  tags$li("Participation Opportunities"),
                  tags$li("Recruiting Studies")
                )
              ),
-             p("Market & Industry Analysts",
+             p(
+               tags$h4("Market & Industry Analysts:"),
                tags$ul(
                  tags$li("Current Trends"),
                  tags$li("Market Intelligence")
                )
              ),
-             p("Special Interest Organizations",
+             p(
+               tags$h4("Special Interest Organizations:"),
                tags$ul(
                  tags$li("Global Clinical Activity"),
                  tags$li("Demographics")
@@ -199,13 +203,23 @@ ui <- navbarPage(
            ),
            fluidRow((
              p(
-               "For any queries, feel free to visit  "
+               "Visit us at  "
                ,
                tags$a(href = "https://oakbloc.com", "Oakbloc Technologies", target =
                         "_blank"),
                style = "margin-top:0px;margin-left:1%; margin-right:1%"
              )
-           ))),
+           )),
+           fluidRow((
+             p(
+               "Follow us on Twitter for regular updates  "
+               ,
+               tags$a(href = "https://twitter.com/OakBlocTech", "Twitter", target =
+                        "_blank"),
+               style = "margin-top:0px;margin-left:1%; margin-right:1%"
+             )
+           ))
+           ),
   #Recruitment Dashboard starts here
   navbarMenu(
     "Recruitment",

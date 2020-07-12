@@ -65,15 +65,18 @@ var_EXTRACT_TOAPP01_DIR<-paste(var_DIR_HOME, "apps/app01/data", sep="")
 var_EXTRACT_TOAPP02_DIR<-paste(var_DIR_HOME, "apps/app02/data/", sep="")
 
 #get the list of files present in dir
-files_list<-list.files(var_EXTRACT_FROM_DIR)
+#files_list<-list.files(var_EXTRACT_FROM_DIR)
 
 #copy all the files in the extract folder for APP01
-file.copy(file.path(var_EXTRACT_FROM_DIR,files_list),var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+#file.copy(file.path(var_EXTRACT_FROM_DIR,files_list),var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 
 #copy individual files from other folders to apps
 var_path_agg_year<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_year_Lst10Yr.txt", sep="")
 var_path_agg_month<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_month.txt", sep="")
 var_path_agg_conditions_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_recruiting.txt", sep="")
+
+####for app02
+var_mv_recruiting_mini<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds", sep="")
 
 #copy the files
 file.copy(var_path_agg_year,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)

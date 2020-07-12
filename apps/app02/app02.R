@@ -7,103 +7,129 @@ library(data.table)
 library(DT)
 library(shinythemes)
 
+
 #read data
-mv_studies_recruiting<-readRDS("data/mv_studies_recruiting.rds") %>%
-  filter(is.na(nct_id)==FALSE) %>%
-  select("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility","Region","latitude","longitude","nct_id")
+mv_studies_recruiting<-readRDS("data/mv_studies_recruiting_mini.rds") %>%
+  filter(is.na(nct_id)==FALSE)
+  
 
-mv_studies_recruiting <- subset.data.frame(mv_studies_recruiting) %>%
-  sample_frac(0.2, replace = FALSE)
+#mv_studies_recruiting <- subset.data.frame(mv_studies_recruiting) %>%
+#  sample_frac(0.2, replace = FALSE)
 
-mv_studies_recruiting_tab<-mv_studies_recruiting %>% 
-       select("ID","Condition","Title","DataMonitoring","RareDisease","city","state","country","ZipCode","StudyPhase","Sponsor","Facility")
+mv_studies_recruiting_tab<-mv_studies_recruiting %>%
+  select("ID","city","state","country","Region","Condition","Sponsor","Facility")
+       
        
 
 mv_studies_recruiting_world<-mv_studies_recruiting %>%
-  filter(is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
-  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+  filter(is.na(nct_id)==FALSE & is.na(latitude)==FALSE)
+  
 
 mv_studies_recruiting_US<-mv_studies_recruiting %>%
-  filter(country=="United States" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
-  select("ID","city","state","country","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+  filter(country=="United States" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE)
+  
 
 mv_studies_recruiting_americas<-mv_studies_recruiting %>%
-  filter(country!="United States" & Region=="Americas" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
-  select("ID","city","state","country","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+  filter(country!="United States" & Region=="Americas" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE)
+  
 
 
 mv_studies_recruiting_europe<-mv_studies_recruiting %>%
-  filter(Region=="Europe" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
-  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+  filter(Region=="Europe" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE)
+  
 
 mv_studies_recruiting_asia<-mv_studies_recruiting %>%
-  filter(Region=="Asia" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
-  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+  filter(Region=="Asia" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE)
+  
 
 mv_studies_recruiting_oceania<-mv_studies_recruiting %>%
-  filter(Region=="Oceania" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
-  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+  filter(Region=="Oceania" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE)
+  
 
 mv_studies_recruiting_africa<-mv_studies_recruiting %>%
-  filter(Region=="Africa" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE) %>%
-  select("ID","city","state","country","Region","Condition","Sponsor","Facility","nct_id","latitude","longitude")
+  filter(Region=="Africa" & is.na(nct_id)==FALSE & is.na(latitude)==FALSE)
+  
 
 
 ui <- navbarPage(
                  title = "Kalehdoo",
                  windowTitle = "Kalehdoo Analytics",
                  theme = shinytheme("united"),
-                 tabPanel(title = "Home",
+                 tabPanel(
+                   #below includehtml is added for google analytics
+                   tags$head(includeHTML(("googleanalyticsapp02.html"))),
+                   title = "Home",
                           fluidRow((
-                            h4("Open Clinical Study Finder", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+                            h2("Recruiting Clinical Study Site Finder", style = "margin-top:0px;margin-left:2%; margin-right:2%")
                           )),
                           fluidRow(style = "margin-top:0px;margin-left:1%; margin-right:1%",
-                            p("The Clinical Study Finder App is an interactive application that helps in finding clinical studies that are currently recruiting patients globally.
-                              The patients can search based on the condition name, sponsor, site, or location, and the results will appear on a geographic map. Once a study is located, the details of the study and contact details of the site can be viewed by navigating to clinicaltrials.gov by simply clicking on the hyperlink. 
+                            h4("The Clinical Study Finder App is an interactive application that helps in finding clinical studies that are currently recruiting patients globally.
+                              The patients can search based on the condition name, sponsor, site, or location, and the results will appear on a geographic map."),
+                            h4("Once a study is located, the details of the study and contact details of the site can be viewed by navigating to clinicaltrials.gov by simply clicking on the hyperlink. 
                               The application can also be very useful for sponsors, CROs, physicians, public and private interest group organizations."),
-                            p(
-                              "The application is built using open-source Openstreet Maps, R and Shiny.
-                              Currently, the app is deployed on the free tier of shiny apps with limited data."
-                            )
-                          ),
-                          fluidRow(
-                            p(
-                              "Follow on twitter for regular updates",
-                              tags$a(href = "https://twitter.com/kalehdoo", "Kalehdoo", target =
-                                       "_blank"),
-                              style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                            h4(
+                              "The application is built using open-source Openstreet Maps, R and Shiny."
                             )
                           ),
                           fluidRow((
-                            p(
-                              "Enhancing user experience for all patients and organizations such as Pharmaceuticals, CROs, public interest groups, independent consultants, and non-profits contributing to find the recruiting studies.",
-                              "The source data used is available to public at ",
-                              tags$a(href = "https://aact.ctti-clinicaltrials.org", "ACCT-CTTI.", target =
+                            h4(
+                              "Please visit Oakbloc wesite to know about other products and initiatives ",
+                              tags$a(href = "https://www.oakbloc.com/", "Oakbloc Technologies", target =
                                        "_blank"),
                               style = "margin-top:0px;margin-left:1%; margin-right:1%"
                             )
-                          ))),
+                          )),
+                          fluidRow(
+                            h5(
+                              "Disclaimer: The source data for the application is obtained from clinicaltrials.gov ACCT-CTTI website ",
+                              tags$a(href = "https://aact.ctti-clinicaltrials.org/download", "ACCT-CTTI", target =
+                                       "_blank"),
+                              style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                            ),
+                            h5(
+                              "The detail level data for individual clinical trials is available on ",
+                              tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
+                                       "_blank"),
+                              "The users are advised to verify the details on clinicaltrials.gov",
+                              style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                            )
+                          ),
+                          
+                          ),
                  tabPanel("Globe",
                           fluidRow(
-                            column(3, align="left", 
+                            h3("Please enter the name of the disease and other details, and click on View Results button to view the results below.")
+                          ),
+                          fluidRow(
+                            column(2, align="left", 
                                    textInput(inputId = "select_city_map_world",
-                                             label = "Search City"
+                                             label = NULL,
+                                             placeholder="City Name"
                                    )
                             ),
-                            column(3, align="left", 
+                            column(2, align="left", 
                                    textInput(inputId = "select_condition_map_world",
-                                             label = "Search Condition"
+                                             label = NULL,
+                                             placeholder="Disease or Condition",
+                                             value = "diabetes"
                                    )
                             ),
                             column(3, align="left", 
                                    textInput(inputId = "select_facility_map_world",
-                                             label = "Search Facility"
+                                             label = NULL,
+                                             placeholder="Site or Facility"
                                    )
                             ),
                             column(3, align="left", 
                                    textInput(inputId = "select_sponsor_map_world",
-                                             label = "Search Sponsor"
+                                             label = NULL,
+                                             placeholder="Sponsor Name"
                                    )
+                            ),
+                            column(2, align="left", 
+                                   actionButton("update_global", "View Results",
+                                                class="btn btn-lg btn-block btn-primary"
+                                                )
                             )
                           ),
                           fluidRow(
@@ -119,7 +145,8 @@ ui <- navbarPage(
                             ),
                             column(3, align="left", 
                                    textInput(inputId = "select_condition_map_europe",
-                                                 label = "Search Condition"
+                                                 label = "Search Condition",
+                                                 value = "diabetes"
                                    )
                             ),
                             column(3, align="left", 
@@ -146,7 +173,8 @@ ui <- navbarPage(
                             ),
                             column(3, align="left", 
                                    textInput(inputId = "select_condition_map_asia",
-                                             label = "Search Condition"
+                                             label = "Search Condition",
+                                             value = "diabetes"
                                    )
                             ),
                             column(3, align="left", 
@@ -173,7 +201,8 @@ ui <- navbarPage(
                             ),
                             column(3, align="left", 
                                    textInput(inputId = "select_condition_map_africa",
-                                             label = "Search Condition"
+                                             label = "Search Condition",
+                                             value = "diabetes"
                                    )
                             ),
                             column(3, align="left", 
@@ -200,7 +229,8 @@ ui <- navbarPage(
                             ),
                             column(3, align="left", 
                                    textInput(inputId = "select_condition_map_oceania",
-                                             label = "Search Condition"
+                                             label = "Search Condition",
+                                             value = "diabetes"
                                    )
                             ),
                             column(3, align="left", 
@@ -227,7 +257,8 @@ ui <- navbarPage(
                             ),
                             column(3, align="left", 
                                    textInput(inputId = "select_condition_map_us",
-                                             label = "Search Condition"
+                                             label = "Search Condition",
+                                             value = "diabetes"
                                    )
                             ),
                             column(3, align="left", 
@@ -254,7 +285,8 @@ ui <- navbarPage(
                             ),
                             column(3, align="left", 
                                    textInput(inputId = "select_condition_map_americas",
-                                             label = "Search Condition"
+                                             label = "Search Condition",
+                                             value = "diabetes"
                                    )
                             ),
                             column(3, align="left", 
@@ -286,8 +318,9 @@ ui <- navbarPage(
 
 server <- function(input, output) {
   
+  
   #reactive dataset for world maps with reduced columns
-  mv_studies_recruiting_map_world<-reactive({
+  mv_studies_recruiting_map_world<-eventReactive(input$update_global,{
     #createleaflet plot 1020 based on reactive set
     subset(mv_studies_recruiting_world, 
            subset=(casefold(city) %like%  casefold(input$select_city_map_world) & casefold(Condition) %like%  casefold(input$select_condition_map_world) & casefold(Sponsor) %like%  casefold(input$select_sponsor_map_world)& casefold(Facility) %like%  casefold(input$select_facility_map_world)))
@@ -299,13 +332,15 @@ server <- function(input, output) {
       lapply(htmltools::HTML)
   }
   output$plot_1020 <- renderLeaflet({
-    leaflet(data=mv_studies_recruiting_map_world()) %>%
+    global_chart<-(
+      leaflet(data=mv_studies_recruiting_map_world()) %>%
       setView(lng=-4.055685, lat=41.294856, zoom=1.5) %>%
       addProviderTiles(providers$CartoDB.Positron,
                        options = providerTileOptions(noWrap = TRUE)) %>%
       addMarkers(~longitude, ~latitude,
                  popup = f_labels_1020(),
                  clusterOptions = markerClusterOptions())
+    )
   })
   
   #reactive dataset for maps with reduced columns

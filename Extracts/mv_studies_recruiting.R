@@ -109,6 +109,23 @@ mv_studies_recruiting<-sqldf("Select urlid as 'ID',
                               from mv_studies_recruiting
                              where nct_id is not null")
 
+#create mini data set with important columns
+mv_studies_recruiting_mini<-sqldf("Select ID,
+                                nct_id,
+                                Condition,
+                                 city,
+                                 state,
+                                 country,
+                                 ZipCode,
+                                 StudyPhase,
+                                 Sponsor,
+                                 Facility,
+                                 Region,
+                                 latitude,
+                                 longitude,
+                                 StudyType
+                              from mv_studies_recruiting
+                             where nct_id is not null")
 
 #recruitment by location
 #agg conditions at condition level
@@ -125,18 +142,22 @@ saveRDS(mv_studies_recruiting, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_
 #write_feather(mv_studies_recruiting, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting.feather"))
 
 
+write.table(mv_studies_recruiting_mini,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.txt", sep=""), sep = "|", row.names = FALSE)
+saveRDS(mv_studies_recruiting_mini, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds"))
+
+
 write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_loc.txt", sep=""), sep = "|", row.names = FALSE)
 
 #write to mongodb
-library(mongolite)
+#library(mongolite)
 #create connection to mongodb cloud
-conn_mongo_mv_recruiting_studies <- mongo(collection = "mv_studies_recruiting", 
-                      db="openanalytics",
-                      url = "mongodb+srv://kalehdoo_user:Aquano139182@kalehdoo-gx7df.mongodb.net/test"
-)
+#conn_mongo_mv_recruiting_studies <- mongo(collection = "mv_studies_recruiting", 
+#                      db="openanalytics",
+#                      url = "mongodb+srv://kalehdoo_user:Aquano139182@kalehdoo-gx7df.mongodb.net/test"
+#)
 
 
-conn_mongo_mv_recruiting_studies$drop()
-conn_mongo_mv_recruiting_studies$insert(mv_studies_recruiting)
+#conn_mongo_mv_recruiting_studies$drop()
+#conn_mongo_mv_recruiting_studies$insert(mv_studies_recruiting)
 
 rm(list = c("mv_studies_recruiting_loc","mv_studies_recruiting","mv_facilities_recruiting","agg_studies","agg_facilities"))
