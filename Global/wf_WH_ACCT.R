@@ -70,13 +70,31 @@ var_EXTRACT_TOAPP02_DIR<-paste(var_DIR_HOME, "apps/app02/data/", sep="")
 #copy all the files in the extract folder for APP01
 #file.copy(file.path(var_EXTRACT_FROM_DIR,files_list),var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 
-#copy individual files from other folders to apps
+#paths for the files required
 var_path_agg_year<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_year_Lst10Yr.txt", sep="")
 var_path_agg_month<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_month.txt", sep="")
 var_path_agg_conditions_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_recruiting.txt", sep="")
-
-####for app02
 var_mv_recruiting_mini<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds", sep="")
+
+########################################################
+
+##copy file extracts required for app02
+file.copy(var_mv_recruiting_mini,var_EXTRACT_TOAPP02_DIR, overwrite = TRUE)
+
+#extract the timestamps of the files copied to app02
+path_app02_mv_rec<-paste(var_EXTRACT_TOAPP02_DIR,"mv_studies_recruiting_mini.rds", sep="")
+time_app02_mv_rec<-file.info(path_app02_mv_rec)$ctime
+
+#prepare write and append log for app02
+dest_app02logfile<-paste(var_EXTRACT_TOAPP02_DIR,"log_app02.txt", sep="")
+#create file if does not exists with header
+if(!file.exists(dest_app02logfile)) {
+  file.create(dest_app02logfile)
+  #write(paste("fileTime", sep="|"),dest_app02logfile, append = TRUE)
+}
+
+##write the file and file timestamp
+write(paste(time_app02_mv_rec, sep="|"), dest_app02logfile, append=FALSE)
 
 #copy the files
 file.copy(var_path_agg_year,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)

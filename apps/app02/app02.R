@@ -9,6 +9,9 @@
   library(firebase)
   library(shinycssloaders)
   
+  #read log file
+  log_app02<-read.csv("data/log_app02.txt", header = FALSE)
+  log_app02_time<-substr(log_app02,1,10)
   
   #read data
   mv_studies_recruiting <-
@@ -70,14 +73,20 @@
   
   # for spinners 2-3 match the background color of spinner
   options(spinner.color.background="#772953")
-  options(spinner.size=2)
+  options(spinner.size=1.5)
   
   ui <- 
     fluidPage(
       useFirebase(), # import dependencies
       useFirebaseUI(), # import UI
-      reqSignin(
-        tags$div(class="text-right", actionButton("signout", "Sign out", class = "btn btn-primary"))
+      reqSignin(splitLayout(cellWidths = c("80%", "20%"),
+                            tags$h4(class="text-left",style = "margin-left:1%; margin-right:1%; text-align:justify;",align="center",
+                              paste0("Data Refreshed(YYYY-MM-DD): ",log_app02_time)),
+                            tags$div(class="text-right",style = "margin-top:0px;margin-left:1%; margin-right:1%",
+                                     actionButton("signout", "Sign out", class = "btn btn-primary")
+                            )
+      )
+      
         ,
         #plotOutput("plot")
         
@@ -113,6 +122,9 @@
                 style="text-align:justify;"
               ),
               h4(
+                "Studies with missing geographic latitude and longitude coordinates will not appear on the maps. Go to the last tab (Table Details) and search again.", style="color: #e95420; text-align:justify;"
+              ),
+              h4(
                 "Once a study is located, the details of the study and contact details of the site can be viewed by navigating to clinicaltrials.gov by simply clicking on the hyperlink.
                                 The application can also be very useful for sponsors, CROs, physicians, public and private interest group organizations.",
                 style="text-align:justify;"
@@ -124,7 +136,7 @@
             fluidRow(
               h5(
                 "Disclaimer: The source data for the application is obtained from clinicaltrials.gov ACCT-CTTI website ",
-                tags$a(href = "https://aact.ctti-clinicaltrials.org/download", "ACCT-CTTI", target =
+                tags$a(href = "https://aact.ctti-clinicaltrials.org/download", "ACCT-CTTI.", target =
                          "_blank"),
                 style = "margin-top:5%;margin-left:1%; margin-right:1%; text-align:justify;"
               ),
@@ -132,7 +144,7 @@
                 "The detail level data for individual clinical trials is available on ",
                 tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
                          "_blank"),
-                "The users are advised to verify the details on clinicaltrials.gov and consult with their physicians for any medical and legal advise. This study finder app should be used as an interactive assistant in finding the relevant clinical trials. Oakbloc Technologies does not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information.",
+                "The users are advised to verify the details on clinicaltrials.gov and consult with their physicians for any medical and legal advise. This study finder app should be used as an interactive assistant in finding the relevant clinical trials. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information.",
                 style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:5%; text-align:justify;"
               )
             ),
@@ -203,14 +215,16 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_city_map_europe",
-                          label = "Search City")
+                          label = NULL),
+                          placeholder = "City Name"
               ),
               column(
                 3,
                 align = "center",
                 textInput(
                   inputId = "select_condition_map_europe",
-                  label = "Search Condition",
+                  label = NULL,
+                  placeholder = "Disease or Condition",
                   value = "diabetes"
                 )
               ),
@@ -218,13 +232,15 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_facility_map_europe",
-                          label = "Search Facility")
+                          label = NULL,
+                          placeholder = "Site or Facility")
               ),
               column(
                 3,
                 align = "center",
                 textInput(inputId = "select_sponsor_map_europe",
-                          label = "Search Sponsor")
+                          label = NULL,
+                          placeholder = "Sponsor Name")
               )
             ),
             fluidRow(
@@ -243,14 +259,16 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_city_map_asia",
-                          label = "Search City")
+                          label = NULL,
+                          placeholder = "City Name")
               ),
               column(
                 3,
                 align = "center",
                 textInput(
                   inputId = "select_condition_map_asia",
-                  label = "Search Condition",
+                  label = NULL,
+                  placeholder = "Disease or Condition",
                   value = "diabetes"
                 )
               ),
@@ -258,13 +276,15 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_facility_map_asia",
-                          label = "Search Facility")
+                          label = NULL,
+                          placeholder = "Site or Facility")
               ),
               column(
                 3,
                 align = "center",
                 textInput(inputId = "select_sponsor_map_asia",
-                          label = "Search Sponsor")
+                          label = NULL,
+                          placeholder = "Sponsor Name")
               )
             ),
             fluidRow(
@@ -283,14 +303,16 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_city_map_africa",
-                          label = "Search City")
+                          label = NULL,
+                          placeholder = "City Name")
               ),
               column(
                 3,
                 align = "center",
                 textInput(
                   inputId = "select_condition_map_africa",
-                  label = "Search Condition",
+                  label = NULL,
+                  placeholder = "Disease or Condition",
                   value = "diabetes"
                 )
               ),
@@ -298,13 +320,15 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_facility_map_africa",
-                          label = "Search Facility")
+                          label = NULL,
+                          placeholder = "Site or Facility")
               ),
               column(
                 3,
                 align = "center",
                 textInput(inputId = "select_sponsor_map_africa",
-                          label = "Search Sponsor")
+                          label = NULL,
+                          placeholder = "Sponsor Name")
               )
             ),
             fluidRow(
@@ -323,14 +347,16 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_city_map_oceania",
-                          label = "Search City")
+                          label = NULL,
+                          placeholder = "City Name")
               ),
               column(
                 3,
                 align = "center",
                 textInput(
                   inputId = "select_condition_map_oceania",
-                  label = "Search Condition",
+                  label = NULL,
+                  placeholder = "Disease or Condition",
                   value = "diabetes"
                 )
               ),
@@ -338,13 +364,15 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_facility_map_oceania",
-                          label = "Search Facility")
+                          label = NULL,
+                          placeholder = "Site or Facility")
               ),
               column(
                 3,
                 align = "center",
                 textInput(inputId = "select_sponsor_map_oceania",
-                          label = "Search Sponsor")
+                          label = NULL,
+                          placeholder = "Sponsor Name")
               )
             ),
             fluidRow(
@@ -363,14 +391,16 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_city_map_us",
-                          label = "Search City")
+                          label = NULL,
+                          placeholder = "City Name")
               ),
               column(
                 3,
                 align = "center",
                 textInput(
                   inputId = "select_condition_map_us",
-                  label = "Search Condition",
+                  label = NULL,
+                  placeholder = "Disease or Condition",
                   value = "diabetes"
                 )
               ),
@@ -378,13 +408,15 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_facility_map_us",
-                          label = "Search Facility")
+                          label = NULL,
+                          placeholder = "Site or Facility")
               ),
               column(
                 3,
                 align = "center",
                 textInput(inputId = "select_sponsor_map_us",
-                          label = "Search Sponsor")
+                          label = NULL,
+                          placeholder = "Sponsor Name")
               )
             ),
             fluidRow(
@@ -403,14 +435,16 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_city_map_americas",
-                          label = "Search City")
+                          label = NULL,
+                          placeholder = "City Name")
               ),
               column(
                 3,
                 align = "center",
                 textInput(
                   inputId = "select_condition_map_americas",
-                  label = "Search Condition",
+                  label = NULL,
+                  placeholder = "Disease or Condition",
                   value = "diabetes"
                 )
               ),
@@ -418,13 +452,15 @@
                 3,
                 align = "center",
                 textInput(inputId = "select_facility_map_americas",
-                          label = "Search Facility")
+                          label = NULL,
+                          placeholder = "Site or Facility")
               ),
               column(
                 3,
                 align = "center",
                 textInput(inputId = "select_sponsor_map_americas",
-                          label = "Search Sponsor")
+                          label = NULL,
+                          placeholder = "Sponsor Name")
               )
             ),
             fluidRow(
