@@ -7,6 +7,7 @@
   library(DT)
   library(shinythemes)
   library(firebase)
+  library(shinycssloaders)
   
   
   #read data
@@ -67,6 +68,9 @@
     filter(Region == "Africa" &
              is.na(nct_id) == FALSE & is.na(latitude) == FALSE)
   
+  # for spinners 2-3 match the background color of spinner
+  options(spinner.color.background="#772953")
+  options(spinner.size=2)
   
   ui <- 
     fluidPage(
@@ -99,20 +103,22 @@
           tabPanel(
             title = "Home",
             fluidRow((
-              h2("Recruiting Clinical Study Site Finder", style = "margin-top:0px;margin-left:2%; margin-right:2%")
+              h1("Recruiting Clinical Study Site Finder", class="display-4", style = "color: #1175B8; margin-top:0px;margin-left:2%; margin-right:2%", align="center")
             )),
             fluidRow(
               style = "margin-top:0px;margin-left:1%; margin-right:1%",
               h4(
                 "The Clinical Study Finder App is an interactive application that helps in finding clinical studies that are currently recruiting patients globally.
-                                The patients can search based on the condition name, sponsor, site, or location, and the results will appear on a geographic map."
+                                The patients can search based on the condition name, sponsor, site, or location, and the results will appear on a geographic map.",
+                style="text-align:justify;"
               ),
               h4(
                 "Once a study is located, the details of the study and contact details of the site can be viewed by navigating to clinicaltrials.gov by simply clicking on the hyperlink.
-                                The application can also be very useful for sponsors, CROs, physicians, public and private interest group organizations."
+                                The application can also be very useful for sponsors, CROs, physicians, public and private interest group organizations.",
+                style="text-align:justify;"
               ),
               h4(
-                "The application is built using open-source Openstreet Maps, R and Shiny."
+                "The application is built using open-source Openstreet Maps, R and Shiny.", style="text-align:justify;"
               )
             ),
             fluidRow(
@@ -120,14 +126,14 @@
                 "Disclaimer: The source data for the application is obtained from clinicaltrials.gov ACCT-CTTI website ",
                 tags$a(href = "https://aact.ctti-clinicaltrials.org/download", "ACCT-CTTI", target =
                          "_blank"),
-                style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                style = "margin-top:5%;margin-left:1%; margin-right:1%; text-align:justify;"
               ),
               h5(
                 "The detail level data for individual clinical trials is available on ",
                 tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
                          "_blank"),
-                "The users are advised to verify the details on clinicaltrials.gov",
-                style = "margin-top:0px;margin-left:1%; margin-right:1%"
+                "The users are advised to verify the details on clinicaltrials.gov and consult with their physicians for any medical and legal advise. This study finder app should be used as an interactive assistant in finding the relevant clinical trials. Oakbloc Technologies does not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information.",
+                style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:5%; text-align:justify;"
               )
             ),
             
@@ -135,8 +141,8 @@
           tabPanel(
             "Globe",
             fluidRow(
-              h3(
-                "Please enter disease name and other details. Hit Display Results button and wait for the the results to appear below.", align = "center",
+              h4(
+                "Please enter disease name and other details. Hit Display Results button and wait for the the results to appear below.", style = "color: #1175B8;", align = "center",
               )
             ),
             fluidRow(
@@ -179,22 +185,29 @@
               )
             ),
             fluidRow(
-              tags$div(class="text-center", actionButton("update_global", "Display Results", class = "btn btn-primary"))
+              tags$div(class="text-center", actionButton("update_global", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
             ),
-            fluidRow(leafletOutput("plot_1020"))
+            fluidRow(
+              withSpinner(leafletOutput("plot_1020"), type = 3)
+              )
           ),
           tabPanel(
             "Europe",
             fluidRow(
+              h4(
+                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+              )
+            ),
+            fluidRow(
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_city_map_europe",
                           label = "Search City")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(
                   inputId = "select_condition_map_europe",
                   label = "Search Condition",
@@ -203,31 +216,38 @@
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_facility_map_europe",
                           label = "Search Facility")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_sponsor_map_europe",
                           label = "Search Sponsor")
               )
             ),
-            fluidRow(leafletOutput("plot_1014"))
+            fluidRow(
+              withSpinner(leafletOutput("plot_1014"), type=3)
+              )
           ),
           tabPanel(
             "Asia",
             fluidRow(
+              h4(
+                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+              )
+            ),
+            fluidRow(
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_city_map_asia",
                           label = "Search City")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(
                   inputId = "select_condition_map_asia",
                   label = "Search Condition",
@@ -236,31 +256,38 @@
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_facility_map_asia",
                           label = "Search Facility")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_sponsor_map_asia",
                           label = "Search Sponsor")
               )
             ),
-            fluidRow(leafletOutput("plot_1015"))
+            fluidRow(
+              withSpinner(leafletOutput("plot_1015"), type=3)
+              )
           ),
           tabPanel(
             "Africa",
             fluidRow(
+              h4(
+                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+              )
+            ),
+            fluidRow(
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_city_map_africa",
                           label = "Search City")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(
                   inputId = "select_condition_map_africa",
                   label = "Search Condition",
@@ -269,31 +296,38 @@
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_facility_map_africa",
                           label = "Search Facility")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_sponsor_map_africa",
                           label = "Search Sponsor")
               )
             ),
-            fluidRow(leafletOutput("plot_1016"))
+            fluidRow(
+              withSpinner(leafletOutput("plot_1016"), type=3)
+              )
           ),
           tabPanel(
             "Oceania",
             fluidRow(
+              h4(
+                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+              )
+            ),
+            fluidRow(
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_city_map_oceania",
                           label = "Search City")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(
                   inputId = "select_condition_map_oceania",
                   label = "Search Condition",
@@ -302,31 +336,38 @@
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_facility_map_oceania",
                           label = "Search Facility")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_sponsor_map_oceania",
                           label = "Search Sponsor")
               )
             ),
-            fluidRow(leafletOutput("plot_1017"))
+            fluidRow(
+              withSpinner(leafletOutput("plot_1017"), type=3)
+              )
           ),
           tabPanel(
             "USA",
             fluidRow(
+              h4(
+                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+              )
+            ),
+            fluidRow(
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_city_map_us",
                           label = "Search City")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(
                   inputId = "select_condition_map_us",
                   label = "Search Condition",
@@ -335,31 +376,38 @@
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_facility_map_us",
                           label = "Search Facility")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_sponsor_map_us",
                           label = "Search Sponsor")
               )
             ),
-            fluidRow(leafletOutput("plot_1018"))
+            fluidRow(
+              withSpinner(leafletOutput("plot_1018"), type=3)
+              )
           ),
           tabPanel(
             "Rest of Americas",
             fluidRow(
+              h4(
+                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+              )
+            ),
+            fluidRow(
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_city_map_americas",
                           label = "Search City")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(
                   inputId = "select_condition_map_americas",
                   label = "Search Condition",
@@ -368,22 +416,24 @@
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_facility_map_americas",
                           label = "Search Facility")
               ),
               column(
                 3,
-                align = "left",
+                align = "center",
                 textInput(inputId = "select_sponsor_map_americas",
                           label = "Search Sponsor")
               )
             ),
-            fluidRow(leafletOutput("plot_1019"))
+            fluidRow(
+              withSpinner(leafletOutput("plot_1019"), type=3)
+              )
           ),
           tabPanel("Table Details",
                    fluidRow(
-                     DT::dataTableOutput("dt_recruitment_1021")
+                     withSpinner(DT::dataTableOutput("dt_recruitment_1021"), type=3)
                    )
           )
         )
@@ -440,7 +490,6 @@
           lapply(htmltools::HTML)
       }
     output$plot_1020 <- renderLeaflet({
-      #f$req_sign_in()
       global_chart <- (
         leaflet(data = mv_studies_recruiting_map_world()) %>%
           setView(
@@ -748,7 +797,11 @@
   
   #remotes::install_github("JohnCoene/firebase")
   
-  #program used to generate the direbase rds file in the home dir
+  #program used to generate the firebase rds file in the home dir
+  #https://github.com/JohnCoene/firebase
   #firebase::create_config(api_key = "AIzaSyAUQdsGJESK28vyTij6RKqNTk_XxUlUI4s", project_id = "studyfinder-acade")
   
+  #install shiny spinning loaders
+  #https://github.com/daattali/shinycssloaders
+  #devtools::install_github('daattali/shinycssloaders')
   
