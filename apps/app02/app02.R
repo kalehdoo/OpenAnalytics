@@ -110,12 +110,62 @@
           ),
           
           tabPanel(
-            title = "Home",
+            title = "Globe",
             fluidRow((
               h1("Recruiting Clinical Study Site Finder", class="display-4", style = "color: #1175B8; margin-top:0px;margin-left:2%; margin-right:2%", align="center")
             )),
             fluidRow(
-              style = "margin-top:0px;margin-left:1%; margin-right:1%",
+              h4(
+                "Modify search criteria and Hit Display Results button.", style = "color: #1175B8;", align = "center",
+              )
+            ),
+            fluidRow(
+              column(
+                3,
+                align = "center",
+                textInput(
+                  inputId = "select_city_map_world",
+                  label = NULL,
+                  placeholder = "City Name"
+                )
+              ),
+              column(
+                3,
+                align = "center",
+                textInput(
+                  inputId = "select_condition_map_world",
+                  label = NULL,
+                  placeholder = "Disease or Condition",
+                  value = "covid-19"
+                )
+              ),
+              column(
+                3,
+                align = "center",
+                textInput(
+                  inputId = "select_facility_map_world",
+                  label = NULL,
+                  placeholder = "Site or Facility"
+                )
+              ),
+              column(
+                3,
+                align = "center",
+                textInput(
+                  inputId = "select_sponsor_map_world",
+                  label = NULL,
+                  placeholder = "Sponsor Name"
+                )
+              )
+            ),
+            fluidRow(
+              tags$div(class="text-center", actionButton("update_global", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
+            ),
+            fluidRow(
+              withSpinner(leafletOutput("plot_1020"), type = 3)
+            ),
+            fluidRow(
+              style = "margin-top:3%;margin-left:1%; margin-right:1%",
               h4(
                 "The Clinical Study Finder App is an interactive application that helps in finding clinical studies that are currently recruiting patients globally.
                                 The patients can search based on the condition name, sponsor, site, or location, and the results will appear on a geographic map.",
@@ -147,61 +197,8 @@
                 "The users are advised to verify the details on clinicaltrials.gov and consult with their physicians for any medical and legal advise. This study finder app should be used as an interactive assistant in finding the relevant clinical trials. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information.",
                 style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:5%; text-align:justify;"
               )
-            ),
+            )
             
-          ),
-          tabPanel(
-            "Globe",
-            fluidRow(
-              h4(
-                "Please enter disease name and other details. Hit Display Results button and wait for the the results to appear below.", style = "color: #1175B8;", align = "center",
-              )
-            ),
-            fluidRow(
-              column(
-                3,
-                align = "center",
-                textInput(
-                  inputId = "select_city_map_world",
-                  label = NULL,
-                  placeholder = "City Name"
-                )
-              ),
-              column(
-                3,
-                align = "center",
-                textInput(
-                  inputId = "select_condition_map_world",
-                  label = NULL,
-                  placeholder = "Disease or Condition",
-                  value = "diabetes"
-                )
-              ),
-              column(
-                3,
-                align = "center",
-                textInput(
-                  inputId = "select_facility_map_world",
-                  label = NULL,
-                  placeholder = "Site or Facility"
-                )
-              ),
-              column(
-                3,
-                align = "center",
-                textInput(
-                  inputId = "select_sponsor_map_world",
-                  label = NULL,
-                  placeholder = "Sponsor Name"
-                )
-              )
-            ),
-            fluidRow(
-              tags$div(class="text-center", actionButton("update_global", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
-            ),
-            fluidRow(
-              withSpinner(leafletOutput("plot_1020"), type = 3)
-              )
           ),
           tabPanel(
             "Europe",
