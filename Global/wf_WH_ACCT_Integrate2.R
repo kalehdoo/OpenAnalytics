@@ -98,4 +98,4 @@ write(paste(NextBatchId,"IntegrationEnd",now(), sep="|"), dest_whlogfile, append
 ##################################################################
 #remove data in the memory and quit the session without saving the session
 rm(list = ls())
-q("no", 1, FALSE)
+#q("no", 1, FALSE)

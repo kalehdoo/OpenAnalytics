@@ -83,7 +83,7 @@ file.copy(var_mv_recruiting_mini,var_EXTRACT_TOAPP02_DIR, overwrite = TRUE)
 
 #extract the timestamps of the files copied to app02
 path_app02_mv_rec<-paste(var_EXTRACT_TOAPP02_DIR,"mv_studies_recruiting_mini.rds", sep="")
-time_app02_mv_rec<-file.info(path_app02_mv_rec)$ctime
+time_app02_mv_rec<-file.info(path_app02_mv_rec)$mtime
 
 #prepare write and append log for app02
 dest_app02logfile<-paste(var_EXTRACT_TOAPP02_DIR,"log_app02.txt", sep="")
@@ -104,6 +104,6 @@ file.copy(var_path_agg_conditions_recruiting,var_EXTRACT_TOAPP01_DIR, overwrite 
 ##################################################################
 #remove data in the memory and quit the session without saving the session
 rm(list = ls())
-q("no", 1, FALSE)
+#q("no", 1, FALSE)
 
 

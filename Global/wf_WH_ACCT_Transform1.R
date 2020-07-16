@@ -69,4 +69,4 @@ write(paste(NextBatchId,"StageEnd",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 #remove data in the memory and quit the session without saving the session
 rm(list = ls())
-q("no", 1, FALSE)
+#q("no", 1, FALSE)

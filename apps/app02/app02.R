@@ -106,7 +106,7 @@
           footer= h4(
             tags$a(href = "https://www.oakbloc.com/", "Oakbloc Technologies", target =
                      "_blank"),
-            style = "margin-top:5%;margin-bottom:2%;", align="center","2019-2020",
+            style = "margin-top:2%;margin-bottom:2%;", align="center","2019-2020",
           ),
           
           tabPanel(
@@ -188,14 +188,14 @@
                 "Disclaimer: The source data for the application is obtained from clinicaltrials.gov ACCT-CTTI website ",
                 tags$a(href = "https://aact.ctti-clinicaltrials.org/download", "ACCT-CTTI.", target =
                          "_blank"),
-                style = "margin-top:5%;margin-left:1%; margin-right:1%; text-align:justify;"
+                style = "margin-top:2%;margin-left:1%; margin-right:1%; text-align:justify;"
               ),
               h5(
                 "The detail level data for individual clinical trials is available on ",
                 tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
                          "_blank"),
                 "The users are advised to verify the details on clinicaltrials.gov and consult with their physicians for any medical and legal advise. This study finder app should be used as an interactive assistant in finding the relevant clinical trials. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information.",
-                style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:5%; text-align:justify;"
+                style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:2%; text-align:justify;"
               )
             )
             
