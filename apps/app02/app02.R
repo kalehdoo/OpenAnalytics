@@ -12,6 +12,7 @@
   #read log file
   log_app02<-read.csv("data/log_app02.txt", header = FALSE)
   log_app02_time<-substr(log_app02,1,10)
+  log_app02_time<-format.Date(log_app02_time, "%d-%b-%Y")
   
   #read data
   mv_studies_recruiting <-
@@ -24,11 +25,13 @@
   
   mv_studies_recruiting_tab <- mv_studies_recruiting %>%
     select("ID",
+           "Condition",
+           "StudyPhase",
            "city",
            "state",
            "country",
+           "ZipCode",
            "Region",
-           "Condition",
            "Sponsor",
            "Facility")
   
@@ -79,11 +82,11 @@
     fluidPage(
       useFirebase(), # import dependencies
       useFirebaseUI(), # import UI
-      reqSignin(splitLayout(cellWidths = c("80%", "20%"),
-                            tags$h4(class="text-left",style = "margin-left:1%; margin-right:1%; text-align:justify;",align="center",
-                              paste0("Data Refreshed(YYYY-MM-DD): ",log_app02_time)),
-                            tags$div(class="text-right",style = "margin-top:0px;margin-left:1%; margin-right:1%",
-                                     actionButton("signout", "Sign out", class = "btn btn-primary")
+      reqSignin(splitLayout(cellWidths = c("75%", "25%"),
+                            tags$h5(class="text-left",style = "color: #F37312; margin-top:2px; margin-left:2px; margin-right:2px;",
+                              paste0("Data Refreshed: ",log_app02_time)),
+                            tags$div(class="text-right",style = "margin-top:2px;margin-left:2px; margin-right:2px",
+                                     actionButton("signout", "Sign out", class = "btn btn-primary btn-sm")
                             )
       )
       
@@ -112,11 +115,11 @@
           tabPanel(
             title = "Globe",
             fluidRow((
-              h1("Recruiting Clinical Study Site Finder", class="display-4", style = "color: #1175B8; margin-top:0px;margin-left:2%; margin-right:2%", align="center")
+              h1("Kalehdoo Clinical Site Finder", class="display-4", style = "color: #1175B8; margin-top:0px;margin-left:2%; margin-right:2%", align="center")
             )),
             fluidRow(
               h4(
-                "Modify search criteria and Hit Display Results button.", style = "color: #1175B8;", align = "center",
+                "Modify search criteria and Hit Display Results button", style = "color: #F37312;", align = "center",
               )
             ),
             fluidRow(
@@ -172,9 +175,6 @@
                 style="text-align:justify;"
               ),
               h4(
-                "Studies with missing geographic latitude and longitude coordinates will not appear on the maps. Go to the last tab (Table Details) and search again.", style="color: #e95420; text-align:justify;"
-              ),
-              h4(
                 "Once a study is located, the details of the study and contact details of the site can be viewed by navigating to clinicaltrials.gov by simply clicking on the hyperlink.
                                 The application can also be very useful for sponsors, CROs, physicians, public and private interest group organizations.",
                 style="text-align:justify;"
@@ -204,7 +204,7 @@
             "Europe",
             fluidRow(
               h4(
-                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+                "Modify search criteria and Hit Display Results button", style = "color: #F37312;", align = "center",
               )
             ),
             fluidRow(
@@ -222,7 +222,7 @@
                   inputId = "select_condition_map_europe",
                   label = NULL,
                   placeholder = "Disease or Condition",
-                  value = "diabetes"
+                  value = "covid-19"
                 )
               ),
               column(
@@ -241,6 +241,9 @@
               )
             ),
             fluidRow(
+              tags$div(class="text-center", actionButton("update_europe", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
+            ),
+            fluidRow(
               withSpinner(leafletOutput("plot_1014"), type=3)
               )
           ),
@@ -248,7 +251,7 @@
             "Asia",
             fluidRow(
               h4(
-                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+                "Modify search criteria and Hit Display Results button", style = "color: #F37312;", align = "center",
               )
             ),
             fluidRow(
@@ -266,7 +269,7 @@
                   inputId = "select_condition_map_asia",
                   label = NULL,
                   placeholder = "Disease or Condition",
-                  value = "diabetes"
+                  value = "covid-19"
                 )
               ),
               column(
@@ -285,6 +288,9 @@
               )
             ),
             fluidRow(
+              tags$div(class="text-center", actionButton("update_asia", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
+            ),
+            fluidRow(
               withSpinner(leafletOutput("plot_1015"), type=3)
               )
           ),
@@ -292,7 +298,7 @@
             "Africa",
             fluidRow(
               h4(
-                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+                "Modify search criteria and Hit Display Results button", style = "color: #F37312;", align = "center",
               )
             ),
             fluidRow(
@@ -310,7 +316,7 @@
                   inputId = "select_condition_map_africa",
                   label = NULL,
                   placeholder = "Disease or Condition",
-                  value = "diabetes"
+                  value = "covid-19"
                 )
               ),
               column(
@@ -329,6 +335,9 @@
               )
             ),
             fluidRow(
+              tags$div(class="text-center", actionButton("update_africa", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
+            ),
+            fluidRow(
               withSpinner(leafletOutput("plot_1016"), type=3)
               )
           ),
@@ -336,7 +345,7 @@
             "Oceania",
             fluidRow(
               h4(
-                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+                "Modify search criteria and Hit Display Results button", style = "color: #F37312;", align = "center",
               )
             ),
             fluidRow(
@@ -354,7 +363,7 @@
                   inputId = "select_condition_map_oceania",
                   label = NULL,
                   placeholder = "Disease or Condition",
-                  value = "diabetes"
+                  value = "covid-19"
                 )
               ),
               column(
@@ -373,6 +382,9 @@
               )
             ),
             fluidRow(
+              tags$div(class="text-center", actionButton("update_oceania", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
+            ),
+            fluidRow(
               withSpinner(leafletOutput("plot_1017"), type=3)
               )
           ),
@@ -380,7 +392,7 @@
             "USA",
             fluidRow(
               h4(
-                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+                "Modify search criteria and Hit Display Results button", style = "color: #F37312;", align = "center",
               )
             ),
             fluidRow(
@@ -398,7 +410,7 @@
                   inputId = "select_condition_map_us",
                   label = NULL,
                   placeholder = "Disease or Condition",
-                  value = "diabetes"
+                  value = "covid-19"
                 )
               ),
               column(
@@ -417,6 +429,9 @@
               )
             ),
             fluidRow(
+              tags$div(class="text-center", actionButton("update_us", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
+            ),
+            fluidRow(
               withSpinner(leafletOutput("plot_1018"), type=3)
               )
           ),
@@ -424,7 +439,7 @@
             "Rest of Americas",
             fluidRow(
               h4(
-                "Modify your search criteria and the results would display immediately.", style = "color: #1175B8;", align = "center",
+                "Modify search criteria and Hit Display Results button", style = "color: #F37312;", align = "center",
               )
             ),
             fluidRow(
@@ -461,6 +476,9 @@
               )
             ),
             fluidRow(
+              tags$div(class="text-center", actionButton("update_americas", "Display Results", class = "btn btn-primary", style="margin-bottom: 0.5%;"))
+            ),
+            fluidRow(
               withSpinner(leafletOutput("plot_1019"), type=3)
               )
           ),
@@ -482,7 +500,8 @@
     f <- FirebaseUI$new()$# instantiate
       set_providers(# define providers
         email = TRUE,
-        google = TRUE)$
+        google = TRUE,
+        facebook=TRUE)$
       set_tos_url(
         url="http://www.oakbloc.com/termsofserviceapp02.html"
       )$
@@ -542,7 +561,7 @@
     })
     
     #reactive dataset for maps with reduced columns
-    mv_studies_recruiting_map_europe <- reactive({
+    mv_studies_recruiting_map_europe <- eventReactive(input$update_europe, {
       #createleaflet plot 1014 based on reactive set
       subset(
         mv_studies_recruiting_europe,
@@ -587,7 +606,7 @@
     })
     
     #reactive dataset for asia maps with reduced columns
-    mv_studies_recruiting_map_asia <- reactive({
+    mv_studies_recruiting_map_asia <- eventReactive(input$update_asia, {
       #createleaflet plot 1015 based on reactive set
       subset(
         mv_studies_recruiting_asia,
@@ -632,7 +651,7 @@
     })
     
     #reactive dataset for africa maps with reduced columns
-    mv_studies_recruiting_map_africa <- reactive({
+    mv_studies_recruiting_map_africa <- eventReactive(input$update_africa, {
       #createleaflet plot 1016 based on reactive set
       subset(
         mv_studies_recruiting_africa,
@@ -677,7 +696,7 @@
     })
     
     #reactive dataset for Oceania maps with reduced columns
-    mv_studies_recruiting_map_oceania <- reactive({
+    mv_studies_recruiting_map_oceania <- eventReactive(input$update_oceania, {
       #createleaflet plot 1017 based on reactive set
       subset(
         mv_studies_recruiting_oceania,
@@ -722,7 +741,7 @@
     })
     
     #reactive dataset for US maps
-    mv_studies_recruiting_map_us <- reactive({
+    mv_studies_recruiting_map_us <- eventReactive(input$update_us, {
       #createleaflet plot 1017 based on reactive set
       subset(
         mv_studies_recruiting_US,
@@ -766,7 +785,7 @@
     })
     
     #reactive dataset for US maps
-    mv_studies_recruiting_map_americas <- reactive({
+    mv_studies_recruiting_map_americas <- eventReactive(input$update_americas, {
       #createleaflet plot 1017 based on reactive set
       subset(
         mv_studies_recruiting_americas,
