@@ -11,10 +11,13 @@
   #set paths for data files
   in_path_agg_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep="")
   in_path_agg_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep="")
+  in_path_facility_contacts<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_facility_contacts.txt", sep="")
 
 #reads the data files into dataframes
 agg_studies<-read.csv(in_path_agg_studies, header=TRUE, sep = "|",na.strings = "NA", nrows = -100)
 agg_facilities<-read.csv(in_path_agg_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+facility_contacts<-read.csv(in_path_facility_contacts, header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
+
 
 agg_studies$official_title<-str_remove_all(agg_studies$official_title, "[',|]")
 agg_studies$condition_name<-str_remove_all(agg_studies$condition_name, "['|]")
@@ -53,6 +56,7 @@ mv_facilities_recruiting<-subset.data.frame(agg_facilities,
                                          select=c(
                                            "nct_id",
                                            "facility_name",
+                                           "facility_id",
                                            "status",
                                            "city",
                                            "state",
@@ -74,7 +78,7 @@ mv_studies_recruiting$urlid<-paste0("<a href=\'","https://clinicaltrials.gov/ct2
 
 mv_facilities_recruiting$nct_id<-as.character(mv_facilities_recruiting$nct_id)
 #join recruiting facilities to recruiting studies
-mv_studies_recruiting<-left_join(mv_studies_recruiting, mv_facilities_recruiting, by="nct_id")
+mv_studies_recruiting<-left_join(mv_facilities_recruiting,mv_studies_recruiting, by="nct_id")
 
 mv_studies_recruiting<-sqldf("Select urlid as 'ID',
                                 nct_id,
@@ -90,6 +94,7 @@ mv_studies_recruiting<-sqldf("Select urlid as 'ID',
                                  phase as 'StudyPhase',
                                  lead_sponsor_name as 'Sponsor',
                                  facility_name as 'Facility',
+                                 facility_id,
                                  region as 'Region',
                                  iso2,
                                  iso3,
@@ -117,7 +122,7 @@ mv_studies_recruiting_mini<-sqldf("Select ID,
                                  state,
                                  country,
                                  ZipCode,
-                                 StudyPhase,
+                                 case when length(StudyPhase)=0 THEN 'NULL VALUE' ELSE StudyPhase END as 'StudyPhase',
                                  Sponsor,
                                  Facility,
                                  Region,
@@ -160,4 +165,33 @@ write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extrac
 #conn_mongo_mv_recruiting_studies$drop()
 #conn_mongo_mv_recruiting_studies$insert(mv_studies_recruiting)
 
-rm(list = c("mv_studies_recruiting_loc","mv_studies_recruiting","mv_facilities_recruiting","agg_studies","agg_facilities"))
+#facilities recruiting
+mv_studies_recr_facility<-sqldf("Select 
+                                nct_id,
+                                 Sponsor,
+                                 facility_id,
+                                 Facility,
+                                 country
+                              from mv_studies_recruiting
+                             where nct_id is not null")
+
+#join recruiting facilities to recruiting studies
+mv_rec_facility_contacts<-left_join(mv_studies_recr_facility, facility_contacts, by=c("nct_id","facility_id"))
+
+mv_rec_facility_contacts<-sqldf("select
+                                nct_id,
+                                 Sponsor,
+                                 facility_id,
+                                 Facility,
+                                 country,
+                                 contact_type,
+                                 name,
+                                 email
+                                from mv_rec_facility_contacts
+                                where length(email) >=1")
+
+write.table(mv_rec_facility_contacts,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_rec_facility_contacts.csv", sep=""), sep = ",", row.names = FALSE)
+
+rm(list = c("mv_studies_recr_facility","mv_rec_facility_contacts","mv_studies_recruiting_loc","mv_studies_recruiting","mv_facilities_recruiting","agg_studies","agg_facilities"))
+
+

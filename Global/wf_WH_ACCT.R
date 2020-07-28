@@ -56,6 +56,10 @@ write(paste(NextBatchId,"start_mv_studies_recruiting",now(), sep="|"), dest_whlo
 source(paste0(var_DIR_HOME,"Extracts/mv_studies_recruiting.R"))
 write(paste(NextBatchId,"end_mv_studies_recruiting",now(), sep="|"), dest_whlogfile, append=TRUE)
 
+write(paste(NextBatchId,"start_rec_conditions_list",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"Extracts/rec_conditions_list.R"))
+write(paste(NextBatchId,"end_rec_conditions_list",now(), sep="|"), dest_whlogfile, append=TRUE)
+
 write(paste(NextBatchId,"DataMartEnd",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 #########################################################################
@@ -75,11 +79,13 @@ var_path_agg_year<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_year_Lst10Yr.
 var_path_agg_month<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_month.txt", sep="")
 var_path_agg_conditions_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_recruiting.txt", sep="")
 var_mv_recruiting_mini<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds", sep="")
+var_rec_conditions_list<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/rec_conditions_list.txt", sep="")
 
 ########################################################
 
 ##copy file extracts required for app02
 file.copy(var_mv_recruiting_mini,var_EXTRACT_TOAPP02_DIR, overwrite = TRUE)
+file.copy(var_rec_conditions_list,var_EXTRACT_TOAPP02_DIR, overwrite = TRUE)
 
 #extract the timestamps of the files copied to app02
 path_app02_mv_rec<-paste(var_EXTRACT_TOAPP02_DIR,"mv_studies_recruiting_mini.rds", sep="")
@@ -96,7 +102,7 @@ if(!file.exists(dest_app02logfile)) {
 ##write the file and file timestamp
 write(paste(time_app02_mv_rec, sep="|"), dest_app02logfile, append=FALSE)
 
-#copy the files
+#copy the files for app01
 file.copy(var_path_agg_year,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_path_agg_month,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_path_agg_conditions_recruiting,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
