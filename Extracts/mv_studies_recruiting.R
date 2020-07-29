@@ -10,7 +10,7 @@
   
   #set paths for data files
   in_path_agg_studies<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep="")
-  in_path_agg_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep="")
+  in_path_agg_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studyfacilities_rec.txt", sep="")
   in_path_facility_contacts<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_facility_contacts.txt", sep="")
 
 #reads the data files into dataframes

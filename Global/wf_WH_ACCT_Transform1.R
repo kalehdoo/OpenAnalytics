@@ -62,9 +62,6 @@ write(paste(NextBatchId,"end_x_facilities",now(), sep="|"), dest_whlogfile, appe
 write(paste(NextBatchId,"start_x_interventions",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"TransformData/x_interventions.R"))
 write(paste(NextBatchId,"end_x_interventions",now(), sep="|"), dest_whlogfile, append=TRUE)
-write(paste(NextBatchId,"start_x_prep_geo_master",now(), sep="|"), dest_whlogfile, append=TRUE)
-source(paste0(var_DIR_HOME,"TransformData/x_prep_geo_master.R"))
-write(paste(NextBatchId,"end_x_prep_geo_master",now(), sep="|"), dest_whlogfile, append=TRUE)
 write(paste(NextBatchId,"StageEnd",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 #remove data in the memory and quit the session without saving the session

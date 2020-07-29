@@ -57,6 +57,10 @@ write(paste(NextBatchId,"start_agg_studyfacilities",now(), sep="|"), dest_whlogf
 source(paste0(var_DIR_HOME,"IntegrateData/agg_studyfacilities.R"))
 write(paste(NextBatchId,"end_agg_studyfacilities",now(), sep="|"), dest_whlogfile, append=TRUE)
 
+write(paste(NextBatchId,"start_agg_studyfacilities_recruiting",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_studyfacilities_recruiting.R"))
+write(paste(NextBatchId,"end_agg_studyfacilities_recruiting",now(), sep="|"), dest_whlogfile, append=TRUE)
+
 write(paste(NextBatchId,"start_agg_facilities_study",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_facilities_study.R"))
 write(paste(NextBatchId,"end_agg_facilities_study",now(), sep="|"), dest_whlogfile, append=TRUE)

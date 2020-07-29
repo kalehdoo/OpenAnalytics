@@ -1,3 +1,4 @@
+#Run only once per project to create the master
 #import libraries
 library(dplyr)
 library(stringr)
@@ -9,8 +10,6 @@ in_master_geolocation_US<-paste0(var_DIR_HOME, "Data/MISC/master_geo_city_US.csv
 #reads the data files into dataframes
 master_geolocation<-read.csv(in_master_geolocation, header=TRUE, sep = ",", na.strings = c(""), stringsAsFactors = FALSE, nrows = -2)
 master_geolocation_US<-read.csv(in_master_geolocation_US, header=TRUE, sep = ",", na.strings = "", stringsAsFactors = FALSE, nrows = -2)
-
-
 
 master_geolocation$city<-str_remove_all(master_geolocation$city, "[',]")
 master_geolocation$state<-str_remove_all(master_geolocation$state, "[',]")
@@ -37,7 +36,7 @@ master_geolocationUS_final2<-data.table(master_geolocation_final)[,list(
 ), by=c('iso2','state','city','zip')]
 
 
-##############################
+##############################Get the data from second datafile only take country and state
 in_geo2<-paste0(var_DIR_HOME, "Data/MISC/worldcitiespop.csv")
 geolocation2<-read.csv(in_geo2, header=TRUE, sep = ",", na.strings = "", stringsAsFactors = FALSE, nrows = -2)
 geolocation2$iso2<-casefold(geolocation2$Country, upper = TRUE)

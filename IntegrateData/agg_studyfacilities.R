@@ -78,34 +78,6 @@ x_facilities_final<-union_all(x_facilities_final,x_facilities_country_geo_zip3_m
 x_facilities_final<-union_all(x_facilities_final,x_facilities_country_geo_zip_missing)
 
 
-#find missing lat long info for cities
-city_latlong_missing<-sqldf("select distinct iso2, state, city
-                            from x_facilities_country_geo_zip3
-                            where (latitude is null and longitude is null) 
-                            order by iso2
-                            ")
-
-city_latlong_missing$latitude<-0
-city_latlong_missing$longitude<-0
-city_latlong_missing$zip<-""
-
-#API key obtained from Bing maps
-api_key<-"Ao0MpNFIpYF8Nz79R4DgQkMnUDnUbSxqFZU-nco5fWPcsY0MFpd2t48mSi5Qw279"
-city_latlong_missing$api_url<-paste0("https://dev.virtualearth.net/REST/v1/Locations?CountryRegion=",city_latlong_missing$iso2,"&adminDistrict=",city_latlong_missing$state,"&locality=",city_latlong_missing$city,"&postalCode=-&addressLine=-&key=",api_key)
-
-
-#set paths for data files
-path_geo_missing<-paste0(var_DIR_HOME, "Data/MISC/geo_missing.txt")
-#create file if does not exists with header
-if(!file.exists(path_geo_missing)) {
-  file.create(path_geo_missing)
-  write(paste("iso2","country","state","city","latitude","longitude","zip","api_url", sep="|"),path_geo_missing, append = FALSE)
-}
-
-#write missing geo code to txt file
-write.table(city_latlong_missing, paste(var_DIR_HOME, "Data/MISC/geo_missing.txt", sep=""), sep = "|", row.names = FALSE, quote = FALSE)
-
-
 #write to txt file
 write.table(x_facilities_final, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep=""), sep = "|", row.names = FALSE, quote = FALSE)
 
