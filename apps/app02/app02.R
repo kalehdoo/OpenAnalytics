@@ -16,17 +16,6 @@ log_app02_time <- format.Date(log_app02_time, "%d-%b-%Y")
 
 
 #read conditions file
-rec_conditions <-
-  read.csv(
-    "data/rec_conditions_list.txt",
-    header = TRUE,
-    sep = "|",
-    na.strings = "NA",
-    nrows = -100,
-    stringsAsFactors = FALSE
-  )
-
-rec_conditions_list<-sort(rec_conditions$ConditionName, decreasing=FALSE)
 
 #read data
 mv_studies_recruiting <-
@@ -159,7 +148,7 @@ ui <-
               inputId = "select_condition_map_world",
               label = NULL,
               value="covid-19",
-              placeholder = "Condition Name"
+              placeholder = "Disease Name"
             )
           ),
           
@@ -209,7 +198,7 @@ ui <-
              paste0("Data Refreshed On: ",log_app02_time)),
           h4(
             "The Clinical Study Site Finder App is an interactive application that helps in finding clinical studies that are currently recruiting patients globally.
-                                The patients can search based on the condition name, sponsor, site, or location, and the results will appear on a map.",
+                                The patients can search based on the Disease Name, sponsor, site, or location, and the results will appear on a map.",
             style = "text-align:justify;"
           ),
           h4(
@@ -224,13 +213,7 @@ ui <-
         ),
         fluidRow(
           h5(
-            "Disclaimer: The source data for the application is obtained from clinicaltrials.gov ACCT-CTTI website ",
-            tags$a(href = "https://aact.ctti-clinicaltrials.org/download", "ACCT-CTTI.", target =
-                     "_blank"),
-            style = "margin-top:2%;margin-left:1%; margin-right:1%; text-align:justify;"
-          ),
-          h5(
-            "The detail level data for individual clinical trials is available on ",
+            "Disclaimer: The source data for the application is available on ",
             tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
                      "_blank"),
             "The users are advised to verify the details on clinicaltrials.gov and consult with their physicians for any medical and legal advise. This study finder app should be used as an interactive assistant in finding the relevant clinical trials. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information.",
@@ -276,7 +259,7 @@ ui <-
             textInput(
               inputId = "select_condition_map_europe",
               label = NULL,
-              placeholder = "Condition/Disease Name",
+              placeholder = "Disease Name",
               value="covid-19"
             )
           ),		  
@@ -362,7 +345,7 @@ ui <-
             textInput(
               inputId = "select_condition_map_asia",
               label = NULL,
-              placeholder = "Condition/Disease Name",
+              placeholder = "Disease Name",
               value="covid-19"
             )
           ),
@@ -448,7 +431,7 @@ ui <-
             textInput(
               inputId = "select_condition_map_africa",
               label = NULL,
-              placeholder = "Condition/Disease Name",
+              placeholder = "Disease Name",
               value="covid-19"
             )
           ),
@@ -534,7 +517,7 @@ ui <-
             textInput(
               inputId = "select_condition_map_oceania",
               label = NULL,
-              placeholder = "Condition/Disease Name",
+              placeholder = "Disease Name",
               value="covid-19"
             )
           ),
@@ -620,7 +603,7 @@ ui <-
             textInput(
               inputId = "select_condition_map_us",
               label = NULL,
-              placeholder = "Condition/Disease Name",
+              placeholder = "Disease Name",
               value="covid-19"
             )
           ),
@@ -706,7 +689,7 @@ ui <-
             textInput(
               inputId = "select_condition_map_americas",
               label = NULL,
-              placeholder = "Condition/Disease Name",
+              placeholder = "Disease Name",
               value="covid-19"
             )
           ),

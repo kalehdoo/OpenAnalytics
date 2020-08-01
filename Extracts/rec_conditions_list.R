@@ -1,5 +1,6 @@
 #import libraries
 library(dplyr)
+library(stringr)
 
 in_path_agg_facilities<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facilities.txt", sep="")
 agg_facilities<-read.csv(in_path_agg_facilities, header=TRUE, sep = "|",na.strings = "NA", nrows = -100, stringsAsFactors = FALSE)
@@ -39,9 +40,20 @@ rec_conditions_list<-subset.data.frame(mv_conditions_recruiting,
                                   select = (condition_name)
                                     )
 
-rec_conditions_list_unique<-as_tibble(unique(tolower(rec_conditions_list$condition_name)))
+rec_conditions_list <- rec_conditions_list %>% mutate(condition_name = gsub("[',]", "", condition_name))
 
-colnames(rec_conditions_list_unique)[colnames(rec_conditions_list_unique)=="value"]<-"ConditionName"
+
+rec_conditions_list1<-unique(casefold(rec_conditions_list$condition_name))
+
+rec_conditions_list2<-str_wrap(rec_conditions_list1, width = 20)
+rec_conditions_list2 <- str_replace_all(rec_conditions_list2, "\\n", "<br>")
+rec_conditions_list2<-as.data.frame(rec_conditions_list2)
+rec_conditions_list1<-as.data.frame(rec_conditions_list1)
+
+rec_conditions_list_final<-cbind(rec_conditions_list1, rec_conditions_list2)
+#rec_conditions_list_unique<-as_tibble(unique(tolower(rec_conditions_list$condition_name)))
+
+#colnames(rec_conditions_list2)[colnames(rec_conditions_list2)=="value"]<-"ConditionName"
 
 #write to txt file
-write.table(rec_conditions_list_unique,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/rec_conditions_list.txt", sep=""), sep = "|", row.names = FALSE)
+write.table(rec_conditions_list_final,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/rec_conditions_list.txt", sep=""), sep = "|", row.names = FALSE)

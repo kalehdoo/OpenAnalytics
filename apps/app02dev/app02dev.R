@@ -26,7 +26,12 @@ rec_conditions <-
         stringsAsFactors = FALSE
     )
 
-rec_conditions_list<-sort(rec_conditions$ConditionName, decreasing=FALSE)
+rec_conditions_list1<-rec_conditions$rec_conditions_list1
+rec_conditions_list2<-rec_conditions$rec_conditions_list2
+#rec_conditions_list<-unique(rec_conditions$ConditionName)
+
+#rec_conditions_list2<-str_wrap(rec_conditions_list, width = 20)
+#rec_conditions_list3 <- str_replace_all(rec_conditions_list2, "\n", "<br>")
 
 #read data
 mv_studies_recruiting <-
@@ -124,24 +129,24 @@ ui <-
             tabPanel(
                 title = "Globe",
                 fluidRow(style = "margin-top:0%; margin-bottom:1%;",
-                    column(4, align="center",
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
-                    ),
-                    column(4, align="center",
-                        h2("Kalehdoo Clinical Site Finder",
-                           #class = "display-4",
-                           style = "color: #1175B8; margin-top:0px;margin-left:2%; margin-right:2%",
-                           align = "center"
-                        ),
-                        h4( "Modify search criteria and Hit Display Results button",
-                            style = "color: #F37312;",
-                            align = "center")
-                    ),
-                    column(4, align="center",
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
-                    )
+                         column(4, align="center",
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
+                         ),
+                         column(4, align="center",
+                                h2("Kalehdoo Clinical Site Finder",
+                                   #class = "display-4",
+                                   style = "color: #1175B8; margin-top:0px;margin-left:2%; margin-right:2%",
+                                   align = "center"
+                                ),
+                                h4( "Modify search criteria and Hit Display Results button",
+                                    style = "color: #F37312;",
+                                    align = "center")
+                         ),
+                         column(4, align="center",
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
+                         )
                 ),
                 fluidRow(
                     column(
@@ -160,11 +165,17 @@ ui <-
                     column(
                         2,
                         align = "center",
-                        textInput(
+                        pickerInput(
                             inputId = "select_condition_map_world",
-                            label = NULL,
-                            value="covid-19",
-                            placeholder = "Condition Name"
+                            choices = rec_conditions_list1,
+                            selected = c("covid-19"),
+                            multiple = TRUE,
+                            options = list(`live-search` = TRUE,style = "btn-info",
+                                           `actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"
+                            ),
+                            choicesOpt = list(
+                                content = rec_conditions_list2
+                            )
                         )
                     ),
                     
@@ -209,15 +220,15 @@ ui <-
                 )),
                 fluidRow(withSpinner(leafletOutput("plot_1020"), type = 3)),
                 fluidRow(style = "margin-top:2%; margin-bottom:1%;",
-                    column(12, align="center",
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                           div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
-                           )
-                        ),
+                         column(12, align="center",
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
+                         )
+                ),
                 fluidRow(style = "margin-top:2%;margin-left:1%; margin-right:1%",
                          h4(class="text-center",style = "color: #F37312; margin-top:2px; margin-left:2px; margin-right:2px;",
                             paste0("Data Refreshed On: ",log_app02_time))
@@ -800,7 +811,7 @@ ui <-
 server <- function(input, output, session) {
     
     #updateSelectizeInput(session = session, inputId = 'select_condition_map_world', choices = rec_conditions$ConditionName, selected = "covid-19", server = TRUE)
-    
+    #updatePickerInput(session = session, inputId = 'select_condition_map_world',selected = "covid-19")
     #reactive dataset for world maps with reduced columns
     mv_studies_recruiting_map_world <-
         eventReactive(input$update_global, {
@@ -811,7 +822,7 @@ server <- function(input, output, session) {
                 subset = (
                     StudyPhase %in%  c(input$select_studyphase_name_world) &
                         casefold(city) %like%  casefold(input$select_city_map_world) &
-                        casefold(Condition) %like%   casefold(input$select_condition_map_world) &
+                        casefold(Condition) %in%   c(input$select_condition_map_world) &
                         casefold(Facility) %like%  casefold(input$select_facility_map_world) &
                         casefold(Sponsor) %like%  casefold(input$select_sponsor_map_world)
                 )
@@ -1151,4 +1162,3 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
-

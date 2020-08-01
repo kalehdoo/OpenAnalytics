@@ -11,3 +11,8 @@ facility_contacts<-read.csv(in_path_fac_contacts, header=TRUE, sep = "|",na.stri
 write.table(facility_contacts, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_facility_contacts.txt", sep=""), sep = "|", row.names = FALSE)
 
 #rm(facility_contacts)
+
+facility_contacts_email<-unique(facility_contacts$email)
+
+#write to txt file
+write.table(facility_contacts_email, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/facility_contacts_email.txt", sep=""), sep = "|", row.names = FALSE, quote = FALSE)
