@@ -25,7 +25,7 @@ mv_studies_recruiting <-
 
 var_studyphase_name <- unique(mv_studies_recruiting$StudyPhase)
 
-var_studyphase_name
+
 #mv_studies_recruiting <- subset.data.frame(mv_studies_recruiting) %>%
 #  sample_frac(0.2, replace = FALSE)
 

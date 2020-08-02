@@ -2,7 +2,7 @@ library(dplyr)
 library(sqldf)
 
 #ACCT_HOME to store path of home dir
-assign("var_DIR_HOME", "C:/Users/ranamanohar/Documents/GitHub/OpenAnalytics/", envir = .GlobalEnv)
+assign("var_DIR_HOME", "C:/msrana/projects/github/OpenAnalytics/", envir = .GlobalEnv)
 
 #set paths for data files
 path_outcome_measurements<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/x_outcome_measurements.txt", sep="")
@@ -24,9 +24,12 @@ studies<-studies %>%
 studies_outcomes<-left_join(studies,outcome_measurements, by="nct_id")
 
 #write to txt file
-write.table(studies_outcomes, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies_outcome_measurements.txt", sep=""), sep = "|", row.names = FALSE, quote = FALSE)
+#write.table(studies_outcomes, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies_outcome_measurements.txt", sep=""), sep = "|", row.names = FALSE, quote = FALSE)
 
-studies_outcomes1<-sqldf("select distinct title, description, units
+studies_outcomes<-sqldf("select distinct condition_name, title, units, param_type, avg(param_value) as mean_param_val, dispersion_type, avg(dispersion_value) as mean_disp_val
                          from studies_outcomes
-                         where condition_name like '%hypertension%'
-                         and units<>'participants'")
+                         where length(title)>0
+                        group by condition_name, title, units, param_type, dispersion_type")
+
+#write to txt file
+write.table(studies_outcomes, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies_outcome_measurements.txt", sep=""), sep = "|", row.names = FALSE, quote = FALSE)

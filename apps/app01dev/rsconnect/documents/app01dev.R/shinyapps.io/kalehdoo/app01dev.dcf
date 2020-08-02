@@ -1,0 +1,13 @@
+name: app01dev
+title: app01dev
+username:
+account: kalehdoo
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2634125
+bundleId: 3464309
+url: https://kalehdoo.shinyapps.io/app01dev/
+when: 1596335517.71454
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: www/bootstrap.css|www/united.min.css

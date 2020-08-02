@@ -18,11 +18,62 @@ library(shinycssloaders)
 library(shinyWidgets)
 
 
+#read study Measurements by condition
+measurements <-
+    read.csv(
+        "data/agg_studies_outcome_measurements.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
+
+#read sponsor agg data
+agg_sponsors <-
+    read.csv(
+        "data/agg_sponsors.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
 
 #read sponsor network data
 r_sponsor_collaborator <-
     read.csv(
         "data/r_sponsor_collaborator.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
+
+r_sponsor_site <-
+    read.csv(
+        "data/r_sponsor_site.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
+
+r_sponsor_conditions <-
+    read.csv(
+        "data/r_sponsor_conditions.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
+
+r_sponsor_interventions <-
+    read.csv(
+        "data/r_sponsor_interventions.txt",
         header = TRUE,
         sep = "|",
         na.strings = "NA",
@@ -77,21 +128,23 @@ agg_Studiesbyconditions <-
     )
 
 #import recruiting data
-#mv_studies_recruiting<-read.csv("data/mv_studies_recruiting.txt", header=TRUE, sep = "|", na.strings = "NA", nrows = 5000, stringsAsFactors = FALSE)
-mv_studies_recruiting <- readRDS("data/mv_studies_recruiting.rds")
-
-#mv_studies_recruiting<-conn_mv_studies_recruiting$find('{}')
-#mv_studies_recruiting<-as_tibble(mv_studies_recruiting)
-
 mv_studies_recruiting <-
-    subset.data.frame(mv_studies_recruiting) %>%
-    sample_frac(0.1, replace = FALSE)
+    readRDS("data/mv_studies_recruiting.rds") %>%
+    filter(is.na(nct_id) == FALSE)
+
+
+var_studyphase_name <- unique(mv_studies_recruiting$StudyPhase)
+
+#mv_studies_recruiting <-
+#    subset.data.frame(mv_studies_recruiting) %>%
+#    sample_frac(0.1, replace = FALSE)
 
 #recruiting data without ID
 mv_studies_recruiting_table <-
     subset.data.frame(
         mv_studies_recruiting,
         select = c(
+            "ID",
             "nct_id",
             "Condition",
             "Title",
@@ -141,21 +194,16 @@ mv_recruiting_studylevel <-
     ), by = 'nct_id']
 
 #recruiting data at sponsor level
-rec_sponsors <- mv_studies_recruiting %>%
-    group_by(Sponsor) %>%
-    summarise(
-        AgencyClass = unique(AgencyClass),
-        SponsorType = unique(SponsorType),
-        cnt_studies = length(unique(nct_id)),
-        cnt_dataMonitor = sum(ifelse(DataMonitoring == "Yes", 1, 0)),
-        cnt_rareDisease = sum(ifelse(RareDisease == "Yes", 1, 0)),
-        median_regToStartDays = median(RegToStartDays),
-        cnt_cities = length(unique(city)),
-        cnt_countries = length(unique(country)),
-        cnt_conditions = sum(unique(CntConditions)),
-        cnt_recFacilities = length(unique(Facility)),
-        TotalFacilities = sum(unique(CntSites))
+rec_sponsors <-
+    read.csv(
+        "data/mv_agg_rec_sponsors.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
     )
+
 
 #####################
 # for spinners 2-3 match the background color of spinner
@@ -166,7 +214,7 @@ ui <- navbarPage(
     #title = div(img(src="https://www.oakbloc.com/images/Oakbloc_transparent.png")),
     title = div(tags$a(href="https://www.oakbloc.com", target="_blank", tags$img(src = "https://www.oakbloc.com/images/Oakbloc_transparent.svg", width="100px", height="35px",style = "padding-top: 0px; padding-bottom: 5px; width: '100%';"))),
     windowTitle = "Kalehdoo Analytics",
-    #theme = "bootstrap.css",
+    #theme = "united.min.css",
     theme = shinytheme("united"),
     collapsible	= TRUE,
     fluid = TRUE,
@@ -245,21 +293,47 @@ ui <- navbarPage(
     #sponsor Starts Here
     navbarMenu(
         "Sponsor",
-        tabPanel("Network",
+        tabPanel("Engagement",
                  mainPanel(
                      width = 12,
                      tabsetPanel(
                          type = "tabs",
                          tabPanel(
-                             "Collaboration", 
+                             "Partners", 
                              fluidRow(
-                                 withSpinner(DT::dataTableOutput("dt_sponsor_network"), type = 3)
+                                 withSpinner(DT::dataTableOutput("dt_sponsor_collaborator"), type = 3)
                              )
                          ),
                          tabPanel(
-                             "Graph", 
+                             "Sites", 
                              fluidRow(
-                                 withSpinner(simpleNetworkOutput("force"), type = 3)
+                                 withSpinner(DT::dataTableOutput("dt_sponsor_site"), type = 3)
+                             )
+                         ),
+                         tabPanel(
+                             "Diseases", 
+                             fluidRow(
+                                 withSpinner(DT::dataTableOutput("dt_sponsor_conditions"), type = 3)
+                             )
+                         ),
+                         tabPanel(
+                             "Interventions", 
+                             fluidRow(
+                                 withSpinner(DT::dataTableOutput("dt_sponsor_interventions"), type = 3)
+                             )
+                         )
+                         
+                     )
+                 )),
+        tabPanel("Performance",
+                 mainPanel(
+                     width = 12,
+                     tabsetPanel(
+                         type = "tabs",
+                         tabPanel(
+                             "Metrics", 
+                             fluidRow(
+                                 withSpinner(DT::dataTableOutput("dt_agg_sponsors"), type = 3)
                              )
                          )
                          
@@ -367,65 +441,85 @@ ui <- navbarPage(
                      tabsetPanel(
                          type = "tabs",
                          tabPanel(
-                             "World Map",
+                             title = "Globe",
                              fluidRow(
-                                 column(
-                                     3,
-                                     align = "left",
-                                     textInput(inputId = "select_city_map",
-                                               label = "Search City")
-                                 ),
-                                 column(
-                                     3,
-                                     align = "left",
-                                     textInput(inputId = "select_condition_map",
-                                               label = "Search Condition")
-                                 ),
-                                 column(
-                                     3,
-                                     align = "left",
-                                     textInput(inputId = "select_facility_map",
-                                               label = "Search Facility")
-                                 ),
-                                 column(
-                                     3,
-                                     align = "left",
-                                     textInput(inputId = "select_sponsor_map",
-                                               label = "Search Sponsor")
+                                 h4(
+                                     "Modify search criteria and Hit Display Results button",
+                                     style = "color: #F37312;",
+                                     align = "center",
                                  )
                              ),
-                             fluidRow(leafletOutput("plot_1014"))
+                             fluidRow(
+                                 column(
+                                     2,
+                                     align = "center",
+                                     pickerInput(
+                                         inputId = "select_studyphase_name_world",
+                                         label = NULL,
+                                         choices = var_studyphase_name,
+                                         options = list(`actions-box` = TRUE, style = "btn-info"
+                                         ),
+                                         multiple = TRUE,
+                                         selected=c(var_studyphase_name)
+                                     )
+                                 ),
+                                 column(
+                                     2,
+                                     align = "center",
+                                     textInput(
+                                         inputId = "select_condition_map_world",
+                                         label = NULL,
+                                         value="covid-19",
+                                         placeholder = "Disease Name"
+                                     )
+                                 ),
+                                 
+                                 
+                                 column(
+                                     2,
+                                     align = "center",
+                                     textInput(
+                                         inputId = "select_city_map_world",
+                                         label = NULL,
+                                         placeholder = "City Name"
+                                     )
+                                 ),    
+                                 
+                                 column(
+                                     3,
+                                     align = "center",
+                                     textInput(
+                                         inputId = "select_sponsor_map_world",
+                                         label = NULL,
+                                         placeholder = "Sponsor Name"
+                                     )
+                                 ),
+                                 column(
+                                     3,
+                                     align = "center",
+                                     textInput(
+                                         inputId = "select_facility_map_world",
+                                         label = NULL,
+                                         placeholder = "Facility Name"
+                                     )
+                                 )
+                             ),
+                             fluidRow(tags$div(
+                                 class = "text-center",
+                                 actionButton(
+                                     "update_global",
+                                     "Display Results",
+                                     class = "btn btn-primary",
+                                     style = "margin-bottom: 0.5%;"
+                                 )
+                             )),
+                             fluidRow(withSpinner(leafletOutput("plot_1020"), type = 3))
+                             
                          ),
                          tabPanel(
                              "Table Details",
-                             fluidRow(
-                                 column(
-                                     3,
-                                     align = "left",
-                                     textInput(inputId = "select_city_tab",
-                                               label = "Search City")
-                                 ),
-                                 column(
-                                     3,
-                                     align = "left",
-                                     textInput(inputId = "select_condition_tab",
-                                               label = "Search Condition")
-                                 ),
-                                 column(
-                                     3,
-                                     align = "left",
-                                     textInput(inputId = "select_facility_tab",
-                                               label = "Search Facility")
-                                 ),
-                                 column(
-                                     3,
-                                     align = "left",
-                                     textInput(inputId = "select_sponsor_tab",
-                                               label = "Search Sponsor")
-                                 )
-                             ),
                              #display recriting studies data table
-                             fluidRow(DT::dataTableOutput("dt_recruitment_1005"))
+                             withSpinner(DT::dataTableOutput("dt_recruitment_1005"), type = 3)
                          )
                          
                      )
@@ -537,9 +631,9 @@ ui <- navbarPage(
     )
     ,
     navbarMenu(
-        "Trends",
+        "Study",
         tabPanel(
-            "Study",
+            "Trends",
             tabsetPanel(
                 type = "tabs",
                 tabPanel("Yearly",
@@ -570,7 +664,21 @@ ui <- navbarPage(
                                  box(plotlyOutput("plot_month_1004", height = 200), title = "Results Posted")
                              )
                          ))
-            ))
+            )),
+        tabPanel("Design",
+                 mainPanel(
+                     width = 12,
+                     tabsetPanel(
+                         type = "tabs",
+                         tabPanel(
+                             "Measurements", 
+                             fluidRow(
+                                 withSpinner(DT::dataTableOutput("dt_measurements"), type = 3)
+                             )
+                         )
+                         
+                     )
+                 ))
     )
     
     #ending main bracket
@@ -586,8 +694,20 @@ server <- function(input, output) {
     #SERVER Begins
     #############################################################################################  
     
+    #reactive dataset for measurements by conditions
+    output$dt_measurements <- renderDataTable({
+        DT::datatable(
+            measurements,
+            filter = 'top',
+            escape = FALSE,
+            rownames = FALSE,
+            options = list(lengthChange = FALSE
+            )
+        )
+    })
+    
     #reactive dataset for sponsor network
-    output$dt_sponsor_network <- renderDataTable({
+    output$dt_sponsor_collaborator <- renderDataTable({
         DT::datatable(
             r_sponsor_collaborator,
             filter = 'top',
@@ -598,37 +718,71 @@ server <- function(input, output) {
         )
     })
     
+    output$dt_sponsor_site <- renderDataTable({
+        DT::datatable(
+            r_sponsor_site,
+            filter = 'top',
+            escape = FALSE,
+            rownames = FALSE,
+            options = list(lengthChange = FALSE
+            )
+        )
+    })
+    
+    output$dt_sponsor_conditions <- renderDataTable({
+        DT::datatable(
+            r_sponsor_conditions,
+            filter = 'top',
+            escape = FALSE,
+            rownames = FALSE,
+            options = list(lengthChange = FALSE
+            )
+        )
+    })
+    
+    output$dt_sponsor_interventions <- renderDataTable({
+        DT::datatable(
+            r_sponsor_interventions,
+            filter = 'top',
+            escape = FALSE,
+            rownames = FALSE,
+            options = list(lengthChange = FALSE
+            )
+        )
+    })
+    
+    #reactive dataset for sponsor agg
+    output$dt_agg_sponsors <- renderDataTable({
+        DT::datatable(
+            agg_sponsors,
+            filter = 'top',
+            escape = FALSE,
+            rownames = FALSE,
+            options = list(lengthChange = FALSE
+            )
+        )
+    })
     
     #display recruitment data
     output$dt_recruitment <-
         renderDataTable(DT::datatable(mv_studies_recruiting_table, filter = 'top'))
     
     #reactive dataset for maps with reduced columns
-    mv_studies_recruiting_map <- reactive({
-        #createleaflet plot 1014 based on reactive set
-        subset(
-            mv_studies_recruiting,
-            select = c(
-                "ID",
-                "city",
-                "state",
-                "country",
-                "Region",
-                "Condition",
-                "Sponsor",
-                "Facility",
-                "nct_id",
-                "latitude",
-                "longitude"
-            ),
-            subset = (
-                casefold(city) %like%  casefold(input$select_city_map) &
-                    casefold(Condition) %like%  casefold(input$select_condition_map) &
-                    casefold(Sponsor) %like%  casefold(input$select_sponsor_map) &
-                    casefold(Facility) %like%  casefold(input$select_facility_map)
+    mv_studies_recruiting_map_world <-
+        eventReactive(input$update_global, {
+            
+            #createleaflet plot 1020 based on reactive set
+            subset(
+                mv_studies_recruiting,
+                subset = (
+                    StudyPhase %in%  c(input$select_studyphase_name_world) &
+                        casefold(city) %like%  casefold(input$select_city_map_world) &
+                        casefold(Condition) %like%   casefold(input$select_condition_map_world) &
+                        casefold(Facility) %like%  casefold(input$select_facility_map_world) &
+                        casefold(Sponsor) %like%  casefold(input$select_sponsor_map_world)
+                )
             )
-        )
-    })
+        })
     
     #reactive dataset for table with selected columns
     mv_studies_recruiting_tab <- reactive({
@@ -659,22 +813,23 @@ server <- function(input, output) {
     
     #createleaflet plot 1014
     #function to display labels
-    f_labels_1014 <-
+    f_labels_1020 <-
         function() {
             sprintf(
-                "<br><strong>Study ID: %s</strong></br><strong>Country: %s</strong><br/><strong>State: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",
-                mv_studies_recruiting_map()$ID,
-                mv_studies_recruiting_map()$country,
-                mv_studies_recruiting_map()$state,
-                mv_studies_recruiting_map()$city,
-                mv_studies_recruiting_map()$Facility,
-                mv_studies_recruiting_map()$Sponsor,
-                mv_studies_recruiting_map()$Condition
+                "<br><strong>Study ID: %s</strong></br><strong>Phase: %s</strong><br/><strong>Country: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",
+                mv_studies_recruiting_map_world()$ID,
+                mv_studies_recruiting_map_world()$StudyPhase,
+                mv_studies_recruiting_map_world()$country,
+                mv_studies_recruiting_map_world()$city,
+                mv_studies_recruiting_map_world()$Facility,
+                mv_studies_recruiting_map_world()$Sponsor,
+                mv_studies_recruiting_map_world()$Condition
             ) %>%
                 lapply(htmltools::HTML)
         }
-    output$plot_1014 <- renderLeaflet({
-        leaflet(data = mv_studies_recruiting_map()) %>%
+    
+    output$plot_1020 <- renderLeaflet({
+        leaflet(data = mv_studies_recruiting_map_world()) %>%
             setView(lng = -15.037721,
                     lat = 14.451703,
                     zoom = 2.2) %>%
@@ -682,7 +837,7 @@ server <- function(input, output) {
                              options = providerTileOptions(noWrap = TRUE)) %>%
             addMarkers(~ longitude,
                        ~ latitude,
-                       popup = f_labels_1014(),
+                       popup = f_labels_1020(),
                        #label = f_labels_1014(),
                        clusterOptions = markerClusterOptions())
     })
@@ -1127,9 +1282,11 @@ server <- function(input, output) {
     
     
     #datatable for recruitment find studies
+    #reactive dataset for maps with reduced columns
     output$dt_recruitment_1005 <- renderDataTable({
         DT::datatable(
-            mv_studies_recruiting_tab(),
+            mv_studies_recruiting_table,
+            filter = 'top',
             escape = FALSE,
             rownames = FALSE,
             options = list(lengthChange = FALSE)

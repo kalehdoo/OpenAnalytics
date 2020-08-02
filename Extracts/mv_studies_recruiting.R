@@ -165,6 +165,24 @@ write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extrac
 #conn_mongo_mv_recruiting_studies$drop()
 #conn_mongo_mv_recruiting_studies$insert(mv_studies_recruiting)
 
+#aggregate at recruiting sponsor level
+agg_rec_sponsors <- mv_studies_recruiting %>%
+  group_by(Sponsor) %>%
+  summarise(
+    AgencyClass = unique(AgencyClass),
+    SponsorType = unique(SponsorType),
+    cnt_studies = length(unique(nct_id)),
+    cnt_dataMonitor = sum(ifelse(DataMonitoring == "Yes", 1, 0)),
+    cnt_rareDisease = sum(ifelse(RareDisease == "Yes", 1, 0)),
+    median_regToStartDays = median(RegToStartDays),
+    cnt_cities = length(unique(city)),
+    cnt_countries = length(unique(country)),
+    cnt_conditions = sum(unique(CntConditions)),
+    cnt_recFacilities = length(unique(Facility)),
+    TotalFacilities = sum(unique(CntSites))
+  )
+
+write.table(agg_rec_sponsors,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_agg_rec_sponsors.txt", sep=""), sep = "|", row.names = FALSE)
 
 rm(list = c("mv_studies_recr_facility","mv_rec_facility_contacts","mv_studies_recruiting_loc","mv_studies_recruiting","mv_facilities_recruiting","agg_studies","agg_facilities"))
 
