@@ -16,6 +16,7 @@ library(rsample)
 library(lubridate)
 library(shinycssloaders)
 library(shinyWidgets)
+library(collapsibleTree)
 
 
 #read study Measurements by condition
@@ -50,6 +51,8 @@ r_sponsor_collaborator <-
         nrows = -100,
         stringsAsFactors = FALSE
     )
+
+
 
 r_sponsor_site <-
     read.csv(
@@ -302,6 +305,32 @@ ui <- navbarPage(
                              "Partners", 
                              fluidRow(
                                  withSpinner(DT::dataTableOutput("dt_sponsor_collaborator"), type = 3)
+                             ),
+                             
+                         ),
+                         tabPanel(
+                             "Partners",
+                             column(
+                                 12,
+                                 align = "center",
+                                 textInput(
+                                     inputId = "select_sponsor_coll",
+                                     label = NULL,
+                                     #value="pfizer",
+                                     placeholder = "Sponsor Name"
+                                 )
+                             ),
+                             fluidRow(tags$div(
+                                 class = "text-center",
+                                 actionButton(
+                                     "update_sponsor_collaborator_1",
+                                     "Display Results",
+                                     class = "btn btn-primary",
+                                     style = "margin-bottom: 0.5%;"
+                                 )
+                             )),
+                             fluidRow(
+                                 collapsibleTreeOutput("sponsor_coll_tree")
                              )
                          ),
                          tabPanel(
@@ -694,6 +723,34 @@ server <- function(input, output) {
     #SERVER Begins
     #############################################################################################  
     
+    #reactive dataset for sponsor-collaborator
+    sponsor_coll_tree_data <-
+        eventReactive(input$update_sponsor_collaborator_1, {
+            
+            #createleaflet plot 1020 based on reactive set
+            subset(
+                r_sponsor_collaborator,
+                select=c("Sponsor","Collaborator","cnt_studies"),
+                subset = (
+                    casefold(Sponsor) %in% casefold(input$select_sponsor_coll)
+                ))
+        })
+    
+    output$sponsor_coll_tree<- renderCollapsibleTree({
+        sponsor_coll_tree_data() %>%
+            group_by(sponsor_coll_tree_data()$Sponsor, sponsor_coll_tree_data()$Collaborator, sponsor_coll_tree_data()$cnt_studies) %>%
+            summarise("Number of Collaborators" = n()) %>%
+            collapsibleTreeSummary(
+                hierarchy = c("sponsor_coll_tree_data()$Sponsor", "sponsor_coll_tree_data()$Collaborator", "sponsor_coll_tree_data()$cnt_studies"),
+                root = "Sponsor",
+                width = 700,
+                attribute = c("Number of Collaborators"),
+                zoomable = FALSE)
+        
+    })
+    
+    
+    
     #reactive dataset for measurements by conditions
     output$dt_measurements <- renderDataTable({
         DT::datatable(
@@ -714,7 +771,7 @@ server <- function(input, output) {
             escape = FALSE,
             rownames = FALSE,
             options = list(lengthChange = FALSE
-                           )
+            )
         )
     })
     
