@@ -18,6 +18,7 @@ colnames(conditions_mesh)[colnames(conditions_mesh)=="mesh_term"]<-"condition_na
 conditions<-subset(conditions, select=c("nct_id","condition_name"))
 conditions_mesh<-subset(conditions_mesh, select=c("nct_id","condition_name"))
 x_conditions<-union_all(conditions,conditions_mesh)
+
 x_conditions<-sqldf("select distinct nct_id,condition_name from x_conditions")
 
 #check if condition matches with any of the rare disease in the list

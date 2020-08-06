@@ -215,7 +215,18 @@ options(spinner.size = 1.5)
 
 ui <- navbarPage(
     #title = div(img(src="https://www.oakbloc.com/images/Oakbloc_transparent.png")),
-    title = div(tags$a(href="https://www.oakbloc.com", target="_blank", tags$img(src = "https://www.oakbloc.com/images/Oakbloc_transparent.svg", width="100px", height="35px",style = "padding-top: 0px; padding-bottom: 5px; width: '100%';"))),
+    title = div(
+        tags$a(
+            href = "https://www.oakbloc.com",
+            target = "_blank",
+            tags$img(
+                src = "https://www.oakbloc.com/images/Oakbloc_transparent.svg",
+                width = "100px",
+                height = "35px",
+                style = "padding-top: 0px; padding-bottom: 5px; width: '100%';"
+            )
+        )
+    ),
     windowTitle = "Kalehdoo Analytics",
     #theme = "united.min.css",
     theme = shinytheme("united"),
@@ -231,147 +242,250 @@ ui <- navbarPage(
     ),
     #Landing Home page starts
     
-    tabPanel(title = "Home",
-             fluidRow((
-                 h3("Kalehdoo Clinical Analytics Platform", style = "margin-top:0px;margin-left:5%; margin-right:5%")
-             )),
-             fluidRow(style = "margin-top:0px;margin-left:1%; margin-right:1%",
-                      p("Clinical Analytics provides insights into the clinical research industry. 
+    tabPanel(
+        title = "Home",
+        fluidRow((
+            h3("Kalehdoo Clinical Analytics Platform", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+        )),
+        fluidRow(
+            style = "margin-top:0px;margin-left:1%; margin-right:1%",
+            p(
+                "Clinical Analytics provides insights into the clinical research industry.
                The market and competitive intelligence gained from the insights can benefit Sponsors, CROs, Industry Analysts, Non-Profit, Government and Special Interest Organizations explore avenues for future growth."
-                      ),
-                      p(
-                          tags$h4("Sponsors:"),
-                          tags$ul(
-                              tags$li("Design Clinical Study"),
-                              tags$li("Reduce Redundant Studies"),
-                              tags$li("Clinical Site Selection"),
-                              tags$li("Design Study Endpoints"),
-                              tags$li("Explore Collaboration Opportunities"),
-                              tags$li("Competitive Intelligence"),
-                              tags$li("Clinical Trends"),
-                              tags$li("Clinical Industry Landscape")
-                          )
-                      ),
-                      p(
-                          tags$h4("Physicians & Patients:"),
-                          tags$ul(
-                              tags$li("Participation Opportunities"),
-                              tags$li("Recruiting Studies")
-                          )
-                      ),
-                      p(
-                          tags$h4("Market & Industry Analysts:"),
-                          tags$ul(
-                              tags$li("Current Trends"),
-                              tags$li("Market Intelligence")
-                          )
-                      ),
-                      p(
-                          tags$h4("Special Interest Organizations:"),
-                          tags$ul(
-                              tags$li("Global Clinical Activity"),
-                              tags$li("Demographics")
-                          )
-                      )
-             ),
-             fluidRow((
-                 p(
-                     "Visit us at  "
-                     ,
-                     tags$a(href = "https://oakbloc.com", "Oakbloc Technologies", target =
-                                "_blank"),
-                     style = "margin-top:0px;margin-left:1%; margin-right:1%"
-                 )
-             )),
-             fluidRow((
-                 p(
-                     "Follow us on Twitter for regular updates  "
-                     ,
-                     tags$a(href = "https://twitter.com/OakBlocTech", "Twitter", target =
-                                "_blank"),
-                     style = "margin-top:0px;margin-left:1%; margin-right:1%"
-                 )
-             ))
+            ),
+            p(
+                tags$h4("Sponsors:"),
+                tags$ul(
+                    tags$li("Design Clinical Study"),
+                    tags$li("Reduce Redundant Studies"),
+                    tags$li("Clinical Site Selection"),
+                    tags$li("Design Study Endpoints"),
+                    tags$li("Explore Collaboration Opportunities"),
+                    tags$li("Competitive Intelligence"),
+                    tags$li("Clinical Trends"),
+                    tags$li("Clinical Industry Landscape")
+                )
+            ),
+            p(tags$h4("Physicians & Patients:"),
+              tags$ul(
+                  tags$li("Participation Opportunities"),
+                  tags$li("Recruiting Studies")
+              )),
+            p(
+                tags$h4("Market & Industry Analysts:"),
+                tags$ul(tags$li("Current Trends"),
+                        tags$li("Market Intelligence"))
+            ),
+            p(
+                tags$h4("Special Interest Organizations:"),
+                tags$ul(tags$li("Global Clinical Activity"),
+                        tags$li("Demographics"))
+            )
+        ),
+        fluidRow((
+            p(
+                "Visit us at  "
+                ,
+                tags$a(href = "https://oakbloc.com", "Oakbloc Technologies", target =
+                           "_blank"),
+                style = "margin-top:0px;margin-left:1%; margin-right:1%"
+            )
+        )),
+        fluidRow((
+            p(
+                "Follow us on Twitter for regular updates  "
+                ,
+                tags$a(href = "https://twitter.com/OakBlocTech", "Twitter", target =
+                           "_blank"),
+                style = "margin-top:0px;margin-left:1%; margin-right:1%"
+            )
+        ))
     ),
     #sponsor Starts Here
     navbarMenu(
         "Sponsor",
-        tabPanel("Engagement",
+        tabPanel("Network",
                  mainPanel(
                      width = 12,
                      tabsetPanel(
                          type = "tabs",
+                         tabPanel("Explore Data",
+                                  fluidRow(
+                                      withSpinner(DT::dataTableOutput("dt_sponsor_collaborator"), type = 3)
+                                  )),
                          tabPanel(
-                             "Partners", 
+                             "Network Tree",
                              fluidRow(
-                                 withSpinner(DT::dataTableOutput("dt_sponsor_collaborator"), type = 3)
+                                 style = "margin-top:2px;",
+                                 column(
+                                     3,
+                                     align = "center",
+                                     textInput(
+                                         inputId = "select_sponsor_coll",
+                                         label = NULL,
+                                         value = "pfizer",
+                                         placeholder = "Sponsor Name"
+                                     )
+                                 ),
+                                 column(9,
+                                        align = "left",
+                                        tags$div(
+                                            class = "text-center",
+                                            actionButton(
+                                                "update_sponsor_collaborator_1",
+                                                "Display Results",
+                                                class = "btn btn-primary",
+                                                style = "margin-bottom: 0.5%;"
+                                            )
+                                        ))
                              ),
-                             
-                         ),
-                         tabPanel(
-                             "Partners",
-                             column(
-                                 12,
-                                 align = "center",
-                                 textInput(
-                                     inputId = "select_sponsor_coll",
-                                     label = NULL,
-                                     #value="pfizer",
-                                     placeholder = "Sponsor Name"
-                                 )
-                             ),
-                             fluidRow(tags$div(
-                                 class = "text-center",
-                                 actionButton(
-                                     "update_sponsor_collaborator_1",
-                                     "Display Results",
-                                     class = "btn btn-primary",
-                                     style = "margin-bottom: 0.5%;"
-                                 )
-                             )),
-                             fluidRow(
-                                 collapsibleTreeOutput("sponsor_coll_tree")
-                             )
-                         ),
-                         tabPanel(
-                             "Sites", 
-                             fluidRow(
-                                 withSpinner(DT::dataTableOutput("dt_sponsor_site"), type = 3)
-                             )
-                         ),
-                         tabPanel(
-                             "Diseases", 
-                             fluidRow(
-                                 withSpinner(DT::dataTableOutput("dt_sponsor_conditions"), type = 3)
-                             )
-                         ),
-                         tabPanel(
-                             "Interventions", 
-                             fluidRow(
-                                 withSpinner(DT::dataTableOutput("dt_sponsor_interventions"), type = 3)
-                             )
+                             fluidRow(withSpinner(
+                                 collapsibleTreeOutput("sponsor_coll_tree"), type = 3
+                             ))
                          )
-                         
                      )
                  )),
         tabPanel("Performance",
                  mainPanel(
                      width = 12,
-                     tabsetPanel(
-                         type = "tabs",
-                         tabPanel(
-                             "Metrics", 
-                             fluidRow(
-                                 withSpinner(DT::dataTableOutput("dt_agg_sponsors"), type = 3)
-                             )
-                         )
-                         
-                     )
+                     tabsetPanel(type = "tabs",
+                                 tabPanel("Metrics",
+                                          fluidRow(
+                                              withSpinner(DT::dataTableOutput("dt_agg_sponsors"), type = 3)
+                                          )))
+                 )),
+        tabPanel("Sites",
+                 mainPanel(
+                     width = 12,
+                     tabsetPanel(type = "tabs",
+                                 tabPanel("Explore Data",
+                                          fluidRow(
+                                              withSpinner(DT::dataTableOutput("dt_sponsor_site"), type = 3)
+                                          )),
+                                 tabPanel(
+                                     "Network Tree",
+                                     fluidRow(
+                                         style = "margin-top:2px;",
+                                         column(
+                                             3,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_site",
+                                                 label = NULL,
+                                                 value = "pfizer",
+                                                 placeholder = "Sponsor Name"
+                                             )
+                                         ),
+                                         column(9,
+                                                align = "left",
+                                                tags$div(
+                                                    class = "text-center",
+                                                    actionButton(
+                                                        "update_sponsor_site_1",
+                                                        "Display Results",
+                                                        class = "btn btn-primary",
+                                                        style = "margin-bottom: 0.5%;"
+                                                    )
+                                                ))
+                                     ),
+                                     fluidRow(withSpinner(
+                                         collapsibleTreeOutput("sponsor_site_tree"), type = 3
+                                     ))
+                                 )
+                                 )
+                 )),
+        tabPanel("Conditions",
+                 mainPanel(
+                     width = 12,
+                     tabsetPanel(type = "tabs",
+                                 tabPanel("Explore Data",
+                                          fluidRow(
+                                              withSpinner(DT::dataTableOutput("dt_sponsor_conditions"), type = 3)
+                                          )),
+                                 tabPanel(
+                                     "Network Tree",
+                                     fluidRow(
+                                         style = "margin-top:2px;",
+                                         column(
+                                             3,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_cond",
+                                                 label = NULL,
+                                                 value = "pfizer",
+                                                 placeholder = "Sponsor Name"
+                                             )
+                                         ),
+                                         column(9,
+                                                align = "left",
+                                                tags$div(
+                                                    class = "text-center",
+                                                    actionButton(
+                                                        "update_sponsor_cond_1",
+                                                        "Display Results",
+                                                        class = "btn btn-primary",
+                                                        style = "margin-bottom: 0.5%;"
+                                                    )
+                                                ))
+                                     ),
+                                     fluidRow(withSpinner(
+                                         collapsibleTreeOutput("sponsor_cond_tree"), type = 3
+                                     ))
+                                 )
+                                 )
+                 )),
+        tabPanel("Interventions",
+                 mainPanel(
+                     width = 12,
+                     tabsetPanel(type = "tabs",
+                                 tabPanel("Explore Data",
+                                          fluidRow(
+                                              withSpinner(DT::dataTableOutput("dt_sponsor_interventions"), type = 3)
+                                          )))
                  ))
-        
-        
     ),
-    
+    navbarMenu("Collaborator",
+               tabPanel(
+                   "Network",
+                   mainPanel(width = 12,
+                             tabsetPanel(
+                                 type = "tabs",
+                                 tabPanel("Data Table",
+                                          fluidRow(
+                                              withSpinner(DT::dataTableOutput("dt_collaborator_sponsor"), type = 3)
+                                          )),
+                                 tabPanel(
+                                     "Network",
+                                     fluidRow(
+                                         style = "margin-top:2px;",
+                                         column(
+                                             3,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_coll_sponsor",
+                                                 label = NULL,
+                                                 value = "quintiles",
+                                                 placeholder = "Collaborator Name"
+                                             )
+                                         ),
+                                         column(9,
+                                                align = "left",
+                                                tags$div(
+                                                    class = "text-center",
+                                                    actionButton(
+                                                        "update_collaborator_sponsor_1",
+                                                        "Display Results",
+                                                        class = "btn btn-primary",
+                                                        style = "margin-bottom: 0.5%;"
+                                                    )
+                                                ))
+                                     ),
+                                     fluidRow(withSpinner(
+                                         collapsibleTreeOutput("coll_sponsor_tree"), type = 3
+                                     ))
+                                 )
+                             ))
+               )),
     #Recruitment Dashboard starts here
     navbarMenu(
         "Recruitment",
@@ -486,10 +600,9 @@ ui <- navbarPage(
                                          inputId = "select_studyphase_name_world",
                                          label = NULL,
                                          choices = var_studyphase_name,
-                                         options = list(`actions-box` = TRUE, style = "btn-info"
-                                         ),
+                                         options = list(`actions-box` = TRUE, style = "btn-info"),
                                          multiple = TRUE,
-                                         selected=c(var_studyphase_name)
+                                         selected = c(var_studyphase_name)
                                      )
                                  ),
                                  column(
@@ -498,7 +611,7 @@ ui <- navbarPage(
                                      textInput(
                                          inputId = "select_condition_map_world",
                                          label = NULL,
-                                         value="covid-19",
+                                         value = "covid-19",
                                          placeholder = "Disease Name"
                                      )
                                  ),
@@ -512,7 +625,7 @@ ui <- navbarPage(
                                          label = NULL,
                                          placeholder = "City Name"
                                      )
-                                 ),    
+                                 ),
                                  
                                  column(
                                      3,
@@ -545,11 +658,11 @@ ui <- navbarPage(
                              fluidRow(withSpinner(leafletOutput("plot_1020"), type = 3))
                              
                          ),
-                         tabPanel(
-                             "Table Details",
-                             #display recriting studies data table
-                             withSpinner(DT::dataTableOutput("dt_recruitment_1005"), type = 3)
-                         )
+                         tabPanel("Table Details",
+                                  #display recriting studies data table
+                                  withSpinner(
+                                      DT::dataTableOutput("dt_recruitment_1005"), type = 3
+                                  ))
                          
                      )
                      
@@ -661,25 +774,25 @@ ui <- navbarPage(
     ,
     navbarMenu(
         "Study",
-        tabPanel(
-            "Trends",
-            tabsetPanel(
-                type = "tabs",
-                tabPanel("Yearly",
-                         mainPanel(
-                             width = 12,
-                             fluidRow(tags$h4("Previous vs Current Year Trends")),
-                             fluidRow(
-                                 box(plotlyOutput("plot_1001", height = 200), title = "Studies Registered"),
-                                 box(plotlyOutput("plot_1002", height = 200), title = "Studies Started")
-                             ),
-                             #create box for plot 1001
-                             fluidRow(
-                                 box(plotlyOutput("plot_1003", height = 200), title = "Studies Completed"),
-                                 box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
-                             )
-                         )),
-                tabPanel("Monthly",
+        tabPanel("Trends",
+                 tabsetPanel(
+                     type = "tabs",
+                     tabPanel("Yearly",
+                              mainPanel(
+                                  width = 12,
+                                  fluidRow(tags$h4("Previous vs Current Year Trends")),
+                                  fluidRow(
+                                      box(plotlyOutput("plot_1001", height = 200), title = "Studies Registered"),
+                                      box(plotlyOutput("plot_1002", height = 200), title = "Studies Started")
+                                  ),
+                                  #create box for plot 1001
+                                  fluidRow(
+                                      box(plotlyOutput("plot_1003", height = 200), title = "Studies Completed"),
+                                      box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
+                                  )
+                              )),
+                     tabPanel(
+                         "Monthly",
                          mainPanel(
                              width = 12,
                              fluidRow(tags$h4("Historical trend for last 10 years")),
@@ -692,21 +805,17 @@ ui <- navbarPage(
                                  box(plotlyOutput("plot_month_1003", height = 200), title = "Studies Completed"),
                                  box(plotlyOutput("plot_month_1004", height = 200), title = "Results Posted")
                              )
-                         ))
-            )),
+                         )
+                     )
+                 )),
         tabPanel("Design",
                  mainPanel(
                      width = 12,
-                     tabsetPanel(
-                         type = "tabs",
-                         tabPanel(
-                             "Measurements", 
-                             fluidRow(
-                                 withSpinner(DT::dataTableOutput("dt_measurements"), type = 3)
-                             )
-                         )
-                         
-                     )
+                     tabsetPanel(type = "tabs",
+                                 tabPanel("Measurements",
+                                          fluidRow(
+                                              withSpinner(DT::dataTableOutput("dt_measurements"), type = 3)
+                                          )))
                  ))
     )
     
@@ -718,38 +827,122 @@ ui <- navbarPage(
 ###########################################################################################################
 
 server <- function(input, output) {
-    
     ####################################################
     #SERVER Begins
-    #############################################################################################  
+    #############################################################################################
     
     #reactive dataset for sponsor-collaborator
     sponsor_coll_tree_data <-
         eventReactive(input$update_sponsor_collaborator_1, {
-            
             #createleaflet plot 1020 based on reactive set
             subset(
                 r_sponsor_collaborator,
-                select=c("Sponsor","Collaborator","cnt_studies"),
-                subset = (
-                    casefold(Sponsor) %in% casefold(input$select_sponsor_coll)
-                ))
+                select = c(
+                    "Sponsor",
+                    "CollaboratorType",
+                    "studyPhase",
+                    "Collaborator",
+                    "cnt_studies"
+                ),
+                subset = (casefold(Sponsor) %like% casefold(c(
+                    input$select_sponsor_coll
+                )))
+            )
         })
     
-    output$sponsor_coll_tree<- renderCollapsibleTree({
+    output$sponsor_coll_tree <- renderCollapsibleTree({
         sponsor_coll_tree_data() %>%
-            group_by(sponsor_coll_tree_data()$Sponsor, sponsor_coll_tree_data()$Collaborator, sponsor_coll_tree_data()$cnt_studies) %>%
+            group_by(
+                sponsor_coll_tree_data()$Sponsor,
+                sponsor_coll_tree_data()$CollaboratorType,
+                sponsor_coll_tree_data()$studyPhase,
+                sponsor_coll_tree_data()$Collaborator,
+                sponsor_coll_tree_data()$cnt_studies
+            ) %>%
             summarise("Number of Collaborators" = n()) %>%
             collapsibleTreeSummary(
-                hierarchy = c("sponsor_coll_tree_data()$Sponsor", "sponsor_coll_tree_data()$Collaborator", "sponsor_coll_tree_data()$cnt_studies"),
+                hierarchy = c(
+                    "sponsor_coll_tree_data()$Sponsor",
+                    "sponsor_coll_tree_data()$CollaboratorType",
+                    "sponsor_coll_tree_data()$studyPhase",
+                    "sponsor_coll_tree_data()$Collaborator",
+                    "sponsor_coll_tree_data()$cnt_studies"
+                ),
                 root = "Sponsor",
-                width = 700,
+                width = 800,
                 attribute = c("Number of Collaborators"),
-                zoomable = FALSE)
+                zoomable = TRUE
+            )
         
     })
     
+    #reactive dataset for sponsor-collaborator
+    coll_sponsor_tree_data <-
+        eventReactive(input$update_collaborator_sponsor_1, {
+            #createleaflet plot 1020 based on reactive set
+            subset(
+                r_sponsor_collaborator,
+                select = c(
+                    "Sponsor",
+                    "sponsorType",
+                    "studyPhase",
+                    "Collaborator",
+                    "cnt_studies"
+                ),
+                subset = (casefold(Collaborator) %like% casefold(c(
+                    input$select_coll_sponsor
+                )))
+            )
+        })
     
+    output$coll_sponsor_tree <- renderCollapsibleTree({
+        coll_sponsor_tree_data() %>%
+            group_by(
+                coll_sponsor_tree_data()$Collaborator,
+                coll_sponsor_tree_data()$sponsorType,
+                coll_sponsor_tree_data()$studyPhase,
+                coll_sponsor_tree_data()$Sponsor,
+                coll_sponsor_tree_data()$cnt_studies
+            ) %>%
+            summarise("Number of Sponsors" = n()) %>%
+            collapsibleTreeSummary(
+                hierarchy = c(
+                    "coll_sponsor_tree_data()$Collaborator",
+                    "coll_sponsor_tree_data()$sponsorType",
+                    "coll_sponsor_tree_data()$studyPhase",
+                    "coll_sponsor_tree_data()$Sponsor",
+                    "coll_sponsor_tree_data()$cnt_studies"
+                ),
+                root = "Collaborator",
+                width = 800,
+                attribute = c("Number of Sponsors"),
+                zoomable = TRUE
+            )
+        
+    })
+    
+    #reactive dataset for Collaborator network
+    output$dt_collaborator_sponsor <- renderDataTable({
+        r_collaborator_sponsor <- subset(
+            r_sponsor_collaborator,
+            select = c(
+                "Collaborator",
+                "CollaboratorType",
+                "Sponsor",
+                "sponsorType",
+                "studyPhase",
+                "cnt_studies"
+            )
+        )
+        
+        DT::datatable(
+            r_collaborator_sponsor,
+            filter = 'top',
+            escape = FALSE,
+            rownames = FALSE,
+            options = list(lengthChange = FALSE)
+        )
+    })
     
     #reactive dataset for measurements by conditions
     output$dt_measurements <- renderDataTable({
@@ -758,8 +951,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE
-            )
+            options = list(lengthChange = FALSE)
         )
     })
     
@@ -770,9 +962,64 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE
-            )
+            options = list(lengthChange = FALSE)
         )
+    })
+    #######################################################
+    #reactive dataset for sponsor-site
+    sponsor_site_tree_data <-
+        eventReactive(input$update_sponsor_site_1, {
+            #createleaflet plot 1020 based on reactive set
+            subset(
+                r_sponsor_site,
+                select = c(
+                    "Sponsor",
+                    "StudyYear",
+                    "Country",
+                    "State",
+                    "City",
+                    "FacilityType",
+                    "studyPhase",
+                    "Facility",
+                    "cnt_studies"
+                ),
+                subset = (casefold(Sponsor) %like% casefold(c(
+                    input$select_sponsor_site
+                )))
+            )
+        })
+    
+    output$sponsor_site_tree <- renderCollapsibleTree({
+        sponsor_site_tree_data() %>%
+            group_by(
+                sponsor_site_tree_data()$Sponsor,
+                sponsor_site_tree_data()$studyPhase,
+                sponsor_site_tree_data()$StudyYear,
+                sponsor_site_tree_data()$FacilityType,
+                sponsor_site_tree_data()$Country,
+                sponsor_site_tree_data()$State,
+                sponsor_site_tree_data()$City,
+                sponsor_site_tree_data()$Facility,
+                sponsor_site_tree_data()$cnt_studies
+            ) %>%
+            summarise("Number of Sites" = n()) %>%
+            collapsibleTreeSummary(
+                hierarchy = c(
+                    "sponsor_site_tree_data()$Sponsor",
+                    "sponsor_site_tree_data()$studyPhase",
+                    "sponsor_site_tree_data()$StudyYear",
+                    "sponsor_site_tree_data()$FacilityType",
+                    "sponsor_site_tree_data()$Country",
+                    "sponsor_site_tree_data()$State",
+                    "sponsor_site_tree_data()$City",
+                    "sponsor_site_tree_data()$Facility",
+                    "sponsor_site_tree_data()$cnt_studies"
+                ),
+                root = "Sponsor",
+                width = 800,
+                attribute = c("Number of Sites"),
+                zoomable = TRUE
+            )
     })
     
     output$dt_sponsor_site <- renderDataTable({
@@ -781,9 +1028,59 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE
-            )
+            options = list(lengthChange = FALSE)
         )
+    })
+    
+    #########################################################
+    
+    #######################################################
+    #reactive dataset for sponsor-condition
+    sponsor_cond_tree_data <-
+        eventReactive(input$update_sponsor_cond_1, {
+            #createleaflet plot 1020 based on reactive set
+            subset(
+                r_sponsor_conditions,
+                select = c(
+                    "Sponsor",
+                    "studyPhase",
+                    "StudyYear",
+                    "StartWord",
+                    "Condition",
+                    "cnt_studies"
+                ),
+                subset = (casefold(Sponsor) %like% casefold(c(
+                    input$select_sponsor_cond
+                )))
+            )
+        })
+    
+    output$sponsor_cond_tree <- renderCollapsibleTree({
+        sponsor_cond_tree_data() %>%
+            group_by(
+                sponsor_cond_tree_data()$Sponsor,
+                sponsor_cond_tree_data()$studyPhase,
+                sponsor_cond_tree_data()$StudyYear,
+                sponsor_cond_tree_data()$StartWord,
+                sponsor_cond_tree_data()$Condition,
+                sponsor_cond_tree_data()$cnt_studies
+            ) %>%
+            summarise("Number of Conditions" = n()) %>%
+            collapsibleTreeSummary(
+                hierarchy = c(
+                    "sponsor_cond_tree_data()$Sponsor",
+                    "sponsor_cond_tree_data()$studyPhase",
+                    "sponsor_cond_tree_data()$StudyYear",
+                    "sponsor_cond_tree_data()$StartWord",
+                    "sponsor_cond_tree_data()$Condition",
+                    "sponsor_cond_tree_data()$cnt_studies"
+                ),
+                root = "Sponsor",
+                width = 800,
+                height = 1000,
+                attribute = c("Number of Conditions"),
+                zoomable = TRUE
+            )
     })
     
     output$dt_sponsor_conditions <- renderDataTable({
@@ -792,10 +1089,12 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE
-            )
+            options = list(lengthChange = FALSE)
         )
     })
+    
+    #########################################################
+    
     
     output$dt_sponsor_interventions <- renderDataTable({
         DT::datatable(
@@ -803,8 +1102,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE
-            )
+            options = list(lengthChange = FALSE)
         )
     })
     
@@ -815,8 +1113,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE
-            )
+            options = list(lengthChange = FALSE)
         )
     })
     
@@ -827,7 +1124,6 @@ server <- function(input, output) {
     #reactive dataset for maps with reduced columns
     mv_studies_recruiting_map_world <-
         eventReactive(input$update_global, {
-            
             #createleaflet plot 1020 based on reactive set
             subset(
                 mv_studies_recruiting,
@@ -892,11 +1188,11 @@ server <- function(input, output) {
                     zoom = 2.2) %>%
             addProviderTiles(providers$CartoDB.Positron,
                              options = providerTileOptions(noWrap = TRUE)) %>%
-            addMarkers(~ longitude,
-                       ~ latitude,
-                       popup = f_labels_1020(),
-                       #label = f_labels_1014(),
-                       clusterOptions = markerClusterOptions())
+            addMarkers( ~ longitude,
+                        ~ latitude,
+                        popup = f_labels_1020(),
+                        #label = f_labels_1014(),
+                        clusterOptions = markerClusterOptions())
     })
     
     #create choropleth plot 1016 world map
@@ -978,10 +1274,10 @@ server <- function(input, output) {
                     zoom = 2) %>%
             addProviderTiles(providers$CartoDB.Positron,
                              options = providerTileOptions(noWrap = TRUE)) %>%
-            addMarkers(~ longitude,
-                       ~ latitude,
-                       label = labels_1013,
-                       clusterOptions = markerClusterOptions())
+            addMarkers( ~ longitude,
+                        ~ latitude,
+                        label = labels_1013,
+                        clusterOptions = markerClusterOptions())
     })
     
     #createleaflet only US plot 1012
@@ -1001,10 +1297,10 @@ server <- function(input, output) {
                     zoom = 4.4) %>%
             addProviderTiles(providers$CartoDB.Positron,
                              options = providerTileOptions(noWrap = TRUE)) %>%
-            addMarkers(~ longitude,
-                       ~ latitude,
-                       label = labels_1012,
-                       clusterOptions = markerClusterOptions())
+            addMarkers( ~ longitude,
+                        ~ latitude,
+                        label = labels_1012,
+                        clusterOptions = markerClusterOptions())
     })
     
     
@@ -1307,9 +1603,11 @@ server <- function(input, output) {
     
     #cteate plot 1007
     output$plot_1007 <- renderPlotly({
-        plot_geo(mv_studies_recruiting_loc,
-                 lat = ~ latitude,
-                 lon = ~ longitude) %>%
+        plot_geo(
+            mv_studies_recruiting_loc,
+            lat = ~ latitude,
+            lon = ~ longitude
+        ) %>%
             add_markers(
                 text = ~ paste(city, iso3, paste("Studies:", cnt_studies), sep = "<br />"),
                 color = ~ cnt_studies,
@@ -1411,11 +1709,16 @@ server <- function(input, output) {
                 type = 'bar',
                 text =  ~ cnt_reg_lstYr,
                 textposition = 'auto',
-                name="Previous",
-                showlegend = FALSE) %>%
-            add_trace(y =  ~ cnt_reg_CurrYr, text =  ~ cnt_reg_CurrYr, name="Current") %>%
-            layout(xaxis=list(title="")) %>%
-            layout(yaxis=list(title=""))
+                name = "Previous",
+                showlegend = FALSE
+            ) %>%
+            add_trace(
+                y =  ~ cnt_reg_CurrYr,
+                text =  ~ cnt_reg_CurrYr,
+                name = "Current"
+            ) %>%
+            layout(xaxis = list(title = "")) %>%
+            layout(yaxis = list(title = ""))
     })
     
     #cteate plot month_1002
@@ -1427,11 +1730,16 @@ server <- function(input, output) {
                 type = 'bar',
                 text =  ~ cnt_started_lstYr,
                 textposition = 'auto',
-                name="Previous",
-                showlegend = FALSE) %>%
-            add_trace(y =  ~ cnt_started_CurrYr, text =  ~ cnt_started_CurrYr, name="Current") %>%
-            layout(xaxis=list(title="")) %>%
-            layout(yaxis=list(title=""))
+                name = "Previous",
+                showlegend = FALSE
+            ) %>%
+            add_trace(
+                y =  ~ cnt_started_CurrYr,
+                text =  ~ cnt_started_CurrYr,
+                name = "Current"
+            ) %>%
+            layout(xaxis = list(title = "")) %>%
+            layout(yaxis = list(title = ""))
     })
     
     #cteate plot month_1003
@@ -1443,11 +1751,16 @@ server <- function(input, output) {
                 type = 'bar',
                 text =  ~ cnt_completed_lstYr,
                 textposition = 'auto',
-                name="Previous",
-                showlegend = FALSE) %>%
-            add_trace(y =  ~ cnt_completed_CurrYr, text =  ~ cnt_completed_CurrYr, name="Current") %>%
-            layout(xaxis=list(title="")) %>%
-            layout(yaxis=list(title=""))
+                name = "Previous",
+                showlegend = FALSE
+            ) %>%
+            add_trace(
+                y =  ~ cnt_completed_CurrYr,
+                text =  ~ cnt_completed_CurrYr,
+                name = "Current"
+            ) %>%
+            layout(xaxis = list(title = "")) %>%
+            layout(yaxis = list(title = ""))
     })
     
     #cteate plot month_1004
@@ -1459,11 +1772,16 @@ server <- function(input, output) {
                 type = 'bar',
                 text =  ~ cnt_posted_lstYr,
                 textposition = 'auto',
-                name="Previous",
-                showlegend = FALSE) %>%
-            add_trace(y =  ~ cnt_posted_CurrYr, text =  ~ cnt_posted_CurrYr, name="Current") %>%
-            layout(xaxis=list(title="")) %>%
-            layout(yaxis=list(title=""))
+                name = "Previous",
+                showlegend = FALSE
+            ) %>%
+            add_trace(
+                y =  ~ cnt_posted_CurrYr,
+                text =  ~ cnt_posted_CurrYr,
+                name = "Current"
+            ) %>%
+            layout(xaxis = list(title = "")) %>%
+            layout(yaxis = list(title = ""))
     })
     
     ####################server ends###########################
