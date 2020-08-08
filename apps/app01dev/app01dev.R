@@ -120,15 +120,6 @@ mv_studies_recruiting_loc <-
 mv_studies_recruiting_loc_US <-
     subset.data.frame(mv_studies_recruiting_loc, subset = (iso3 == "USA" &
                                                                length(latitude) > 0))
-agg_Studiesbyconditions <-
-    read.csv(
-        "data/agg_conditions_recruiting.txt",
-        header = TRUE,
-        sep = "|",
-        na.strings = "NA",
-        nrows = 5000,
-        stringsAsFactors = FALSE
-    )
 
 #import recruiting data
 mv_studies_recruiting <-
@@ -147,7 +138,6 @@ mv_studies_recruiting_table <-
     subset.data.frame(
         mv_studies_recruiting,
         select = c(
-            "ID",
             "nct_id",
             "Condition",
             "Title",
@@ -173,28 +163,7 @@ mv_studies_recruiting_table <-
         )
     )
 
-#recruiting data at study level
-mv_recruiting_studylevel <-
-    data.table(mv_studies_recruiting)[, list(
-        totalFacilities = unique(CntSites),
-        cnt_cities = length(unique(city)),
-        cnt_countries = length(unique(country)),
-        cnt_recFacilities = length(unique(Facility)),
-        Condition = unique(Condition),
-        Title = unique(Title),
-        DataMonitoring = unique(DataMonitoring),
-        RareDisease = unique(RareDisease),
-        StudyPhase = unique(StudyPhase),
-        Sponsor = unique(Sponsor),
-        StudyType = unique(StudyType),
-        PostedYrMon = unique(PostedYrMon),
-        StartYrMon = unique(StartYrMon),
-        RegToStartDays = unique(RegToStartDays),
-        AgencyClass = unique(AgencyClass),
-        SponsorType = unique(SponsorType),
-        CntConditions = unique(CntConditions),
-        InterventionType = unique(InterventionType)
-    ), by = 'nct_id']
+
 
 #recruiting data at sponsor level
 rec_sponsors <-
@@ -214,7 +183,6 @@ options(spinner.color.background = "#772953")
 options(spinner.size = 1.5)
 
 ui <- navbarPage(
-    #title = div(img(src="https://www.oakbloc.com/images/Oakbloc_transparent.png")),
     title = div(
         tags$a(
             href = "https://www.oakbloc.com",
@@ -304,6 +272,76 @@ ui <- navbarPage(
     #sponsor Starts Here
     navbarMenu(
         "Sponsor",
+        tabPanel("Summary",
+                 mainPanel(
+                     width = 12,
+                     tabsetPanel(
+                         type = "tabs",
+                         tabPanel(
+                             "Summary",
+                             fluidRow(
+                                 column(align = "center", style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("sponsorbox_cnt_sponsors", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("sponsorbox_cnt_sponsors_Ind", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("sponsorbox_cnt_sponsors_Hosp", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("sponsorbox_cnt_sponsors_Acad", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("sponsorbox_cnt_sponsors_Rec", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("sponsorbox_cnt_sponsors_Global", width = 2)
+                                 )
+                             ),
+                             
+                             fluidRow(
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     plotlyOutput("plot_1008_na")
+                                 ),
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     plotlyOutput("plot_1008_2_na")
+                                 )
+                             ),
+                             fluidRow(
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     plotlyOutput("plot_1008_3_na")
+                                 ),
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     plotlyOutput("plot_1008_4_na")
+                                 )
+                             )
+                         ),
+                         #summary tab ends here
+                         tabPanel("Data",
+                                  fluidRow(DT::dataTableOutput("dt_recruitment_na")))
+                     )
+                 )),
         tabPanel("Network",
                  mainPanel(
                      width = 12,
@@ -497,82 +535,59 @@ ui <- navbarPage(
                          tabPanel(
                              "Summary",
                              fluidRow(
-                                 style = "height:50px;background-color: orange; padding: 5px; border-style: solid; border-width: 1px;",
-                                 column(
-                                     12,
-                                     shinydashboard::valueBoxOutput("box_studies", width = 2),
-                                     shinydashboard::valueBoxOutput("box_sponsors", width = 2),
-                                     shinydashboard::valueBoxOutput("box_countries", width = 2),
-                                     shinydashboard::valueBoxOutput("box_cities", width = 2),
+                                 column(align = "center", style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                     3,
+                                     shinydashboard::valueBoxOutput("box_studies", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                     3,
+                                     shinydashboard::valueBoxOutput("box_sponsors", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                     2,
+                                     shinydashboard::valueBoxOutput("box_countries", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                     2,
+                                     shinydashboard::valueBoxOutput("box_cities", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                     2,
                                      shinydashboard::valueBoxOutput("box_facilities", width = 2)
                                  )
                              ),
                              
                              fluidRow(
-                                 style = "padding: 5px; border-style: solid; border-width: 1px;",
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
                                  column(
                                      6,
                                      align = "left",
-                                     style = "border-right: 1px solid",
+                                     style = "border: 0.3px solid",
                                      plotlyOutput("plot_1008")
                                  ),
                                  column(
                                      6,
                                      align = "left",
-                                     style = "border-left: 1px solid;",
+                                     style = "border: 0.3px solid;",
                                      plotlyOutput("plot_1008_2")
                                  )
                              ),
                              fluidRow(
-                                 style = "padding: 5px; border-style: solid; border-width: 1px;",
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
                                  column(
                                      6,
                                      align = "left",
-                                     style = "border-right: 1px solid",
+                                     style = "border: 0.3px solid",
                                      plotlyOutput("plot_1008_3")
                                  ),
                                  column(
                                      6,
                                      align = "left",
-                                     style = "border-left: 1px solid;",
+                                     style = "border: 0.3px solid;",
                                      plotlyOutput("plot_1008_4")
                                  )
                              )
                          ),
-                         tabPanel(
-                             "Summary 2",
-                             fluidRow(
-                                 style = "padding: 5px; border-style: solid; border-width: 1px;",
-                                 column(
-                                     6,
-                                     align = "left",
-                                     style = "border-right: 1px solid",
-                                     plotlyOutput("plot_1008_5")
-                                 ),
-                                 column(
-                                     6,
-                                     align = "left",
-                                     style = "border-left: 1px solid;",
-                                     plotlyOutput("plot_1008_6")
-                                 )
-                             ),
-                             fluidRow(
-                                 style = "padding: 5px; border-style: solid; border-width: 1px;",
-                                 column(
-                                     6,
-                                     align = "left",
-                                     style = "border-right: 1px solid",
-                                     plotlyOutput("plot_1008_31")
-                                 ),
-                                 column(
-                                     6,
-                                     align = "left",
-                                     style = "border-left: 1px solid;",
-                                     plotlyOutput("plot_1008_41")
-                                 )
-                             )
-                         ),
-                         #Summary tab 2 ends here
                          #summary tab ends here
                          tabPanel("Data",
                                   fluidRow(DT::dataTableOutput("dt_recruitment")))
@@ -759,16 +774,6 @@ ui <- navbarPage(
                                       DT::dataTableOutput("dt_sponsor_recruitment")
                                   ))
                      )
-                 )),
-        tabPanel("Conditions",
-                 mainPanel(
-                     width = 12,
-                     tabsetPanel(type = "tabs",
-                                 tabPanel("Studies",
-                                          fluidRow(
-                                              plotOutput("plot_1009")
-                                          )))
-                     
                  ))
     )
     ,
@@ -831,6 +836,51 @@ server <- function(input, output) {
     #SERVER Begins
     #############################################################################################
     
+    #Create infobox for sponsor dashboard
+    summ_sponsor <- data.frame(        
+        cnt_sponsors = length(unique(agg_sponsors$lead_sponsor_name)),
+        cnt_sponsors_Ind = sum(ifelse(agg_sponsors$agency_class == "Industry", 1, 0), na.rm = TRUE),
+        cnt_sponsors_Hosp = sum(ifelse(agg_sponsors$sponsor_type == "Hospital", 1, 0), na.rm = TRUE),
+        cnt_sponsors_Acad = sum(ifelse(agg_sponsors$sponsor_type == "Academic", 1, 0), na.rm = TRUE),
+        cnt_sponsors_Rec = sum(ifelse(agg_sponsors$cnt_recruiting_status >= 1, 1, 0), na.rm = TRUE),
+        cnt_sponsors_Global = sum(ifelse(agg_sponsors$cnt_global_studies >= 1, 1, 0), na.rm = TRUE)
+    )
+    
+    output$sponsorbox_cnt_sponsors <- shinydashboard::renderValueBox({
+        valueBox("Total",
+                 summ_sponsor$cnt_sponsors
+        )
+    })
+    
+    output$sponsorbox_cnt_sponsors_Ind <- shinydashboard::renderValueBox({
+        valueBox("Industry",
+                 summ_sponsor$cnt_sponsors_Ind
+                 #icon = icon("credit-card")
+        )
+    })
+    
+    output$sponsorbox_cnt_sponsors_Hosp <- shinydashboard::renderValueBox({
+        valueBox("Hospital",
+                 summ_sponsor$cnt_sponsors_Hosp
+        )
+    })
+    
+    output$sponsorbox_cnt_sponsors_Acad <- shinydashboard::renderValueBox({
+        valueBox("Academic",
+                 summ_sponsor$cnt_sponsors_Acad)
+    })
+    
+    output$sponsorbox_cnt_sponsors_Rec <- shinydashboard::renderValueBox({
+        valueBox("Recruiting",
+                 summ_sponsor$cnt_sponsors_Rec)
+    })
+    
+    output$sponsorbox_cnt_sponsors_Global <- shinydashboard::renderValueBox({
+        valueBox("Global",
+                 summ_sponsor$cnt_sponsors_Global)
+    })
+    
+    ####################################################################
     #reactive dataset for sponsor-collaborator
     sponsor_coll_tree_data <-
         eventReactive(input$update_sponsor_collaborator_1, {
@@ -1304,25 +1354,6 @@ server <- function(input, output) {
     })
     
     
-    #Create wordcloud plot 1009
-    output$plot_1009 <- renderPlot({
-        wordcloud(
-            words = agg_Studiesbyconditions$condition_name,
-            freq = agg_Studiesbyconditions$cnt_recruitingstudies,
-            scale = c(3, 0.5),
-            min.freq = 1,
-            max.words = 500,
-            random.order = FALSE,
-            random.color = FALSE,
-            rot.per = 0,
-            fixed.asp = FALSE,
-            #textStemming=TRUE,
-            #excludeWords=c("Disease","Syndrome"),
-            colors = brewer.pal(8, "Dark2")
-        )
-    })
-    
-    
     #create plot 1008
     output$plot_1008 <- renderPlotly({
         mv_studies_recruiting_table %>%
@@ -1427,72 +1458,33 @@ server <- function(input, output) {
     )
     
     output$box_studies <- shinydashboard::renderValueBox({
-        infoBox("Studies: ",
-                summ_rec$cnt_studies,
-                icon = icon("credit-card"))
+        valueBox("Studies",
+                summ_rec$cnt_studies
+                )
     })
     
     output$box_sponsors <- shinydashboard::renderValueBox({
-        infoBox("Sponsors: ",
-                summ_rec$cnt_sponsors,
-                icon = icon("credit-card"))
+        valueBox("Sponsors",
+                summ_rec$cnt_sponsors
+                #icon = icon("credit-card")
+                )
     })
     
     output$box_countries <- shinydashboard::renderValueBox({
-        infoBox("Countries: ",
-                summ_rec$cnt_countries,
-                icon = icon("credit-card"))
+        valueBox("Countries",
+                summ_rec$cnt_countries
+                )
     })
     
     output$box_cities <- shinydashboard::renderValueBox({
-        infoBox("Cities: ",
-                summ_rec$cnt_cities,
-                icon = icon("credit-card"))
+        valueBox("Cities",
+                summ_rec$cnt_cities)
     })
     
     output$box_facilities <- shinydashboard::renderValueBox({
-        infoBox("Facilities: ",
-                summ_rec$cnt_facilities,
-                icon = icon("credit-card"))
+        valueBox("Facilities",
+                summ_rec$cnt_facilities)
     })
-    
-    #Recruitment - Summary2
-    #create plot 1008_5
-    output$plot_1008_5 <- renderPlotly({
-        plot_ly(
-            data = mv_recruiting_studylevel,
-            x = ~ RegToStartDays,
-            type = "histogram",
-            histfunc = "count",
-            histnorm = ""
-        )
-    })
-    
-    #create plot 1008_6
-    output$plot_1008_6 <- renderPlotly({
-        plot_ly() %>%
-            add_trace(
-                data = mv_recruiting_studylevel,
-                x =  ~ RegToStartDays,
-                y =  ~ totalFacilities,
-                type = "scatter",
-                mode = "markers",
-                color = ~ StudyType,
-                text = ~ paste(
-                    paste("Study ID:", nct_id),
-                    paste("Sponsor:", Sponsor),
-                    paste("Num of Sites:", totalFacilities),
-                    paste("Lead Time:", RegToStartDays),
-                    sep = "<br />"
-                ),
-                hoverinfo = 'text'
-            ) %>%
-            layout(
-                xaxis = list(title = "Days (Reg to Study Start)", showgrid = TRUE),
-                yaxis = list(title = "Number of Sites", showgrid = TRUE)
-            )
-    })
-    
     
     
     #create plot 1030 - for Recruiting-sponsor
