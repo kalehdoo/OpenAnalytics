@@ -41,6 +41,26 @@ agg_sponsors <-
         stringsAsFactors = FALSE
     )
 
+agg_sponsors_by_time <-
+    read.csv(
+        "data/agg_sponsors_by_time.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
+
+agg_sponsorstype_by_time <-
+    read.csv(
+        "data/agg_sponsorstype_by_time.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
+
 #read sponsor network data
 r_sponsor_collaborator <-
     read.csv(
@@ -213,7 +233,7 @@ ui <- navbarPage(
     tabPanel(
         title = "Home",
         fluidRow((
-            h3("Kalehdoo Clinical Analytics Platform", style = "margin-top:0px;margin-left:5%; margin-right:5%")
+            h3("Kalehdoo Clinical Analytics Platform (Under Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
         )),
         fluidRow(
             style = "margin-top:0px;margin-left:1%; margin-right:1%",
@@ -259,6 +279,15 @@ ui <- navbarPage(
                 style = "margin-top:0px;margin-left:1%; margin-right:1%"
             )
         )),
+        fluidRow(
+            h5(
+                "Disclaimer: The source data for the application is obtained from ",
+                tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
+                           "_blank"),
+                "Oakbloc Technologies tries to keep the data as accurate as possible. However, there are chances of mistakes and inaccuracies which is solely unintentional. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information by anyone. Please use at your own risk.",
+                style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:2%; text-align:justify;"
+            )
+        ),
         fluidRow((
             p(
                 "Follow us on Twitter for regular updates  "
@@ -312,13 +341,13 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid",
-                                     plotlyOutput("plot_1008_na")
+                                     plotlyOutput("plot_sp_sum_1111")
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid;",
-                                     plotlyOutput("plot_1008_2_na")
+                                     plotlyOutput("plot_sp_sum_1112")
                                  )
                              ),
                              fluidRow(
@@ -327,13 +356,79 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid",
-                                     plotlyOutput("plot_1008_3_na")
+                                     plotlyOutput("plot_sp_sum_1113")
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid;",
-                                     plotlyOutput("plot_1008_4_na")
+                                     plotlyOutput("plot_sp_sum_1114")
+                                 )
+                             )
+                         ),
+                         tabPanel(
+                             "Industry Share",
+                             fluidRow(
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     plotlyOutput("plot_sp_sum_1121")
+                                 ),
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     plotlyOutput("plot_sp_sum_1122")
+                                 )
+                             ),
+                             fluidRow(
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     plotlyOutput("plot_sp_sum_1123")
+                                 ),
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     plotlyOutput("plot_sp_sum_1124")
+                                 )
+                             )
+                         ),
+                         tabPanel(
+                             "Industry Trend",
+                             fluidRow(
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     plotlyOutput("plot_sp_sum_1131")
+                                 ),
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     plotlyOutput("plot_sp_sum_1132")
+                                 )
+                             ),
+                             fluidRow(
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     plotlyOutput("plot_sp_sum_1133")
+                                 ),
+                                 column(
+                                     6,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     plotlyOutput("plot_sp_sum_1134")
                                  )
                              )
                          ),
@@ -356,7 +451,7 @@ ui <- navbarPage(
                              fluidRow(
                                  style = "margin-top:2px;",
                                  column(
-                                     3,
+                                     5,
                                      align = "center",
                                      textInput(
                                          inputId = "select_sponsor_coll",
@@ -365,7 +460,17 @@ ui <- navbarPage(
                                          placeholder = "Sponsor Name"
                                      )
                                  ),
-                                 column(9,
+                                 column(
+                                     5,
+                                     align = "center",
+                                     textInput(
+                                         inputId = "select_sponsor_coll_colname",
+                                         label = NULL,
+                                         value = "",
+                                         placeholder = "Collaborator Name"
+                                     )
+                                 ),
+                                 column(2,
                                         align = "left",
                                         tags$div(
                                             class = "text-center",
@@ -414,7 +519,37 @@ ui <- navbarPage(
                                                  placeholder = "Sponsor Name"
                                              )
                                          ),
-                                         column(9,
+                                         column(
+                                             2,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_site_country",
+                                                 label = NULL,
+                                                 value = "United States",
+                                                 placeholder = "Country"
+                                             )
+                                         ),
+                                         column(
+                                             2,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_site_city",
+                                                 label = NULL,
+                                                 value = "",
+                                                 placeholder = "City"
+                                             )
+                                         ),
+                                         column(
+                                             3,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_site_facility",
+                                                 label = NULL,
+                                                 value = "",
+                                                 placeholder = "Site Name"
+                                             )
+                                         ),
+                                         column(2,
                                                 align = "left",
                                                 tags$div(
                                                     class = "text-center",
@@ -430,7 +565,7 @@ ui <- navbarPage(
                                          collapsibleTreeOutput("sponsor_site_tree"), type = 3
                                      ))
                                  )
-                                 )
+                     )
                  )),
         tabPanel("Conditions",
                  mainPanel(
@@ -445,7 +580,7 @@ ui <- navbarPage(
                                      fluidRow(
                                          style = "margin-top:2px;",
                                          column(
-                                             3,
+                                             5,
                                              align = "center",
                                              textInput(
                                                  inputId = "select_sponsor_cond",
@@ -454,7 +589,17 @@ ui <- navbarPage(
                                                  placeholder = "Sponsor Name"
                                              )
                                          ),
-                                         column(9,
+                                         column(
+                                             5,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_condname",
+                                                 label = NULL,
+                                                 value = "diabetes",
+                                                 placeholder = "Condition Name"
+                                             )
+                                         ),
+                                         column(2,
                                                 align = "left",
                                                 tags$div(
                                                     class = "text-center",
@@ -470,7 +615,7 @@ ui <- navbarPage(
                                          collapsibleTreeOutput("sponsor_cond_tree"), type = 3
                                      ))
                                  )
-                                 )
+                     )
                  )),
         tabPanel("Interventions",
                  mainPanel(
@@ -536,24 +681,24 @@ ui <- navbarPage(
                              "Summary",
                              fluidRow(
                                  column(align = "center", style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
-                                     3,
-                                     shinydashboard::valueBoxOutput("box_studies", width = 2)
+                                        3,
+                                        shinydashboard::valueBoxOutput("box_studies", width = 2)
                                  ),
                                  column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
-                                     3,
-                                     shinydashboard::valueBoxOutput("box_sponsors", width = 2)
+                                        3,
+                                        shinydashboard::valueBoxOutput("box_sponsors", width = 2)
                                  ),
                                  column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
-                                     2,
-                                     shinydashboard::valueBoxOutput("box_countries", width = 2)
+                                        2,
+                                        shinydashboard::valueBoxOutput("box_countries", width = 2)
                                  ),
                                  column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
-                                     2,
-                                     shinydashboard::valueBoxOutput("box_cities", width = 2)
+                                        2,
+                                        shinydashboard::valueBoxOutput("box_cities", width = 2)
                                  ),
                                  column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
-                                     2,
-                                     shinydashboard::valueBoxOutput("box_facilities", width = 2)
+                                        2,
+                                        shinydashboard::valueBoxOutput("box_facilities", width = 2)
                                  )
                              ),
                              
@@ -800,7 +945,7 @@ ui <- navbarPage(
                          "Monthly",
                          mainPanel(
                              width = 12,
-                             fluidRow(tags$h4("Historical trend for last 10 years")),
+                             fluidRow(tags$h4("Monthly Comparison (Last Year Month Vs Current Year Month)")),
                              fluidRow(
                                  box(plotlyOutput("plot_month_1001", height = 200), title = "Studies Registered"),
                                  box(plotlyOutput("plot_month_1002", height = 200), title = "Studies Started")
@@ -880,6 +1025,360 @@ server <- function(input, output) {
                  summ_sponsor$cnt_sponsors_Global)
     })
     
+    #top sponsors - summary
+    top_sponsors <-
+        data.frame(agg_sponsors, stringsAsFactors = FALSE) %>%
+        filter(is.na(lead_sponsor_name) == FALSE) %>%
+        group_by(lead_sponsor_name) %>%
+        summarise(cnt_st = sum(cnt_studies_registered)) %>%
+        top_n(10, cnt_st) %>%
+        arrange(desc(cnt_st))
+    
+    top_sponsors$lead_sponsor_name <-
+        factor(top_sponsors$lead_sponsor_name,
+               levels = unique(top_sponsors$lead_sponsor_name)[order(top_sponsors$cnt_st, decreasing = FALSE)])
+    
+    
+    
+    output$plot_sp_sum_1111 <- renderPlotly({
+        top_sponsors %>%
+            plot_ly(
+                y =  ~ lead_sponsor_name,
+                x =  ~ cnt_st,
+                type = 'bar',
+                text = ~ paste(
+                    paste("Sponsor:", lead_sponsor_name),
+                    paste("Total Studies:", cnt_st),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text',
+                textposition = 'inside',
+                orientation = 'h'
+            ) %>%
+            layout(
+                title = "Top Sponsors by Studies Registered",
+                xaxis = list(title = '# Studies Registered'),
+                yaxis = list(title = 'Sponsor Name', showticklabels = FALSE)
+            )
+    })
+    
+    #top sponsors last year - summary
+    top_sponsors_lstyr <-
+        data.frame(agg_sponsors, stringsAsFactors = FALSE) %>%
+        filter(is.na(lead_sponsor_name) == FALSE) %>%
+        group_by(lead_sponsor_name) %>%
+        summarise(cnt_st = sum(cnt_study_registered_lstyr)) %>%
+        top_n(10, cnt_st) %>%
+        arrange(desc(cnt_st))
+    
+    top_sponsors_lstyr$lead_sponsor_name <-
+        factor(top_sponsors_lstyr$lead_sponsor_name,
+               levels = unique(top_sponsors_lstyr$lead_sponsor_name)[order(top_sponsors_lstyr$cnt_st, decreasing = FALSE)])
+    
+    output$plot_sp_sum_1112 <- renderPlotly({
+        top_sponsors_lstyr %>%
+            plot_ly(
+                y =  ~ lead_sponsor_name,
+                x =  ~ cnt_st,
+                type = 'bar',
+                text = ~ paste(
+                    paste("Sponsor:", lead_sponsor_name),
+                    paste("Studies Last Year:", cnt_st),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text',
+                textposition = 'inside',
+                orientation = 'h'
+            ) %>%
+            layout(
+                title = "Top Sponsors by Studies Registered Last Year",
+                xaxis = list(title = '# Studies Registered'),
+                yaxis = list(title = 'Sponsor Name', showticklabels = FALSE)
+            )
+    })
+    
+    #Top global sponsors - Summary
+    top_sponsors_global <-
+        data.frame(agg_sponsors, stringsAsFactors = FALSE) %>%
+        filter(is.na(lead_sponsor_name) == FALSE) %>%
+        group_by(lead_sponsor_name) %>%
+        summarise(cnt_st = sum(cnt_global_studies)) %>%
+        top_n(10, cnt_st) %>%
+        arrange(desc(cnt_st))
+    
+    top_sponsors_global$lead_sponsor_name <-
+        factor(top_sponsors_global$lead_sponsor_name,
+               levels = unique(top_sponsors_global$lead_sponsor_name)[order(top_sponsors_global$cnt_st, decreasing = FALSE)])
+    
+    output$plot_sp_sum_1113 <- renderPlotly({
+        top_sponsors_global %>%
+            plot_ly(
+                y =  ~ lead_sponsor_name,
+                x =  ~ cnt_st,
+                type = 'bar',
+                text = ~ paste(
+                    paste("Sponsor:", lead_sponsor_name),
+                    paste("Global Studies:", cnt_st),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text',
+                textposition = 'inside',
+                orientation = 'h'
+            ) %>%
+            layout(
+                title = "Top Global Sponsors by Studies",
+                xaxis = list(title = '# Global Studies Registered'),
+                yaxis = list(title = 'Sponsor Name', showticklabels = FALSE)
+            )
+    })
+    
+    #Num of Sponsors by Type - Summary
+    output$plot_sp_sum_1114 <- renderPlotly({
+        agg_sponsors %>%
+            group_by(sponsor_type) %>%
+            summarise(cnt_sponsors = length(unique((lead_sponsor_name)))) %>%
+            plot_ly(
+                values =  ~ cnt_sponsors,
+                labels =  ~ (sponsor_type),
+                type = 'pie'
+            ) %>%
+            layout(title = "Num of Sponsors by Type",
+                   legend = list(orientation = "h"))
+        
+    })
+    
+    #################################################
+    #Registered trend by Type - Sponsor Trends
+    agg_sponsors_by_time_registered <-
+        data.frame(agg_sponsors_by_time, stringsAsFactors = FALSE) %>%
+        group_by(common_year, sponsor_type) %>%
+        summarise(cnt_st = sum(cnt_studies_registered, na.rm=TRUE)
+        )
+    
+    agg_sponsors_by_time_registered<-mutate(agg_sponsors_by_time_registered,
+                                            cnt_st2=sum(cnt_st),
+                                            pct_st=round((cnt_st*100/sum(cnt_st, na.rm = TRUE)), digits = 2)
+    )
+    
+    #create chart
+    output$plot_sp_sum_1121 <- renderPlotly({
+        plot_ly(agg_sponsors_by_time_registered,
+                x = ~common_year, 
+                y = ~pct_st, 
+                type = 'bar',
+                color = ~sponsor_type,
+                text = ~ paste(
+                    paste("Sponsor Type:", sponsor_type),
+                    paste("Year Total:", cnt_st2),
+                    paste("Studies:", cnt_st),
+                    paste("% Share:", pct_st),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = '% Study Share'),barmode = "stack",
+                   xaxis = list(title = "Study Registration Year", showgrid = TRUE),
+                   title = 'Study Registration Share - 15 Years')
+    })
+    
+    #Started trend by Type - Sponsor Trends
+    agg_sponsors_by_time_started <-
+        data.frame(agg_sponsors_by_time, stringsAsFactors = FALSE) %>%
+        group_by(common_year, sponsor_type) %>%
+        summarise(cnt_st = sum(cnt_studies_started, na.rm=TRUE)
+        )
+    
+    agg_sponsors_by_time_started<-mutate(agg_sponsors_by_time_started,
+                                         cnt_st2=sum(cnt_st),
+                                         pct_st=round((cnt_st*100/sum(cnt_st, na.rm = TRUE)), digits = 2)
+    )
+    
+    #create chart
+    output$plot_sp_sum_1122 <- renderPlotly({
+        plot_ly(agg_sponsors_by_time_started,
+                x = ~common_year, 
+                y = ~pct_st, 
+                type = 'bar',
+                color = ~sponsor_type,
+                text = ~ paste(
+                    paste("Sponsor Type:", sponsor_type),
+                    paste("Year Total:", cnt_st2),
+                    paste("Studies:", cnt_st),
+                    paste("% Share:", pct_st),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = '% Study Share'),barmode = "stack",
+                   xaxis = list(title = "Study Started Year", showgrid = TRUE),
+                   title = 'Study Started Share - 15 Years')
+    })
+    
+    #completed trend by Type - Sponsor Trends
+    agg_sponsors_by_time_completed <-
+        data.frame(agg_sponsors_by_time, stringsAsFactors = FALSE) %>%
+        group_by(common_year, sponsor_type) %>%
+        summarise(cnt_st = sum(cnt_studies_completed, na.rm=TRUE)
+        )
+    
+    agg_sponsors_by_time_completed<-mutate(agg_sponsors_by_time_completed,
+                                           cnt_st2=sum(cnt_st),
+                                           pct_st=round((cnt_st*100/sum(cnt_st, na.rm = TRUE)), digits = 2)
+    )
+    
+    #create chart
+    output$plot_sp_sum_1123 <- renderPlotly({
+        plot_ly(agg_sponsors_by_time_completed,
+                x = ~common_year, 
+                y = ~pct_st, 
+                type = 'bar',
+                color = ~sponsor_type,
+                text = ~ paste(
+                    paste("Sponsor Type:", sponsor_type),
+                    paste("Year Total:", cnt_st2),
+                    paste("Studies:", cnt_st),
+                    paste("% Share:", pct_st),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = '% Study Share'),barmode = "stack",
+                   xaxis = list(title = "Study Completed Year", showgrid = TRUE),
+                   title = 'Study Completed Share - 15 Years')
+    })
+    
+    #results_posted trend by Type - Sponsor Trends
+    agg_sponsors_by_time_results_posted <-
+        data.frame(agg_sponsors_by_time, stringsAsFactors = FALSE) %>%
+        group_by(common_year, sponsor_type) %>%
+        summarise(cnt_st = sum(cnt_studies_results_posted, na.rm=TRUE)
+        )
+    
+    agg_sponsors_by_time_results_posted<-mutate(agg_sponsors_by_time_results_posted,
+                                                cnt_st2=sum(cnt_st),
+                                                pct_st=round((cnt_st*100/sum(cnt_st, na.rm = TRUE)), digits = 2)
+    )
+    
+    #create chart
+    output$plot_sp_sum_1124 <- renderPlotly({
+        plot_ly(agg_sponsors_by_time_results_posted,
+                x = ~common_year, 
+                y = ~pct_st, 
+                type = 'bar',
+                color = ~sponsor_type,
+                text = ~ paste(
+                    paste("Sponsor Type:", sponsor_type),
+                    paste("Year Total:", cnt_st2),
+                    paste("Studies:", cnt_st),
+                    paste("% Share:", pct_st),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = '% Study Share'),barmode = "stack",
+                   xaxis = list(title = "Results Posted Year", showgrid = TRUE),
+                   title = 'Results Posted Share - 15 Years')
+    })
+    
+    
+    #################################################
+    #Registered trend2 by Type - Sponsor Trends
+    agg_sponsorstype_by_time1 <-
+        data.frame(agg_sponsorstype_by_time, stringsAsFactors = FALSE) %>%
+        group_by(study_first_posted_year, sponsor_type) %>%
+        summarise(cnt_sponsors = sum(cnt_sponsors, na.rm=TRUE),
+                  cnt_studies_with_collab = sum(cnt_studies_with_collab, na.rm=TRUE),
+                  cnt_studies_USonly = sum(cnt_studies_USonly, na.rm=TRUE),
+                  cnt_studies_with_nonUS_country = sum(cnt_studies_with_nonUS_country, na.rm=TRUE)
+        )
+    
+    agg_sponsorstype_by_time1<-mutate(agg_sponsorstype_by_time1,
+                                      cnt_sponsors_total=sum(cnt_sponsors),
+                                      pct_sponsors=round((cnt_sponsors*100/sum(cnt_sponsors, na.rm = TRUE)), digits = 2),
+                                      cnt_studies_with_collab_total=sum(cnt_studies_with_collab),
+                                      pct_studies_with_collab=round((cnt_studies_with_collab*100/sum(cnt_studies_with_collab, na.rm = TRUE)), digits = 2),
+                                      cnt_studies_USonly_total=sum(cnt_studies_USonly),
+                                      pct_studies_USonly=round((cnt_studies_USonly*100/sum(cnt_studies_USonly, na.rm = TRUE)), digits = 2),
+                                      cnt_studies_with_nonUS_country_total=sum(cnt_studies_with_nonUS_country),
+                                      pct_studies_with_nonUS_country=round((cnt_studies_with_nonUS_country*100/sum(cnt_studies_with_nonUS_country, na.rm = TRUE)), digits = 2)
+    )
+    
+    #create chart
+    output$plot_sp_sum_1131 <- renderPlotly({
+        plot_ly(agg_sponsorstype_by_time1,
+                x = ~study_first_posted_year, 
+                y = ~cnt_sponsors, 
+                type = 'bar',
+                color = ~sponsor_type,
+                text = ~ paste(
+                    paste("Sponsor Type:", sponsor_type),
+                    paste("Year Total:", cnt_sponsors_total),
+                    paste("Sponsors:", cnt_sponsors),
+                    paste("% Share:", pct_sponsors),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = ' No of Sponsors'),barmode = "stack",
+                   xaxis = list(title = "Study Registration Year", showgrid = TRUE),
+                   title = 'Sponsors Trend - 15 Years')
+    })
+    
+    #create chart
+    output$plot_sp_sum_1132 <- renderPlotly({
+        plot_ly(agg_sponsorstype_by_time1,
+                x = ~study_first_posted_year, 
+                y = ~cnt_studies_with_collab, 
+                type = 'bar',
+                color = ~sponsor_type,
+                text = ~ paste(
+                    paste("Sponsor Type:", sponsor_type),
+                    paste("Year Total:", cnt_studies_with_collab_total),
+                    paste("Collaboration Studies:", cnt_studies_with_collab),
+                    paste("% Share:", pct_studies_with_collab),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = ' No of Studies with Collaborator'),barmode = "stack",
+                   xaxis = list(title = "Study Registration Year", showgrid = TRUE),
+                   title = 'Collaborated Studies Trend - 15 Years')
+    })
+    
+    #create chart
+    output$plot_sp_sum_1133 <- renderPlotly({
+        plot_ly(agg_sponsorstype_by_time1,
+                x = ~study_first_posted_year, 
+                y = ~cnt_studies_USonly, 
+                type = 'bar',
+                color = ~sponsor_type,
+                text = ~ paste(
+                    paste("Sponsor Type:", sponsor_type),
+                    paste("Year Total:", cnt_studies_USonly_total),
+                    paste("US Only Studies:", cnt_studies_USonly),
+                    paste("% Share:", pct_studies_USonly),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = ' No of US Only Studies'),barmode = "stack",
+                   xaxis = list(title = "Study Registration Year", showgrid = TRUE),
+                   title = 'US Only Studies Trend - 15 Years')
+    })
+    
+    #create chart
+    output$plot_sp_sum_1134 <- renderPlotly({
+        plot_ly(agg_sponsorstype_by_time1,
+                x = ~study_first_posted_year, 
+                y = ~cnt_studies_with_nonUS_country, 
+                type = 'bar',
+                color = ~sponsor_type,
+                text = ~ paste(
+                    paste("Sponsor Type:", sponsor_type),
+                    paste("Year Total:", cnt_studies_with_nonUS_country_total),
+                    paste("Studies with non-US Country:", cnt_studies_with_nonUS_country),
+                    paste("% Share:", pct_studies_with_nonUS_country),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = ' No of Studies with non-US Country'),barmode = "stack",
+                   xaxis = list(title = "Study Registration Year", showgrid = TRUE),
+                   title = 'Studies with non-US Country Trend - 15 Years')
+    })
+    
     ####################################################################
     #reactive dataset for sponsor-collaborator
     sponsor_coll_tree_data <-
@@ -896,7 +1395,10 @@ server <- function(input, output) {
                 ),
                 subset = (casefold(Sponsor) %like% casefold(c(
                     input$select_sponsor_coll
-                )))
+                )) & casefold(Collaborator) %like% casefold(c(
+                    input$select_sponsor_coll_colname
+                ))
+                )
             )
         })
     
@@ -1035,7 +1537,18 @@ server <- function(input, output) {
                 ),
                 subset = (casefold(Sponsor) %like% casefold(c(
                     input$select_sponsor_site
-                )))
+                )) &
+                    casefold(Country) %like% casefold(c(
+                        input$select_sponsor_site_country
+                    )) &
+                    casefold(City) %like% casefold(c(
+                        input$select_sponsor_site_city
+                    )) &
+                    casefold(Facility) %like% casefold(c(
+                        input$select_sponsor_site_facility
+                    ))
+                
+                )
             )
         })
     
@@ -1101,7 +1614,11 @@ server <- function(input, output) {
                 ),
                 subset = (casefold(Sponsor) %like% casefold(c(
                     input$select_sponsor_cond
-                )))
+                )) &
+                    casefold(Condition) %like% casefold(c(
+                        input$select_sponsor_condname
+                    ))
+                )
             )
         })
     
@@ -1459,31 +1976,31 @@ server <- function(input, output) {
     
     output$box_studies <- shinydashboard::renderValueBox({
         valueBox("Studies",
-                summ_rec$cnt_studies
-                )
+                 summ_rec$cnt_studies
+        )
     })
     
     output$box_sponsors <- shinydashboard::renderValueBox({
         valueBox("Sponsors",
-                summ_rec$cnt_sponsors
-                #icon = icon("credit-card")
-                )
+                 summ_rec$cnt_sponsors
+                 #icon = icon("credit-card")
+        )
     })
     
     output$box_countries <- shinydashboard::renderValueBox({
         valueBox("Countries",
-                summ_rec$cnt_countries
-                )
+                 summ_rec$cnt_countries
+        )
     })
     
     output$box_cities <- shinydashboard::renderValueBox({
         valueBox("Cities",
-                summ_rec$cnt_cities)
+                 summ_rec$cnt_cities)
     })
     
     output$box_facilities <- shinydashboard::renderValueBox({
         valueBox("Facilities",
-                summ_rec$cnt_facilities)
+                 summ_rec$cnt_facilities)
     })
     
     

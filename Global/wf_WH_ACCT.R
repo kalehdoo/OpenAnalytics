@@ -34,6 +34,7 @@ assign("var_last_year_3", (var_current_year-3), envir = .GlobalEnv)
 assign("var_last_year_4", (var_current_year-4), envir = .GlobalEnv)
 assign("var_last_year_5", (var_current_year-5), envir = .GlobalEnv)
 assign("var_last_year_10", (var_current_year-10), envir = .GlobalEnv)
+assign("var_last_year_15", (var_current_year-15), envir = .GlobalEnv)
 
 ########################################################
 #prepare write and append log for warehouse load

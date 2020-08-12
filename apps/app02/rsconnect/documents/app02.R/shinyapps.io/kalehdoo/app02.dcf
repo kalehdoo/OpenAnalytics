@@ -5,9 +5,9 @@ account: kalehdoo
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1882345
-bundleId: 3457487
+bundleId: 3490828
 url: https://kalehdoo.shinyapps.io/app02/
-when: 1596165198.31002
+when: 1596904007.04975
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: firebase.rds|data/rec_conditions_list.txt
+ignoredFiles: firebase.rds
