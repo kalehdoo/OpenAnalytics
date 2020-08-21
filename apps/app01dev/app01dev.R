@@ -317,7 +317,7 @@ ui <- navbarPage(
                                      #tags$h2("Dropdown Button"),
                                      #br(),
                                      dropdownButton(
-                                         tags$h5("The sponsors with just one registered study have been excluded."),
+                                         tags$h5("Only Sponsors with more than one clinical study registered are included in this analysis."),
                                          #br(),
                                          tags$h5("See the Data Dictionary tab for detailed definitions of the metrics."),
                                          circle = TRUE, 
@@ -454,8 +454,73 @@ ui <- navbarPage(
                              )
                          ),
                          #summary tab ends here
-                         tabPanel("Data",
-                                  fluidRow(DT::dataTableOutput("dt_agg_sponsors_summ")))
+                         tabPanel("Sponsor Data",
+                                  fluidRow(DT::dataTableOutput("dt_agg_sponsors_summ"))
+                                  ),
+                         tabPanel("Data Dictionary",
+                                  fluidRow(
+                                      style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                      tags$h5("Only Sponsors with more than one clinical study registered are included in this analysis."),
+                                      h5("List of column names and their descriptions:"),
+                                      tags$div(tags$ol(
+                                        tags$li(tags$span("lead_sponsor_name: The full name of the lead sponsor who sponsored the clinical trial.")),
+                                        tags$li(tags$span("agency_class: The agency class of a sponsor indicating if the sponsor belongs to Industry or others.")),
+                                        tags$li(tags$span("sponsor_type: The field is not available in original data and is derived from agency class. The others in agency class is further expanded to categorise sponsors into Hospital, Academic or Others based on the name of the sponsor. It may not be 100% correct.")),
+                                        tags$li(tags$span("cnt_studies_registered: The total number of studies registered by a sponsor in clinicaltrials.gov.")),
+                                        tags$li(tags$span("year_first_study_reg: The year when the sponsor registered its first study.")),
+                                        tags$li(tags$span("year_last_study_reg: The year when the sponsor registered its most recent study.")),
+                                        tags$li(tags$span("cnt_US_only_studies: The number of studies the were conducted inside the United States only.")),
+                                        tags$li(tags$span("cnt_nonUS_only_studies: The number of studies the were conducted completely outside the United States.")),
+                                        tags$li(tags$span("cnt_global_studies: The number of studies the were conducted both in the United States as well as atleast one other country.")),
+                                        tags$li(tags$span("cnt_studies_1country: The number of studies that involved exactly one country.")),
+                                        tags$li(tags$span("cnt_studies_2to5country: The number of studies that involved greater than or equal to 2 countries and less than or equal to 5 countries.")),
+                                        tags$li(tags$span("cnt_studies_6to10country: The number of studies that involved greater than or equal to 6 countries and less than or equal to 10 countries.")),
+                                        tags$li(tags$span("cnt_studies_11to30country: The number of studies that involved greater than or equal to 11 countries and less than or equal to 30 countries.")),
+                                        tags$li(tags$span("cnt_studies_31to50country: The number of studies that involved greater than or equal to 31 countries and less than or equal to 50 countries.")),
+                                        tags$li(tags$span("cnt_studies_50pluscountry: The number of studies that involved greater than to 50 countries.")),
+                                        tags$li(tags$span("cnt_completed_status: The number of studies marked as completed by the sponsor.")),
+                                        tags$li(tags$span("cnt_suspended: The number of studies marked as completed by the sponsor.")),
+                                        tags$li(tags$span("cnt_started_actual: The number of studies that were actually started in the past.")),
+                                        tags$li(tags$span("cnt_recruiting_status: The number of studies marked as Racruiting by the sponsor.")),
+                                        tags$li(tags$span("cnt_results_submitted: The number of studies with study results posted or submitted by the sponsor.")),
+                                        tags$li(tags$span("ratio_results_to_completed: The percentage ratio of number of studies with results posted and number of completed studies.")),
+                                        tags$li(tags$span("cnt_has_dmc: The number of studies having DMC(Data Monitoring Committee).")),
+                                        tags$li(tags$span("cnt_interventional: The number of Interventional studies.")),
+                                        tags$li(tags$span("cnt_observational: The number of Observational studies.")),
+                                        tags$li(tags$span("cnt_phase1: The number of studies having Phase 1 study phase.")),
+                                        tags$li(tags$span("cnt_phase2: The number of studies having Phase 2 study phase.")),
+                                        tags$li(tags$span("cnt_phase3: The number of studies having Phase 3 study phase.")),
+                                        tags$li(tags$span("cnt_phase4: The number of studies having Phase 4 study phase.")),
+                                        tags$li(tags$span("cnt_actual_study_enrollment: The total number of study participants actually enrolled by the sponsor.")),
+                                        tags$li(tags$span("cnt_anticipated_study_enrollment: The total number of study participants the sponsor anticipated to enroll.")),
+                                        tags$li(tags$span("cnt_study_registered_curryr: The total number of studies registered by the sponsor in the current year.")),
+                                        tags$li(tags$span("cnt_started_actual_curryr: The total number of studies started by the sponsor in the current year.")),
+                                        tags$li(tags$span("cnt_study_registered_lstyr: The total number of studies registered by the sponsor in the previous year.")),
+                                        tags$li(tags$span("cnt_started_actual_lstyr: The total number of studies started by the sponsor in the previous year.")),
+                                        tags$li(tags$span("cnt_completed_status_lstyr: The total number of studies completed by the sponsor in the previous year.")),
+                                        tags$li(tags$span("cnt_results_submitted_lstyr: The total number of studies with results posted or submitted by the sponsor in the previous year.")),
+                                        tags$li(tags$span("cnt_conditions: The total number of study conditions for all the studies registered by the sponsor.")),
+                                        tags$li(tags$span("cnt_rare_condition_match: The total number of rare-disease conditions for all the studies registered by the sponsor.")),
+                                        tags$li(tags$span("cnt_rare_condition_studies: The total number of studies that involved at least one rare-disease condition.")),
+                                        tags$li(tags$span("avg_register_to_start_days_ph1: The average number of days from study registration to study initiation for Phase 1 studies.")),
+                                        tags$li(tags$span("avg_register_to_start_days_ph2: The average number of days from study registration to study initiation for Phase 2 studies.")),
+                                        tags$li(tags$span("avg_register_to_start_days_ph3: The average number of days from study registration to study initiation for Phase 3 studies.")),
+                                        tags$li(tags$span("avg_register_to_start_days_ph4: The average number of days from study registration to study initiation for Phase 4 studies.")),
+                                        tags$li(tags$span("avg_start_to_complete_days_ph1: The average number of days from study initiation to study completion for Phase 1 studies.")),
+                                        tags$li(tags$span("avg_start_to_complete_days_ph2: The average number of days from study initiation to study completion for Phase 2 studies.")),
+                                        tags$li(tags$span("avg_start_to_complete_days_ph3: The average number of days from study initiation to study completion for Phase 3 studies.")),
+                                        tags$li(tags$span("avg_start_to_complete_days_ph4: The average number of days from study initiation to study completion for Phase 4 studies.")),
+                                        tags$li(tags$span("sponsor_size: The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponor has registered studies between 11 and 50.")),
+                                        tags$li(tags$span("cnt_collaborators: The total number of collaborators a sponsor has worked with.")),
+                                        tags$li(tags$span("cnt_colab_NIH: The total number of NIH collaborators a sponsor has worked with.")),
+                                        tags$li(tags$span("cnt_colab_nonind: The total number of Non-Industry collaborators a sponsor has worked with.")),
+                                        tags$li(tags$span("cnt_colab_USFed: The total number of US Fed collaborators a sponsor has worked with.")),
+                                        tags$li(tags$span("cnt_colab_Ind: The total number of Industry collaborators a sponsor has worked with.")),
+                                        tags$li(tags$span("cnt_colab_Hosp: The total number of Hospital collaborators a sponsor has worked with.")),
+                                        tags$li(tags$span("cnt_colab_Acad: The total number of Academic collaborators a sponsor has worked with."))
+                                        ))
+                                  )
+                         )
                      )
                  )),
         tabPanel("Network",
@@ -523,11 +588,11 @@ ui <- navbarPage(
                                              #tags$h2("Dropdown Button"),
                                              #br(),
                                              dropdownButton(
-                                                 tags$h5("Enter the sponsor names and hit Compare button to see the results."),
+                                                 tags$h5("Enter the sponsor names and hit Compare button to compare the sponsors side by side. Sponsor names are case insensitive."),
                                                  circle = TRUE, 
                                                  status = "info",
                                                  icon = icon("info"), 
-                                                 size = "sm",
+                                                 size = "xs",
                                                  width = "500px",
                                                  tooltip = tooltipOptions(title = "Help!")
                                              )
@@ -1600,12 +1665,12 @@ server <- function(input, output) {
         agg_sponsors %>%
             plot_ly(
                 y =  ~ avg_start_to_complete_days_ph1,
-                x =  ~ sponsor_size,
-                color = ~sponsor_size,
+                x =  ~ sponsor_type,
+                color = ~sponsor_type,
                 type = 'box') %>%
             layout(
                 title = "Avg Start to Complete Days - Phase 1",
-                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                xaxis = list(title = 'Sponsor Type', showticklabels = FALSE),
                 yaxis = list(title = 'Average Days'),
                 showlegend = TRUE,
                 legend = list(x = 0.9, y = 0.9)
@@ -1616,12 +1681,12 @@ server <- function(input, output) {
         agg_sponsors %>%
             plot_ly(
                 y =  ~ avg_start_to_complete_days_ph2,
-                x =  ~ sponsor_size,
-                color = ~sponsor_size,
+                x =  ~ sponsor_type,
+                color = ~sponsor_type,
                 type = 'box') %>%
             layout(
                 title = "Avg Start to Complete Days - Phase 2",
-                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                xaxis = list(title = 'Sponsor Type', showticklabels = FALSE),
                 yaxis = list(title = 'Average Days'),
                 showlegend = TRUE,
                 legend = list(x = 0.9, y = 0.9)
@@ -1632,12 +1697,12 @@ server <- function(input, output) {
         agg_sponsors %>%
             plot_ly(
                 y =  ~ avg_start_to_complete_days_ph3,
-                x =  ~ sponsor_size,
-                color = ~sponsor_size,
+                x =  ~ sponsor_type,
+                color = ~sponsor_type,
                 type = 'box') %>%
             layout(
                 title = "Avg Start to Complete Days - Phase 3",
-                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                xaxis = list(title = 'Sponsor Type', showticklabels = FALSE),
                 yaxis = list(title = 'Average Days'),
                 showlegend = TRUE,
                 legend = list(x = 0.9, y = 0.9)
@@ -1648,12 +1713,12 @@ server <- function(input, output) {
         agg_sponsors %>%
             plot_ly(
                 y =  ~ avg_start_to_complete_days_ph4,
-                x =  ~ sponsor_size,
-                color = ~sponsor_size,
+                x =  ~ sponsor_type,
+                color = ~sponsor_type,
                 type = 'box') %>%
             layout(
                 title = "Avg Start to Complete Days - Phase 4",
-                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                xaxis = list(title = 'Sponsor Type', showticklabels = FALSE),
                 yaxis = list(title = 'Average Days'),
                 showlegend = TRUE,
                 legend = list(x = 0.9, y = 0.9)
@@ -1665,12 +1730,12 @@ server <- function(input, output) {
         agg_sponsors %>%
             plot_ly(
                 y =  ~ avg_register_to_start_days_ph1,
-                x =  ~ sponsor_size,
-                color = ~sponsor_size,
+                x =  ~ sponsor_type,
+                color = ~sponsor_type,
                 type = 'box') %>%
             layout(
                 title = "Avg Reg to Initiation Days - Phase 1",
-                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                xaxis = list(title = 'Sponsor Type', showticklabels = FALSE),
                 yaxis = list(title = 'Average Days'),
                 showlegend = TRUE,
                 legend = list(x = 0.9, y = 0.9)
@@ -1681,12 +1746,12 @@ server <- function(input, output) {
         agg_sponsors %>%
             plot_ly(
                 y =  ~ avg_register_to_start_days_ph2,
-                x =  ~ sponsor_size,
-                color = ~sponsor_size,
+                x =  ~ sponsor_type,
+                color = ~sponsor_type,
                 type = 'box') %>%
             layout(
                 title = "Avg Reg to Initiation Days - Phase 2",
-                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                xaxis = list(title = 'Sponsor Type', showticklabels = FALSE),
                 yaxis = list(title = 'Average Days'),
                 showlegend = TRUE,
                 legend = list(x = 0.9, y = 0.9)
@@ -1697,12 +1762,12 @@ server <- function(input, output) {
         agg_sponsors %>%
             plot_ly(
                 y =  ~ avg_register_to_start_days_ph3,
-                x =  ~ sponsor_size,
-                color = ~sponsor_size,
+                x =  ~ sponsor_type,
+                color = ~sponsor_type,
                 type = 'box') %>%
             layout(
                 title = "Avg Reg to Initiation Days - Phase 3",
-                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                xaxis = list(title = 'Sponsor Type', showticklabels = FALSE),
                 yaxis = list(title = 'Average Days'),
                 showlegend = TRUE,
                 legend = list(x = 0.9, y = 0.9)
@@ -1713,12 +1778,12 @@ server <- function(input, output) {
         agg_sponsors %>%
             plot_ly(
                 y =  ~ avg_register_to_start_days_ph4,
-                x =  ~ sponsor_size,
-                color = ~sponsor_size,
+                x =  ~ sponsor_type,
+                color = ~sponsor_type,
                 type = 'box') %>%
             layout(
                 title = "Avg Reg to Initiation Days - Phase 4",
-                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                xaxis = list(title = 'Sponsor Type', showticklabels = FALSE),
                 yaxis = list(title = 'Average Days'),
                 showlegend = TRUE,
                 legend = list(x = 0.9, y = 0.9)

@@ -30,6 +30,8 @@ agg_sponsors1 <- setDT(agg_studies)[, list(
   agency_class=unique(agency_class),
   sponsor_type=unique(sponsor_type),
   cnt_studies_registered = length(unique(nct_id)),
+  year_first_study_reg = min(study_first_posted_year, na.rm = TRUE),
+  year_last_study_reg = max(study_first_posted_year, na.rm = TRUE),
   cnt_US_only_studies = sum(flag_USonly, na.rm = TRUE),
   cnt_nonUS_only_studies = sum(ifelse((flag_has_US_site == 0 & cnt_countries_nonUS >= 1), 1L, 0L), na.rm = TRUE),
   cnt_global_studies = sum(ifelse((flag_has_US_site == 1 & cnt_countries_nonUS >= 1), 1L, 0L), na.rm = TRUE),
@@ -39,10 +41,11 @@ agg_sponsors1 <- setDT(agg_studies)[, list(
   cnt_studies_11to30country = sum(ifelse((cnt_countries >= 11 & cnt_countries <=30), 1L, 0L), na.rm = TRUE),
   cnt_studies_31to50country = sum(ifelse((cnt_countries >= 31 & cnt_countries <=50), 1L, 0L), na.rm = TRUE),
   cnt_studies_50pluscountry = sum(ifelse((cnt_countries >= 51), 1L, 0L), na.rm = TRUE),
+  cnt_completed_status = sum(flag_completed_status, na.rm = TRUE),
+  cnt_suspended = sum(ifelse(overall_status == "Suspended", 1, 0), na.rm = TRUE),
   cnt_started_actual = sum(flag_actual_started, na.rm = TRUE),
   cnt_recruiting_status = sum(flag_recruiting_status, na.rm = TRUE),
   cnt_results_submitted = sum(flag_results_posted, na.rm = TRUE),
-  cnt_completed_status = sum(flag_completed_status, na.rm = TRUE),
   ratio_results_to_completed = 100 * (round(
     (sum(flag_results_posted, na.rm = TRUE) / sum(flag_completed_status, na.rm = TRUE)),
   digits=2)),
@@ -80,14 +83,14 @@ agg_sponsors1 <- setDT(agg_studies)[, list(
   cnt_conditions = sum(cnt_conditions, na.rm = TRUE),
   cnt_rare_condition_match = sum(cnt_match_rare_condition, na.rm = TRUE),
   cnt_rare_condition_studies = sum(if_else(cnt_match_rare_condition>0,1,0), na.rm = TRUE),
-  avg_register_to_start_days_ph1 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 1" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE),
-  avg_register_to_start_days_ph2 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 2" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE),
-  avg_register_to_start_days_ph3 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 3" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE),
-  avg_register_to_start_days_ph4 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 4" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE),
-  avg_start_to_complete_days_ph1 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 1" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE),
-  avg_start_to_complete_days_ph2 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 2" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE),
-  avg_start_to_complete_days_ph3 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 3" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE),
-  avg_start_to_complete_days_ph4 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 4" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE)
+  avg_register_to_start_days_ph1 = round(mean(case_when(is.na(phase)==FALSE & phase == "Phase 1" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE)),
+  avg_register_to_start_days_ph2 = round(mean(case_when(is.na(phase)==FALSE & phase == "Phase 2" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE)),
+  avg_register_to_start_days_ph3 = round(mean(case_when(is.na(phase)==FALSE & phase == "Phase 3" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE)),
+  avg_register_to_start_days_ph4 = round(mean(case_when(is.na(phase)==FALSE & phase == "Phase 4" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE)),
+  avg_start_to_complete_days_ph1 = round(mean(case_when(is.na(phase)==FALSE & phase == "Phase 1" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE)),
+  avg_start_to_complete_days_ph2 = round(mean(case_when(is.na(phase)==FALSE & phase == "Phase 2" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE)),
+  avg_start_to_complete_days_ph3 = round(mean(case_when(is.na(phase)==FALSE & phase == "Phase 3" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE)),
+  avg_start_to_complete_days_ph4 = round(mean(case_when(is.na(phase)==FALSE & phase == "Phase 4" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE))
   
 ), by = 'lead_sponsor_name']
 
