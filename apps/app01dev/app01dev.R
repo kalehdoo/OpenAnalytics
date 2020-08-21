@@ -149,6 +149,7 @@ mv_studies_recruiting <-
 
 
 var_studyphase_name <- unique(mv_studies_recruiting$StudyPhase)
+var_sponsor_size <- sort(unique(agg_sponsors$sponsor_size), decreasing=TRUE)
 
 #mv_studies_recruiting <-
 #    subset.data.frame(mv_studies_recruiting) %>%
@@ -636,6 +637,36 @@ ui <- navbarPage(
                                  tabPanel(
                                      "Initiation",
                                      fluidRow(
+                                         column(
+                                             1,
+                                             align = "left",
+                                             #tags$h2("Dropdown Button"),
+                                             #br(),
+                                             dropdownButton(
+                                                 tags$h5("Select the sponsor size. The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponor has registered studies between 11 and 50."),
+                                                 circle = TRUE, 
+                                                 status = "info",
+                                                 icon = icon("info"), 
+                                                 size = "xs",
+                                                 width = "500px",
+                                                 tooltip = tooltipOptions(title = "Help!")
+                                             )
+                                         ),                                         
+                                         column(
+                                     11,
+                                     align = "center",
+                                     pickerInput(
+                                         inputId = "select_sponsor_size_initiation",
+                                         label = NULL,
+                                         choices = var_sponsor_size,
+                                         options = list(style = "btn-info"),
+                                         multiple = FALSE,
+                                         selected = "7_XL_1KT2K"
+                                     )
+                                 )
+                                     ),
+
+                                     fluidRow(
                                          style = "padding: 5px; border-style: solid; border-width: 0.3px;",
                                          column(
                                              6,
@@ -669,6 +700,35 @@ ui <- navbarPage(
                                  tabPanel(
                                      "Completion",
                                      fluidRow(
+                                         column(
+                                             1,
+                                             align = "left",
+                                             #tags$h2("Dropdown Button"),
+                                             #br(),
+                                             dropdownButton(
+                                                 tags$h5("Select the sponsor size. The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponor has registered studies between 11 and 50."),
+                                                 circle = TRUE, 
+                                                 status = "info",
+                                                 icon = icon("info"), 
+                                                 size = "xs",
+                                                 width = "500px",
+                                                 tooltip = tooltipOptions(title = "Help!")
+                                             )
+                                         ),                                         
+                                         column(
+                                     11,
+                                     align = "center",
+                                     pickerInput(
+                                         inputId = "select_sponsor_size_completion",
+                                         label = NULL,
+                                         choices = var_sponsor_size,
+                                         options = list(style = "btn-info"),
+                                         multiple = FALSE,
+                                         selected = "7_XL_1KT2K"
+                                     )
+                                 )
+                                     ),
+                                     fluidRow(
                                          style = "padding: 5px; border-style: solid; border-width: 0.3px;",
                                          column(
                                              6,
@@ -701,6 +761,35 @@ ui <- navbarPage(
                                  ),
                                  tabPanel(
                                      "KPIs",
+                                     fluidRow(  
+                                         column(
+                                             1,
+                                             align = "left",
+                                             #tags$h2("Dropdown Button"),
+                                             #br(),
+                                             dropdownButton(
+                                                 tags$h5("Select the sponsor size. The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponor has registered studies between 11 and 50."),
+                                                 circle = TRUE, 
+                                                 status = "info",
+                                                 icon = icon("info"), 
+                                                 size = "xs",
+                                                 width = "500px",
+                                                 tooltip = tooltipOptions(title = "Help!")
+                                             )
+                                         ),                                       
+                                         column(
+                                     11,
+                                     align = "center",
+                                     pickerInput(
+                                         inputId = "select_sponsor_size_kpi",
+                                         label = NULL,
+                                         choices = var_sponsor_size,
+                                         options = list(style = "btn-info"),
+                                         multiple = FALSE,
+                                         selected = "7_XL_1KT2K"
+                                     )
+                                 )
+                                     ),
                                      fluidRow(
                                          style = "padding: 5px; border-style: solid; border-width: 0.3px;",
                                          column(
@@ -1660,9 +1749,14 @@ server <- function(input, output) {
     ####################################################################
     #Sponsor - Performance
     #sponsor - performance - Summary
+    agg_sponsors_completion <- reactive({
+        subset.data.frame(agg_sponsors, subset=(sponsor_size == input$select_sponsor_size_completion)
+        )
+    })
+
     #Completion Duration
     output$plot_sp_per_1311 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_completion() %>%
             plot_ly(
                 y =  ~ avg_start_to_complete_days_ph1,
                 x =  ~ sponsor_type,
@@ -1678,7 +1772,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1312 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_completion() %>%
             plot_ly(
                 y =  ~ avg_start_to_complete_days_ph2,
                 x =  ~ sponsor_type,
@@ -1694,7 +1788,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1313 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_completion() %>%
             plot_ly(
                 y =  ~ avg_start_to_complete_days_ph3,
                 x =  ~ sponsor_type,
@@ -1710,7 +1804,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1314 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_completion() %>%
             plot_ly(
                 y =  ~ avg_start_to_complete_days_ph4,
                 x =  ~ sponsor_type,
@@ -1725,9 +1819,14 @@ server <- function(input, output) {
             )
     })
     
+    agg_sponsors_initiation <- reactive({
+        subset.data.frame(agg_sponsors, subset=(sponsor_size == input$select_sponsor_size_initiation)
+        )
+    })
+
     #Initiation Duration
     output$plot_sp_per_1321 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_initiation() %>%
             plot_ly(
                 y =  ~ avg_register_to_start_days_ph1,
                 x =  ~ sponsor_type,
@@ -1743,7 +1842,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1322 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_initiation() %>%
             plot_ly(
                 y =  ~ avg_register_to_start_days_ph2,
                 x =  ~ sponsor_type,
@@ -1759,7 +1858,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1323 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_initiation() %>%
             plot_ly(
                 y =  ~ avg_register_to_start_days_ph3,
                 x =  ~ sponsor_type,
@@ -1775,7 +1874,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1324 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_initiation() %>%
             plot_ly(
                 y =  ~ avg_register_to_start_days_ph4,
                 x =  ~ sponsor_type,
@@ -1791,8 +1890,13 @@ server <- function(input, output) {
     })
     
     #Sponsor KPIs
+    agg_sponsors_kpi <- reactive({
+        subset.data.frame(agg_sponsors, subset=(sponsor_size == input$select_sponsor_size_kpi)
+        )
+    })
+
     output$plot_sp_per_1331 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_kpi() %>%
             plot_ly(
                 y =  ~ cnt_observational,
                 x =  ~ cnt_interventional,
@@ -1820,7 +1924,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1332 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_kpi() %>%
             plot_ly(
                 y =  ~ cnt_started_actual,
                 x =  ~ cnt_studies_registered,
@@ -1848,7 +1952,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1333 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_kpi() %>%
             plot_ly(
                 y =  ~ cnt_nonUS_only_studies,
                 x =  ~ cnt_US_only_studies,
@@ -1876,7 +1980,7 @@ server <- function(input, output) {
     })
     
     output$plot_sp_per_1334 <- renderPlotly({
-        agg_sponsors %>%
+        agg_sponsors_kpi() %>%
             plot_ly(
                 y =  ~ cnt_colab_nonind,
                 x =  ~ cnt_colab_Ind,
