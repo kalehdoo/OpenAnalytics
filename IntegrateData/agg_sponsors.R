@@ -43,9 +43,9 @@ agg_sponsors1 <- setDT(agg_studies)[, list(
   cnt_recruiting_status = sum(flag_recruiting_status, na.rm = TRUE),
   cnt_results_submitted = sum(flag_results_posted, na.rm = TRUE),
   cnt_completed_status = sum(flag_completed_status, na.rm = TRUE),
-  ratio_results_to_completed = 100 * (
-    sum(flag_results_posted, na.rm = TRUE) / sum(flag_completed_status, na.rm = TRUE)
-  ),
+  ratio_results_to_completed = 100 * (round(
+    (sum(flag_results_posted, na.rm = TRUE) / sum(flag_completed_status, na.rm = TRUE)),
+  digits=2)),
   cnt_has_dmc = sum(flag_has_dmc, na.rm = TRUE),
   cnt_interventional = sum(ifelse(study_type == "Interventional", 1, 0), na.rm = TRUE),
   cnt_observational = sum(ifelse(study_type == "Observational", 1, 0), na.rm = TRUE),
@@ -55,6 +55,13 @@ agg_sponsors1 <- setDT(agg_studies)[, list(
   cnt_phase4 = sum(ifelse(phase == "Phase 4", 1, 0), na.rm = TRUE),
   cnt_actual_study_enrollment = sum(actual_study_enrollment, na.rm = TRUE),
   cnt_anticipated_study_enrollment = sum(anticipated_study_enrollment, na.rm = TRUE),
+  cnt_study_registered_curryr = sum(ifelse(
+    study_first_posted_year == var_current_year[1], 1, 0
+  ), na.rm = TRUE),
+  cnt_started_actual_curryr = sum(
+    ifelse(start_year == var_current_year[1], flag_actual_started, 0L),
+    na.rm = TRUE
+  ),
   cnt_study_registered_lstyr = sum(ifelse(
     study_first_posted_year == var_last_year[1], 1, 0
   ), na.rm = TRUE),
@@ -70,94 +77,31 @@ agg_sponsors1 <- setDT(agg_studies)[, list(
     ifelse(results_first_posted_year == var_last_year[1], 1L, 0L),
     na.rm = TRUE
   ),
-  
-  cnt_study_registered_lstyr2 = sum(
-    ifelse(study_first_posted_year == var_last_year_2[1], 1, 0),
-    na.rm = TRUE
-  ),
-  cnt_started_actual_lstyr2 = sum(
-    ifelse(start_year == var_last_year_2[1], flag_actual_started, 0L),
-    na.rm = TRUE
-  ),
-  cnt_completed_status_lstyr2 = sum(
-    ifelse(completed_year == var_last_year_2[1], flag_completed_status, 0L),
-    na.rm = TRUE
-  ),
-  cnt_results_submitted_lstyr2 = sum(
-    ifelse(
-      results_first_posted_year == var_last_year_2[1],
-      flag_results_posted,
-      0L
-    ),
-    na.rm = TRUE
-  ),
-  cnt_study_registered_lstyr3 = sum(
-    ifelse(study_first_posted_year == var_last_year_3[1], 1, 0),
-    na.rm = TRUE
-  ),
-  cnt_started_actual_lstyr3 = sum(
-    ifelse(start_year == var_last_year_3[1], flag_actual_started, 0L),
-    na.rm = TRUE
-  ),
-  cnt_completed_status_lstyr3 = sum(
-    ifelse(completed_year == var_last_year_3[1], flag_completed_status, 0L),
-    na.rm = TRUE
-  ),
-  cnt_results_submitted_lstyr3 = sum(
-    ifelse(
-      results_first_posted_year == var_last_year_3[1],
-      flag_results_posted,
-      0L
-    ),
-    na.rm = TRUE
-  ),
-  cnt_study_registered_lstyr4 = sum(
-    ifelse(study_first_posted_year == var_last_year_4[1], 1, 0),
-    na.rm = TRUE
-  ),
-  cnt_started_actual_lstyr4 = sum(
-    ifelse(start_year == var_last_year_4[1], flag_actual_started, 0L),
-    na.rm = TRUE
-  ),
-  cnt_completed_status_lstyr4 = sum(
-    ifelse(completed_year == var_last_year_4[1], flag_completed_status, 0L),
-    na.rm = TRUE
-  ),
-  cnt_results_submitted_lstyr4 = sum(
-    ifelse(
-      results_first_posted_year == var_last_year_4[1],
-      flag_results_posted,
-      0L
-    ),
-    na.rm = TRUE
-  ),
-  cnt_study_registered_lstyr5 = sum(
-    ifelse(study_first_posted_year == var_last_year_5[1], 1, 0),
-    na.rm = TRUE
-  ),
-  cnt_started_actual_lstyr5 = sum(
-    ifelse(start_year == var_last_year_5[1], flag_actual_started, 0L),
-    na.rm = TRUE
-  ),
-  cnt_completed_status_lstyr5 = sum(
-    ifelse(completed_year == var_last_year_5[1], flag_completed_status, 0L),
-    na.rm = TRUE
-  ),
-  cnt_results_submitted_lstyr5 = sum(
-    ifelse(
-      results_first_posted_year == var_last_year_5[1],
-      flag_results_posted,
-      0L
-    ),
-    na.rm = TRUE
-  ),
-  
   cnt_conditions = sum(cnt_conditions, na.rm = TRUE),
   cnt_rare_condition_match = sum(cnt_match_rare_condition, na.rm = TRUE),
-  cnt_rare_condition_studies = sum(if_else(cnt_match_rare_condition>0,1,0), na.rm = TRUE)
+  cnt_rare_condition_studies = sum(if_else(cnt_match_rare_condition>0,1,0), na.rm = TRUE),
+  avg_register_to_start_days_ph1 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 1" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE),
+  avg_register_to_start_days_ph2 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 2" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE),
+  avg_register_to_start_days_ph3 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 3" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE),
+  avg_register_to_start_days_ph4 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 4" & flag_actual_started==1 ~ register_to_start_days), na.rm = TRUE),
+  avg_start_to_complete_days_ph1 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 1" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE),
+  avg_start_to_complete_days_ph2 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 2" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE),
+  avg_start_to_complete_days_ph3 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 3" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE),
+  avg_start_to_complete_days_ph4 = mean(case_when(is.na(phase)==FALSE & phase == "Phase 4" & flag_completed_status==1 ~ start_to_complete_days), na.rm = TRUE)
   
 ), by = 'lead_sponsor_name']
 
+
+agg_sponsors<-mutate(agg_sponsors1,
+                     sponsor_size=case_when(cnt_studies_registered>=0 &cnt_studies_registered<=10 ~ "1_XXXS_0T10",
+                                            cnt_studies_registered>=11 &cnt_studies_registered<=50 ~ "2_XXS_11T50",
+                                            cnt_studies_registered>=51 &cnt_studies_registered<=100 ~ "3_XS_51T100",
+                                            cnt_studies_registered>=101 &cnt_studies_registered<=200 ~ "4_S_101T200",
+                                            cnt_studies_registered>=201 &cnt_studies_registered<=500 ~ "5_M_201T500",
+                                            cnt_studies_registered>=501 &cnt_studies_registered<=1000 ~ "6_L_501T1K",
+                                            cnt_studies_registered>=1001 &cnt_studies_registered<=2000 ~ "7_XL_1KT2K",
+                                            cnt_studies_registered>=2001 ~ "8_XXL_over_2K")
+                     )
 
 #add collaborator per sponsors
 #set paths for data files
@@ -175,6 +119,7 @@ collaborators<-read.csv(in_path_x_collaborators, header=TRUE, sep = "|",na.strin
 sponsor_collaborators<- sqldf("select sponsors.lead_sponsor_name as 'lead_sponsor_name',
                                         count(distinct(collaborators.collaborator_name)) as cnt_collaborators,
                                         count(distinct(CASE when collaborators.agency_class='NIH' THEN collaborators.collaborator_name END)) as 'cnt_colab_NIH',
+                                        count(distinct(CASE when collaborators.sponsor_type!='Industry' THEN collaborators.collaborator_name END)) as 'cnt_colab_nonind',
                                         count(distinct(CASE when collaborators.agency_class='U.S. Fed' THEN collaborators.collaborator_name END)) as 'cnt_colab_USFed',
                                         count(distinct(CASE when collaborators.agency_class='Industry' THEN collaborators.collaborator_name END)) as 'cnt_colab_Ind',
                                         count(distinct(CASE when collaborators.sponsor_type='Hospital' THEN collaborators.collaborator_name END)) as 'cnt_colab_Hosp',
@@ -185,7 +130,10 @@ sponsor_collaborators<- sqldf("select sponsors.lead_sponsor_name as 'lead_sponso
                                group by sponsors.lead_sponsor_name")
 
 #stich collaborators with agg studies
-agg_sponsors<-left_join(agg_sponsors1, sponsor_collaborators, by=c("lead_sponsor_name"))
+agg_sponsors<-left_join(agg_sponsors, sponsor_collaborators, by=c("lead_sponsor_name"))
+
+agg_sponsors<-subset.data.frame(agg_sponsors,
+                                subset = (cnt_studies_registered>1))
 
 #write to txt file
 write.table(

@@ -41,6 +41,7 @@ agg_sponsors <-
     stringsAsFactors = FALSE
   )
 
+
 agg_sponsors_by_time <-
   read.csv(
     "data/agg_sponsors_by_time.txt",
@@ -341,13 +342,13 @@ ui <- navbarPage(
                        6,
                        align = "left",
                        style = "border: 0.3px solid",
-                       plotlyOutput("plot_sp_sum_1111")
+                       withSpinner(plotlyOutput("plot_sp_sum_1111"), type = 3)
                      ),
                      column(
                        6,
                        align = "left",
                        style = "border: 0.3px solid;",
-                       plotlyOutput("plot_sp_sum_1112")
+                       withSpinner(plotlyOutput("plot_sp_sum_1112"), type = 3)
                      )
                    ),
                    fluidRow(
@@ -356,13 +357,13 @@ ui <- navbarPage(
                        6,
                        align = "left",
                        style = "border: 0.3px solid",
-                       plotlyOutput("plot_sp_sum_1113")
+                       withSpinner(plotlyOutput("plot_sp_sum_1113"), type = 3)
                      ),
                      column(
                        6,
                        align = "left",
                        style = "border: 0.3px solid;",
-                       plotlyOutput("plot_sp_sum_1114")
+                       withSpinner(plotlyOutput("plot_sp_sum_1114"), type = 3)
                      )
                    )
                  ),
@@ -374,13 +375,13 @@ ui <- navbarPage(
                        6,
                        align = "left",
                        style = "border: 0.3px solid",
-                       plotlyOutput("plot_sp_sum_1121")
+                       withSpinner(plotlyOutput("plot_sp_sum_1121"), type = 3)
                      ),
                      column(
                        6,
                        align = "left",
                        style = "border: 0.3px solid;",
-                       plotlyOutput("plot_sp_sum_1122")
+                       withSpinner(plotlyOutput("plot_sp_sum_1122"), type = 3)
                      )
                    ),
                    fluidRow(
@@ -389,13 +390,13 @@ ui <- navbarPage(
                        6,
                        align = "left",
                        style = "border: 0.3px solid",
-                       plotlyOutput("plot_sp_sum_1123")
+                       withSpinner(plotlyOutput("plot_sp_sum_1123"), type = 3)
                      ),
                      column(
                        6,
                        align = "left",
                        style = "border: 0.3px solid;",
-                       plotlyOutput("plot_sp_sum_1124")
+                       withSpinner(plotlyOutput("plot_sp_sum_1124"), type = 3)
                      )
                    )
                  ),
@@ -407,13 +408,13 @@ ui <- navbarPage(
                        6,
                        align = "left",
                        style = "border: 0.3px solid",
-                       plotlyOutput("plot_sp_sum_1131")
+                       withSpinner(plotlyOutput("plot_sp_sum_1131"), type = 3)
                      ),
                      column(
                        6,
                        align = "left",
                        style = "border: 0.3px solid;",
-                       plotlyOutput("plot_sp_sum_1132")
+                       withSpinner(plotlyOutput("plot_sp_sum_1132"), type = 3)
                      )
                    ),
                    fluidRow(
@@ -422,13 +423,13 @@ ui <- navbarPage(
                        6,
                        align = "left",
                        style = "border: 0.3px solid",
-                       plotlyOutput("plot_sp_sum_1133")
+                       withSpinner(plotlyOutput("plot_sp_sum_1133"), type = 3)
                      ),
                      column(
                        6,
                        align = "left",
                        style = "border: 0.3px solid;",
-                       plotlyOutput("plot_sp_sum_1134")
+                       withSpinner(plotlyOutput("plot_sp_sum_1134"), type = 3)
                      )
                    )
                  ),
@@ -492,10 +493,231 @@ ui <- navbarPage(
              mainPanel(
                width = 12,
                tabsetPanel(type = "tabs",
-                           tabPanel("Metrics",
+                           tabPanel(
+                             "Compare",
+                             fluidRow(
+                               style = "margin-top:2px;",
+                               column(
+                                 5,
+                                 align = "center",
+                                 textInput(
+                                   inputId = "select_sponsor_name_1",
+                                   label = NULL,
+                                   value = "pfizer",
+                                   placeholder = "Sponsor Name 1"
+                                 )
+                               ),
+                               column(2,
+                                      align = "left",
+                                      tags$div(
+                                        class = "text-center",
+                                        actionButton(
+                                          "update_agg_sponsor_1",
+                                          "Compare",
+                                          class = "btn btn-primary",
+                                          style = "margin-bottom: 0.5%;"
+                                        )
+                                      )),
+                               column(
+                                 5,
+                                 align = "center",
+                                 textInput(
+                                   inputId = "select_sponsor_name_2",
+                                   label = NULL,
+                                   value = "Novartis Pharmaceuticals",
+                                   placeholder = "Sponsor Name 2"
+                                 )
+                               )
+                             ),
+                             fluidRow(
+                               column(
+                                 5,
+                                 style = "height:100px; background-color: #46D2CE;",
+                                 align = "center",
+                                 plotlyOutput("plot_sp_per_1")
+                               ),
+                               column(
+                                 2,
+                                 style = "height:100px; background-color: #46D2CE; opacity: 0.8;",
+                                 align = "center",
+                                 tags$h4("Total Registered Studies", style="text-align:center; padding-top: 3px;")
+                               ),
+                               column(
+                                 5,
+                                 style = "height:100px; background-color: #46D2CE;",
+                                 align = "center",
+                                 plotlyOutput("plot_sp_per_2")
+                               )
+                               
+                             ),
+                             fluidRow(
+                               column(
+                                 5,
+                                 style = "height:100px; background-color: #86B9B0;",
+                                 align = "center",
+                                 plotlyOutput("plot_sp_per_12")
+                               ),
+                               column(
+                                 2,
+                                 style = "height:100px; background-color: #86B9B0; opacity: 0.8;",
+                                 align = "center",
+                                 tags$h4("Registered Studies - Last Year", style="text-align:center; padding-top: 3px;")
+                               ),
+                               column(
+                                 5,
+                                 style = "height:100px; background-color: #86B9B0;",
+                                 align = "center",
+                                 plotlyOutput("plot_sp_per_22")
+                               )
+                               
+                             ),
+                             fluidRow(
+                               column(
+                                 5,
+                                 style = "height:100px; background-color: #46D2CE;",
+                                 align = "center",
+                                 plotlyOutput("plot_sp_per_13")
+                               ),
+                               column(
+                                 2,
+                                 style = "height:100px; background-color: #46D2CE; opacity: 0.8;",
+                                 align = "center",
+                                 tags$h4("Registered Studies - Current Year", style="text-align:center; padding-top: 3px;")
+                               ),
+                               column(
+                                 5,
+                                 style = "height:100px; background-color: #46D2CE;",
+                                 align = "center",
+                                 plotlyOutput("plot_sp_per_23")
+                               )
+                               
+                             ),
+                             fluidRow(
+                               column(
+                                 5,
+                                 style = "height:100px; background-color: #86B9B0;",
+                                 align = "center",
+                                 plotlyOutput("plot_sp_per_14")
+                               ),
+                               column(
+                                 2,
+                                 style = "height:100px; background-color: #86B9B0; opacity: 0.8;",
+                                 align = "center",
+                                 tags$h4("Initiated Studies - Current Year", style="text-align:center; padding-top: 3px;")
+                               ),
+                               column(
+                                 5,
+                                 style = "height:100px; background-color: #86B9B0;",
+                                 align = "center",
+                                 plotlyOutput("plot_sp_per_24")
+                               )
+                               
+                             )
+                           ),
+                           tabPanel(
+                             "Initiation",
+                             fluidRow(
+                               style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid",
+                                 withSpinner(plotlyOutput("plot_sp_per_1321"), type = 3)
+                               ),
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid;",
+                                 withSpinner(plotlyOutput("plot_sp_per_1322"), type = 3)
+                               )
+                             ),
+                             fluidRow(
+                               style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid",
+                                 withSpinner(plotlyOutput("plot_sp_per_1323"), type = 3)
+                               ),
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid;",
+                                 withSpinner(plotlyOutput("plot_sp_per_1324"), type = 3)
+                               )
+                             )
+                           ),
+                           tabPanel(
+                             "Completion",
+                             fluidRow(
+                               style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid",
+                                 withSpinner(plotlyOutput("plot_sp_per_1311"), type = 3)
+                               ),
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid;",
+                                 withSpinner(plotlyOutput("plot_sp_per_1312"), type = 3)
+                               )
+                             ),
+                             fluidRow(
+                               style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid",
+                                 withSpinner(plotlyOutput("plot_sp_per_1313"), type = 3)
+                               ),
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid;",
+                                 withSpinner(plotlyOutput("plot_sp_per_1314"), type = 3)
+                               )
+                             )
+                           ),
+                           tabPanel(
+                             "KPIs",
+                             fluidRow(
+                               style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid",
+                                 withSpinner(plotlyOutput("plot_sp_per_1331"), type = 3)
+                               ),
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid;",
+                                 withSpinner(plotlyOutput("plot_sp_per_1332"), type = 3)
+                               )
+                             ),
+                             fluidRow(
+                               style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid",
+                                 withSpinner(plotlyOutput("plot_sp_per_1333"), type = 3)
+                               ),
+                               column(
+                                 6,
+                                 align = "left",
+                                 style = "border: 0.3px solid;",
+                                 withSpinner(plotlyOutput("plot_sp_per_1334"), type = 3)
+                               )
+                             )
+                           ),
+                           tabPanel("Metrics Table",
                                     fluidRow(
                                       withSpinner(DT::dataTableOutput("dt_agg_sponsors"), type = 3)
-                                    )))
+                                    ))
+               )
              )),
     tabPanel("Sites",
              mainPanel(
@@ -981,6 +1203,181 @@ server <- function(input, output) {
   #SERVER Begins
   #############################################################################################
   
+  #reactive dataset for sponsor comparison
+  agg_sponsor_1 <-
+    eventReactive(input$update_agg_sponsor_1, {
+      #createleaflet plot 1020 based on reactive set
+      subset(agg_sponsors,
+             subset = (casefold(lead_sponsor_name) == casefold(c(
+               input$select_sponsor_name_1
+             )))
+      )
+    })
+  
+  agg_sponsor_2 <-
+    eventReactive(input$update_agg_sponsor_1, {
+      #createleaflet plot 1020 based on reactive set
+      subset(agg_sponsors,
+             subset = (casefold(lead_sponsor_name) == casefold(c(
+               input$select_sponsor_name_2
+             )))
+      )
+    })
+  
+  summ_sponsor_compare <- data.frame(        
+    max_cnt_studies_registered = max(agg_sponsors$cnt_studies_registered),
+    max_cnt_study_registered_lstyr = max(agg_sponsors$cnt_study_registered_lstyr),
+    max_cnt_study_registered_curryr = max(agg_sponsors$cnt_study_registered_curryr),
+    max_cnt_started_actual_curryr = max(agg_sponsors$cnt_started_actual_curryr)
+  )
+  
+  output$plot_sp_per_1 <- renderPlotly({
+    agg_sponsor_1() %>%
+      plot_ly(
+        type = "indicator",
+        mode = "number+gauge+delta",
+        gauge = list(shape = "bullet",
+                     axis = list(range = list(NULL, ~ summ_sponsor_compare$max_cnt_studies_registered)),
+                     threshold = list(
+                       line = list(color = "red", width = 3),
+                       thickness = 0.85,
+                       value = ~ summ_sponsor_compare$max_cnt_studies_registered)
+        ),
+        delta = list(reference = ~ summ_sponsor_compare$max_cnt_studies_registered),
+        value = ~ agg_sponsor_1()$cnt_studies_registered,
+        #domain = list(x = c(0, 1), y = c(0, 1)),
+        #title= list(text = " Profit"),
+        height = 100
+      )
+  })
+  
+  output$plot_sp_per_2 <- renderPlotly({
+    agg_sponsor_2() %>%
+      plot_ly(
+        type = "indicator",
+        mode = "number+gauge+delta",
+        gauge = list(shape = "bullet",
+                     axis = list(range = list(NULL, ~ summ_sponsor_compare$max_cnt_studies_registered)),
+                     threshold = list(
+                       line = list(color = "red", width = 3),
+                       thickness = 0.85,
+                       value = ~ summ_sponsor_compare$max_cnt_studies_registered)
+        ),
+        delta = list(reference = ~ summ_sponsor_compare$max_cnt_studies_registered),
+        value = ~ agg_sponsor_2()$cnt_studies_registered,
+        height = 100
+      )
+  })
+  
+  output$plot_sp_per_12 <- renderPlotly({
+    agg_sponsor_1() %>%
+      plot_ly(
+        type = "indicator",
+        mode = "number+gauge+delta",
+        gauge = list(shape = "bullet",
+                     axis = list(range = list(NULL, ~ summ_sponsor_compare$max_cnt_study_registered_lstyr)),
+                     threshold = list(
+                       line = list(color = "red", width = 3),
+                       thickness = 0.85,
+                       value = ~ summ_sponsor_compare$max_cnt_study_registered_lstyr)
+        ),
+        delta = list(reference = ~ summ_sponsor_compare$max_cnt_study_registered_lstyr),
+        value = ~ agg_sponsor_1()$cnt_study_registered_lstyr,
+        height = 100
+      )
+  })
+  
+  output$plot_sp_per_22 <- renderPlotly({
+    agg_sponsor_2() %>%
+      plot_ly(
+        type = "indicator",
+        mode = "number+gauge+delta",
+        gauge = list(shape = "bullet",
+                     axis = list(range = list(NULL, ~ summ_sponsor_compare$max_cnt_study_registered_lstyr)),
+                     threshold = list(
+                       line = list(color = "red", width = 3),
+                       thickness = 0.85,
+                       value = ~ summ_sponsor_compare$max_cnt_study_registered_lstyr)
+        ),
+        delta = list(reference = ~ summ_sponsor_compare$max_cnt_study_registered_lstyr),
+        value = ~ agg_sponsor_2()$cnt_study_registered_lstyr,
+        height = 100
+      )
+  })
+  
+  output$plot_sp_per_13 <- renderPlotly({
+    agg_sponsor_1() %>%
+      plot_ly(
+        type = "indicator",
+        mode = "number+gauge+delta",
+        gauge = list(shape = "bullet",
+                     axis = list(range = list(NULL, ~ summ_sponsor_compare$max_cnt_study_registered_curryr)),
+                     threshold = list(
+                       line = list(color = "red", width = 3),
+                       thickness = 0.85,
+                       value = ~ summ_sponsor_compare$max_cnt_study_registered_curryr)
+        ),
+        delta = list(reference = ~ summ_sponsor_compare$max_cnt_study_registered_curryr),
+        value = ~ agg_sponsor_1()$cnt_study_registered_curryr,
+        height = 100
+      )
+  })
+  
+  output$plot_sp_per_23 <- renderPlotly({
+    agg_sponsor_2() %>%
+      plot_ly(
+        type = "indicator",
+        mode = "number+gauge+delta",
+        gauge = list(shape = "bullet",
+                     axis = list(range = list(NULL, ~ summ_sponsor_compare$max_cnt_study_registered_curryr)),
+                     threshold = list(
+                       line = list(color = "red", width = 3),
+                       thickness = 0.85,
+                       value = ~ summ_sponsor_compare$max_cnt_study_registered_curryr)
+        ),
+        delta = list(reference = ~ summ_sponsor_compare$max_cnt_study_registered_curryr),
+        value = ~ agg_sponsor_2()$cnt_study_registered_curryr,
+        height = 100
+      )
+  })
+  
+  output$plot_sp_per_14 <- renderPlotly({
+    agg_sponsor_1() %>%
+      plot_ly(
+        type = "indicator",
+        mode = "number+gauge+delta",
+        gauge = list(shape = "bullet",
+                     axis = list(range = list(NULL, ~ summ_sponsor_compare$max_cnt_started_actual_curryr)),
+                     threshold = list(
+                       line = list(color = "red", width = 3),
+                       thickness = 0.85,
+                       value = ~ summ_sponsor_compare$max_cnt_started_actual_curryr)
+        ),
+        delta = list(reference = ~ summ_sponsor_compare$max_cnt_started_actual_curryr),
+        value = ~ agg_sponsor_1()$cnt_started_actual_curryr,
+        height = 100
+      )
+  })
+  
+  output$plot_sp_per_24 <- renderPlotly({
+    agg_sponsor_2() %>%
+      plot_ly(
+        type = "indicator",
+        mode = "number+gauge+delta",
+        gauge = list(shape = "bullet",
+                     axis = list(range = list(NULL, ~ summ_sponsor_compare$max_cnt_started_actual_curryr)),
+                     threshold = list(
+                       line = list(color = "red", width = 3),
+                       thickness = 0.85,
+                       value = ~ summ_sponsor_compare$max_cnt_started_actual_curryr)
+        ),
+        delta = list(reference = ~ summ_sponsor_compare$max_cnt_started_actual_curryr),
+        value = ~ agg_sponsor_2()$cnt_started_actual_curryr,
+        height = 100
+      )
+  })
+  
+  ######################################################################
   #Create infobox for sponsor dashboard
   summ_sponsor <- data.frame(        
     cnt_sponsors = length(unique(agg_sponsors$lead_sponsor_name)),
@@ -1378,6 +1775,251 @@ server <- function(input, output) {
              xaxis = list(title = "Study Registration Year", showgrid = TRUE),
              title = 'Studies with non-US Country Trend - 15 Years')
   })
+  
+  ####################################################################
+  #Sponsor - Performance
+  #sponsor - performance - Summary
+  #Completion Duration
+  output$plot_sp_per_1311 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ avg_start_to_complete_days_ph1,
+        x =  ~ sponsor_size,
+        color = ~sponsor_size,
+        type = 'box') %>%
+      layout(
+        title = "Avg Start to Complete Days - Phase 1",
+        xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+        yaxis = list(title = 'Average Days'),
+        showlegend = TRUE,
+        legend = list(x = 0.9, y = 0.9)
+      )
+  })
+  
+  output$plot_sp_per_1312 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ avg_start_to_complete_days_ph2,
+        x =  ~ sponsor_size,
+        color = ~sponsor_size,
+        type = 'box') %>%
+      layout(
+        title = "Avg Start to Complete Days - Phase 2",
+        xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+        yaxis = list(title = 'Average Days'),
+        showlegend = TRUE,
+        legend = list(x = 0.9, y = 0.9)
+      )
+  })
+  
+  output$plot_sp_per_1313 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ avg_start_to_complete_days_ph3,
+        x =  ~ sponsor_size,
+        color = ~sponsor_size,
+        type = 'box') %>%
+      layout(
+        title = "Avg Start to Complete Days - Phase 3",
+        xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+        yaxis = list(title = 'Average Days'),
+        showlegend = TRUE,
+        legend = list(x = 0.9, y = 0.9)
+      )
+  })
+  
+  output$plot_sp_per_1314 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ avg_start_to_complete_days_ph4,
+        x =  ~ sponsor_size,
+        color = ~sponsor_size,
+        type = 'box') %>%
+      layout(
+        title = "Avg Start to Complete Days - Phase 4",
+        xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+        yaxis = list(title = 'Average Days'),
+        showlegend = TRUE,
+        legend = list(x = 0.9, y = 0.9)
+      )
+  })
+  
+  #Initiation Duration
+  output$plot_sp_per_1321 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ avg_register_to_start_days_ph1,
+        x =  ~ sponsor_size,
+        color = ~sponsor_size,
+        type = 'box') %>%
+      layout(
+        title = "Avg Reg to Initiation Days - Phase 1",
+        xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+        yaxis = list(title = 'Average Days'),
+        showlegend = TRUE,
+        legend = list(x = 0.9, y = 0.9)
+      )
+  })
+  
+  output$plot_sp_per_1322 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ avg_register_to_start_days_ph2,
+        x =  ~ sponsor_size,
+        color = ~sponsor_size,
+        type = 'box') %>%
+      layout(
+        title = "Avg Reg to Initiation Days - Phase 2",
+        xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+        yaxis = list(title = 'Average Days'),
+        showlegend = TRUE,
+        legend = list(x = 0.9, y = 0.9)
+      )
+  })
+  
+  output$plot_sp_per_1323 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ avg_register_to_start_days_ph3,
+        x =  ~ sponsor_size,
+        color = ~sponsor_size,
+        type = 'box') %>%
+      layout(
+        title = "Avg Reg to Initiation Days - Phase 3",
+        xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+        yaxis = list(title = 'Average Days'),
+        showlegend = TRUE,
+        legend = list(x = 0.9, y = 0.9)
+      )
+  })
+  
+  output$plot_sp_per_1324 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ avg_register_to_start_days_ph4,
+        x =  ~ sponsor_size,
+        color = ~sponsor_size,
+        type = 'box') %>%
+      layout(
+        title = "Avg Reg to Initiation Days - Phase 4",
+        xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+        yaxis = list(title = 'Average Days'),
+        showlegend = TRUE,
+        legend = list(x = 0.9, y = 0.9)
+      )
+  })
+  
+  #Sponsor KPIs
+  output$plot_sp_per_1331 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ cnt_observational,
+        x =  ~ cnt_interventional,
+        color = ~ sponsor_type,
+        size = ~ cnt_has_dmc,
+        type = 'scatter',
+        mode = 'markers',
+        marker = list(opacity = 0.6, sizemode = 'diameter'),
+        text = ~ paste(
+          lead_sponsor_name,
+          paste("Type:", sponsor_type),
+          paste("Interventional:", cnt_interventional),
+          paste("Observational:", cnt_observational),
+          paste("DMC:", cnt_has_dmc),
+          sep = "<br />"
+        ),
+        hoverinfo = 'text'
+      ) %>%
+      layout(
+        title = "Interventional Vs Observational",
+        xaxis = list(title = 'Interventional Studies'),
+        yaxis = list(title = 'Observational Studies'),
+        showlegend = TRUE
+      )
+  })
+  
+  output$plot_sp_per_1332 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ cnt_started_actual,
+        x =  ~ cnt_studies_registered,
+        color = ~ sponsor_type,
+        size = ~ cnt_results_submitted,
+        type = 'scatter',
+        mode = 'markers',
+        marker = list(opacity = 0.6, sizemode = 'diameter'),
+        text = ~ paste(
+          lead_sponsor_name,
+          paste("Type:", sponsor_type),
+          paste("Registered:", cnt_studies_registered),
+          paste("Initiated:", cnt_started_actual),
+          paste("Results Posted:", cnt_results_submitted),
+          sep = "<br />"
+        ),
+        hoverinfo = 'text'
+      ) %>%
+      layout(
+        title = "Registered Vs Initiated",
+        xaxis = list(title = 'Registered Studies'),
+        yaxis = list(title = 'Initiated Studies'),
+        showlegend = TRUE
+      )
+  })
+  
+  output$plot_sp_per_1333 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ cnt_nonUS_only_studies,
+        x =  ~ cnt_US_only_studies,
+        color = ~ sponsor_type,
+        size = ~ cnt_global_studies,
+        type = 'scatter',
+        mode = 'markers',
+        marker = list(opacity = 0.5, sizemode = 'diameter'),
+        text = ~ paste(
+          lead_sponsor_name,
+          paste("Type:", sponsor_type),
+          paste("US Only:", cnt_US_only_studies),
+          paste("non-US Only:", cnt_nonUS_only_studies),
+          paste("Global:", cnt_global_studies),
+          sep = "<br />"
+        ),
+        hoverinfo = 'text'
+      ) %>%
+      layout(
+        title = "US Only Vs non-US Only Studies",
+        xaxis = list(title = 'US Only Studies'),
+        yaxis = list(title = 'non-US Only Studies'),
+        showlegend = TRUE
+      )
+  })
+  
+  output$plot_sp_per_1334 <- renderPlotly({
+    agg_sponsors %>%
+      plot_ly(
+        y =  ~ cnt_colab_nonind,
+        x =  ~ cnt_colab_Ind,
+        color = ~ sponsor_type,
+        type = 'scatter',
+        mode = 'markers',
+        marker = list(opacity = 0.8, size=10),
+        text = ~ paste(
+          lead_sponsor_name,
+          paste("Type:", sponsor_type),
+          paste("Industry:", cnt_colab_Ind),
+          paste("non-Industry:", cnt_colab_nonind),
+          sep = "<br />"
+        ),
+        hoverinfo = 'text'
+      ) %>%
+      layout(
+        title = "Industry Vs Non-Industry Collaboration",
+        xaxis = list(title = 'Industry Collaborators'),
+        yaxis = list(title = 'Non-Industry Collaborators'),
+        showlegend = TRUE
+      )
+  })
+  
   
   ####################################################################
   #reactive dataset for sponsor-collaborator

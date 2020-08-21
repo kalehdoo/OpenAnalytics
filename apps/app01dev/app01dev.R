@@ -41,6 +41,7 @@ agg_sponsors <-
         stringsAsFactors = FALSE
     )
 
+
 agg_sponsors_by_time <-
     read.csv(
         "data/agg_sponsors_by_time.txt",
@@ -309,6 +310,26 @@ ui <- navbarPage(
                          tabPanel(
                              "Summary",
                              fluidRow(
+                                 style = "margin-top:2px;",
+                                 column(
+                                     1,
+                                     align = "left",
+                                     #tags$h2("Dropdown Button"),
+                                     #br(),
+                                     dropdownButton(
+                                         tags$h5("The sponsors with just one registered study have been excluded."),
+                                         #br(),
+                                         tags$h5("See the Data Dictionary tab for detailed definitions of the metrics."),
+                                         circle = TRUE, 
+                                         status = "info",
+                                         icon = icon("info"), 
+                                         size = "xs",
+                                         width = "500px",
+                                         tooltip = tooltipOptions(title = "Help!")
+                                     )
+                                 )
+                             ),
+                             fluidRow(
                                  column(align = "center", style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
                                         2,
                                         shinydashboard::valueBoxOutput("sponsorbox_cnt_sponsors", width = 2)
@@ -341,13 +362,13 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid",
-                                     plotlyOutput("plot_sp_sum_1111")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1111"), type = 3)
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid;",
-                                     plotlyOutput("plot_sp_sum_1112")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1112"), type = 3)
                                  )
                              ),
                              fluidRow(
@@ -356,13 +377,13 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid",
-                                     plotlyOutput("plot_sp_sum_1113")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1113"), type = 3)
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid;",
-                                     plotlyOutput("plot_sp_sum_1114")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1114"), type = 3)
                                  )
                              )
                          ),
@@ -374,13 +395,13 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid",
-                                     plotlyOutput("plot_sp_sum_1121")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1121"), type = 3)
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid;",
-                                     plotlyOutput("plot_sp_sum_1122")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1122"), type = 3)
                                  )
                              ),
                              fluidRow(
@@ -389,13 +410,13 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid",
-                                     plotlyOutput("plot_sp_sum_1123")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1123"), type = 3)
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid;",
-                                     plotlyOutput("plot_sp_sum_1124")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1124"), type = 3)
                                  )
                              )
                          ),
@@ -407,13 +428,13 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid",
-                                     plotlyOutput("plot_sp_sum_1131")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1131"), type = 3)
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid;",
-                                     plotlyOutput("plot_sp_sum_1132")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1132"), type = 3)
                                  )
                              ),
                              fluidRow(
@@ -422,19 +443,19 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid",
-                                     plotlyOutput("plot_sp_sum_1133")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1133"), type = 3)
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border: 0.3px solid;",
-                                     plotlyOutput("plot_sp_sum_1134")
+                                     withSpinner(plotlyOutput("plot_sp_sum_1134"), type = 3)
                                  )
                              )
                          ),
                          #summary tab ends here
                          tabPanel("Data",
-                                  fluidRow(DT::dataTableOutput("dt_recruitment_na")))
+                                  fluidRow(DT::dataTableOutput("dt_agg_sponsors_summ")))
                      )
                  )),
         tabPanel("Network",
@@ -492,10 +513,165 @@ ui <- navbarPage(
                  mainPanel(
                      width = 12,
                      tabsetPanel(type = "tabs",
-                                 tabPanel("Metrics",
+                                 tabPanel(
+                                     "Compare",
+                                     fluidRow(
+                                         style = "margin-top:2px;",
+                                         column(
+                                             1,
+                                             align = "left",
+                                             #tags$h2("Dropdown Button"),
+                                             #br(),
+                                             dropdownButton(
+                                                 tags$h5("Enter the sponsor names and hit Compare button to see the results."),
+                                                 circle = TRUE, 
+                                                 status = "info",
+                                                 icon = icon("info"), 
+                                                 size = "sm",
+                                                 width = "500px",
+                                                 tooltip = tooltipOptions(title = "Help!")
+                                             )
+                                         ),
+                                         column(
+                                             5,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_name_1",
+                                                 label = NULL,
+                                                 value = "pfizer",
+                                                 placeholder = "Sponsor Name 1"
+                                             )
+                                         ),
+                                         column(1,
+                                                align = "left",
+                                                tags$div(
+                                                    class = "text-center",
+                                                    actionButton(
+                                                        "update_agg_sponsor_1",
+                                                        "Compare",
+                                                        class = "btn btn-primary",
+                                                        style = "margin-bottom: 0.5%;"
+                                                    )
+                                                )),
+                                         column(
+                                             5,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_name_2",
+                                                 label = NULL,
+                                                 value = "Novartis Pharmaceuticals",
+                                                 placeholder = "Sponsor Name 2"
+                                             )
+                                         )
+                                     ),
+                                     fluidRow(
+                                         withSpinner(DT::dataTableOutput("dt_agg_sponsor_compare"), type = 3)
+                                     )
+                                 ),
+                                 tabPanel(
+                                     "Initiation",
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid",
+                                             withSpinner(plotlyOutput("plot_sp_per_1321"), type = 3)
+                                         ),
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid;",
+                                             withSpinner(plotlyOutput("plot_sp_per_1322"), type = 3)
+                                         )
+                                     ),
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid",
+                                             withSpinner(plotlyOutput("plot_sp_per_1323"), type = 3)
+                                         ),
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid;",
+                                             withSpinner(plotlyOutput("plot_sp_per_1324"), type = 3)
+                                         )
+                                     )
+                                 ),
+                                 tabPanel(
+                                     "Completion",
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid",
+                                             withSpinner(plotlyOutput("plot_sp_per_1311"), type = 3)
+                                         ),
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid;",
+                                             withSpinner(plotlyOutput("plot_sp_per_1312"), type = 3)
+                                         )
+                                     ),
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid",
+                                             withSpinner(plotlyOutput("plot_sp_per_1313"), type = 3)
+                                         ),
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid;",
+                                             withSpinner(plotlyOutput("plot_sp_per_1314"), type = 3)
+                                         )
+                                     )
+                                 ),
+                                 tabPanel(
+                                     "KPIs",
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid",
+                                             withSpinner(plotlyOutput("plot_sp_per_1331"), type = 3)
+                                         ),
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid;",
+                                             withSpinner(plotlyOutput("plot_sp_per_1332"), type = 3)
+                                         )
+                                     ),
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid",
+                                             withSpinner(plotlyOutput("plot_sp_per_1333"), type = 3)
+                                         ),
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid;",
+                                             withSpinner(plotlyOutput("plot_sp_per_1334"), type = 3)
+                                         )
+                                     )
+                                 ),
+                                 tabPanel("Metrics Table",
                                           fluidRow(
                                               withSpinner(DT::dataTableOutput("dt_agg_sponsors"), type = 3)
-                                          )))
+                                          ))
+                                 )
                  )),
         tabPanel("Sites",
                  mainPanel(
@@ -981,6 +1157,33 @@ server <- function(input, output) {
     #SERVER Begins
     #############################################################################################
     
+    #reactive dataset for sponsor comparison
+    agg_sponsor_compare <-
+        eventReactive(input$update_agg_sponsor_1, {
+            agg_sponsor_1<-subset(agg_sponsors,
+                subset = (
+                    casefold(lead_sponsor_name) %like% casefold(c(input$select_sponsor_name_1))
+                |
+                    casefold(lead_sponsor_name) %like% casefold(c(input$select_sponsor_name_2))
+                )
+            )
+            
+                        
+        })
+    
+    
+    
+    output$dt_agg_sponsor_compare <- renderDataTable({
+        DT::datatable(
+            agg_sponsor_compare(),
+            escape = FALSE,
+            rownames = FALSE,
+            options = list(lengthChange = FALSE,
+                           dom='t')
+        )
+    })
+    
+   ######################################################################
     #Create infobox for sponsor dashboard
     summ_sponsor <- data.frame(        
         cnt_sponsors = length(unique(agg_sponsors$lead_sponsor_name)),
@@ -992,7 +1195,7 @@ server <- function(input, output) {
     )
     
     output$sponsorbox_cnt_sponsors <- shinydashboard::renderValueBox({
-        valueBox("Total",
+        valueBox("Sponsors",
                  summ_sponsor$cnt_sponsors
         )
     })
@@ -1145,6 +1348,16 @@ server <- function(input, output) {
             layout(title = "Num of Sponsors by Type",
                    legend = list(orientation = "h"))
         
+    })
+    
+    output$dt_agg_sponsors_summ <- renderDataTable({
+        DT::datatable(
+            agg_sponsors,
+            filter = 'top',
+            escape = FALSE,
+            rownames = FALSE,
+            options = list(lengthChange = FALSE)
+        )
     })
     
     #################################################
@@ -1378,6 +1591,251 @@ server <- function(input, output) {
                    xaxis = list(title = "Study Registration Year", showgrid = TRUE),
                    title = 'Studies with non-US Country Trend - 15 Years')
     })
+    
+    ####################################################################
+    #Sponsor - Performance
+    #sponsor - performance - Summary
+    #Completion Duration
+    output$plot_sp_per_1311 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ avg_start_to_complete_days_ph1,
+                x =  ~ sponsor_size,
+                color = ~sponsor_size,
+                type = 'box') %>%
+            layout(
+                title = "Avg Start to Complete Days - Phase 1",
+                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                yaxis = list(title = 'Average Days'),
+                showlegend = TRUE,
+                legend = list(x = 0.9, y = 0.9)
+            )
+    })
+    
+    output$plot_sp_per_1312 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ avg_start_to_complete_days_ph2,
+                x =  ~ sponsor_size,
+                color = ~sponsor_size,
+                type = 'box') %>%
+            layout(
+                title = "Avg Start to Complete Days - Phase 2",
+                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                yaxis = list(title = 'Average Days'),
+                showlegend = TRUE,
+                legend = list(x = 0.9, y = 0.9)
+            )
+    })
+    
+    output$plot_sp_per_1313 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ avg_start_to_complete_days_ph3,
+                x =  ~ sponsor_size,
+                color = ~sponsor_size,
+                type = 'box') %>%
+            layout(
+                title = "Avg Start to Complete Days - Phase 3",
+                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                yaxis = list(title = 'Average Days'),
+                showlegend = TRUE,
+                legend = list(x = 0.9, y = 0.9)
+            )
+    })
+    
+    output$plot_sp_per_1314 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ avg_start_to_complete_days_ph4,
+                x =  ~ sponsor_size,
+                color = ~sponsor_size,
+                type = 'box') %>%
+            layout(
+                title = "Avg Start to Complete Days - Phase 4",
+                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                yaxis = list(title = 'Average Days'),
+                showlegend = TRUE,
+                legend = list(x = 0.9, y = 0.9)
+            )
+    })
+    
+    #Initiation Duration
+    output$plot_sp_per_1321 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ avg_register_to_start_days_ph1,
+                x =  ~ sponsor_size,
+                color = ~sponsor_size,
+                type = 'box') %>%
+            layout(
+                title = "Avg Reg to Initiation Days - Phase 1",
+                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                yaxis = list(title = 'Average Days'),
+                showlegend = TRUE,
+                legend = list(x = 0.9, y = 0.9)
+            )
+    })
+    
+    output$plot_sp_per_1322 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ avg_register_to_start_days_ph2,
+                x =  ~ sponsor_size,
+                color = ~sponsor_size,
+                type = 'box') %>%
+            layout(
+                title = "Avg Reg to Initiation Days - Phase 2",
+                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                yaxis = list(title = 'Average Days'),
+                showlegend = TRUE,
+                legend = list(x = 0.9, y = 0.9)
+            )
+    })
+    
+    output$plot_sp_per_1323 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ avg_register_to_start_days_ph3,
+                x =  ~ sponsor_size,
+                color = ~sponsor_size,
+                type = 'box') %>%
+            layout(
+                title = "Avg Reg to Initiation Days - Phase 3",
+                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                yaxis = list(title = 'Average Days'),
+                showlegend = TRUE,
+                legend = list(x = 0.9, y = 0.9)
+            )
+    })
+    
+    output$plot_sp_per_1324 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ avg_register_to_start_days_ph4,
+                x =  ~ sponsor_size,
+                color = ~sponsor_size,
+                type = 'box') %>%
+            layout(
+                title = "Avg Reg to Initiation Days - Phase 4",
+                xaxis = list(title = 'Sponsor Size', showticklabels = FALSE),
+                yaxis = list(title = 'Average Days'),
+                showlegend = TRUE,
+                legend = list(x = 0.9, y = 0.9)
+            )
+    })
+    
+    #Sponsor KPIs
+    output$plot_sp_per_1331 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ cnt_observational,
+                x =  ~ cnt_interventional,
+                color = ~ sponsor_type,
+                size = ~ cnt_has_dmc,
+                type = 'scatter',
+                mode = 'markers',
+                marker = list(opacity = 0.6, sizemode = 'diameter'),
+                text = ~ paste(
+                    lead_sponsor_name,
+                    paste("Type:", sponsor_type),
+                    paste("Interventional:", cnt_interventional),
+                    paste("Observational:", cnt_observational),
+                    paste("DMC:", cnt_has_dmc),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text'
+                ) %>%
+            layout(
+                title = "Interventional Vs Observational",
+                xaxis = list(title = 'Interventional Studies'),
+                yaxis = list(title = 'Observational Studies'),
+                showlegend = TRUE
+            )
+    })
+    
+    output$plot_sp_per_1332 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ cnt_started_actual,
+                x =  ~ cnt_studies_registered,
+                color = ~ sponsor_type,
+                size = ~ cnt_results_submitted,
+                type = 'scatter',
+                mode = 'markers',
+                marker = list(opacity = 0.6, sizemode = 'diameter'),
+                text = ~ paste(
+                    lead_sponsor_name,
+                    paste("Type:", sponsor_type),
+                    paste("Registered:", cnt_studies_registered),
+                    paste("Initiated:", cnt_started_actual),
+                    paste("Results Posted:", cnt_results_submitted),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text'
+            ) %>%
+            layout(
+                title = "Registered Vs Initiated",
+                xaxis = list(title = 'Registered Studies'),
+                yaxis = list(title = 'Initiated Studies'),
+                showlegend = TRUE
+            )
+    })
+    
+    output$plot_sp_per_1333 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ cnt_nonUS_only_studies,
+                x =  ~ cnt_US_only_studies,
+                color = ~ sponsor_type,
+                size = ~ cnt_global_studies,
+                type = 'scatter',
+                mode = 'markers',
+                marker = list(opacity = 0.5, sizemode = 'diameter'),
+                text = ~ paste(
+                    lead_sponsor_name,
+                    paste("Type:", sponsor_type),
+                    paste("US Only:", cnt_US_only_studies),
+                    paste("non-US Only:", cnt_nonUS_only_studies),
+                    paste("Global:", cnt_global_studies),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text'
+            ) %>%
+            layout(
+                title = "US Only Vs non-US Only Studies",
+                xaxis = list(title = 'US Only Studies'),
+                yaxis = list(title = 'non-US Only Studies'),
+                showlegend = TRUE
+            )
+    })
+    
+    output$plot_sp_per_1334 <- renderPlotly({
+        agg_sponsors %>%
+            plot_ly(
+                y =  ~ cnt_colab_nonind,
+                x =  ~ cnt_colab_Ind,
+                color = ~ sponsor_type,
+                type = 'scatter',
+                mode = 'markers',
+                marker = list(opacity = 0.8, size=10),
+                text = ~ paste(
+                    lead_sponsor_name,
+                    paste("Type:", sponsor_type),
+                    paste("Industry:", cnt_colab_Ind),
+                    paste("non-Industry:", cnt_colab_nonind),
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text'
+            ) %>%
+            layout(
+                title = "Industry Vs Non-Industry Collaboration",
+                xaxis = list(title = 'Industry Collaborators'),
+                yaxis = list(title = 'Non-Industry Collaborators'),
+                showlegend = TRUE
+            )
+    })
+    
     
     ####################################################################
     #reactive dataset for sponsor-collaborator

@@ -23,3 +23,6 @@ sponsor_central_contacts1<-subset.data.frame(sponsor_central_contacts,
                                               is.na(email)==FALSE
                                             )
 
+
+#write to txt file
+write.table(sponsor_central_contacts1, paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_central_contacts_Industry.txt", sep=""), sep = "|", row.names = FALSE)
