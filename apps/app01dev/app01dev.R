@@ -18,6 +18,7 @@ library(shinycssloaders)
 library(shinyWidgets)
 library(collapsibleTree)
 
+var_current_year<- year(today())
 
 #read study Measurements by condition
 measurements <-
@@ -209,13 +210,18 @@ agg_studies <-
         stringsAsFactors = FALSE
     )
 
-
 #####################
 # for spinners 2-3 match the background color of spinner
 options(spinner.color.background = "#772953")
 options(spinner.size = 1.5)
 
-ui <- navbarPage(
+ui <-
+fluidPage(
+    #below includehtml is added for google analytics
+    tags$head(includeHTML((
+      "googleanalyticsapp01.html"
+    ))), 
+    navbarPage(
     title = div(
         tags$a(
             href = "https://www.oakbloc.com",
@@ -246,8 +252,13 @@ ui <- navbarPage(
     tabPanel(
         title = "Home",
         fluidRow((
-            h3("Kalehdoo Clinical Analytics Platform (Under Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
-        )),
+          h2(
+            "Kalehdoo Clinical Intelligence",
+            #class = "display-4",
+            style = "color: #1175B8; margin-top:0px;margin-left:2%; margin-right:2%",
+            align = "center"
+          )
+        )),        
         fluidRow(style = "margin:2px;",
                                  column(align = "center", style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
                                         2,
@@ -337,7 +348,7 @@ ui <- navbarPage(
                          tabPanel(
                              "Summary",
                              fluidRow(
-                                 style = "margin-top:2px;",
+                                 style = "padding:2px;",
                                  column(
                                      1,
                                      align = "left",
@@ -608,7 +619,7 @@ ui <- navbarPage(
                                  tabPanel(
                                      "Compare",
                                      fluidRow(
-                                         style = "margin-top:2px;",
+                                         style = "padding:2px;",
                                          column(
                                              1,
                                              align = "left",
@@ -662,7 +673,7 @@ ui <- navbarPage(
                                  ),
                                  tabPanel(
                                      "Initiation",
-                                     fluidRow(
+                                     fluidRow(style = "padding:2px;",
                                          column(
                                              1,
                                              align = "left",
@@ -725,7 +736,7 @@ ui <- navbarPage(
                                  ),
                                  tabPanel(
                                      "Completion",
-                                     fluidRow(
+                                     fluidRow(style = "padding:2px;",
                                          column(
                                              1,
                                              align = "left",
@@ -1225,32 +1236,20 @@ ui <- navbarPage(
                      tabsetPanel(
                          type = "tabs",
                          tabPanel(
-                             "Summary",
-                             fluidRow(
-                                 style = "height:50px;background-color: orange; padding: 5px; border-style: solid; border-width: 1px;",
-                                 column(
-                                     12,
-                                     shinydashboard::valueBoxOutput("box_studies1", width = 2),
-                                     shinydashboard::valueBoxOutput("box_sponsors1", width = 2),
-                                     shinydashboard::valueBoxOutput("box_countries1", width = 2),
-                                     shinydashboard::valueBoxOutput("box_cities1", width = 2),
-                                     shinydashboard::valueBoxOutput("box_facilities1", width = 2)
-                                 )
-                             ),
-                             
+                             "Summary",                             
                              fluidRow(
                                  style = "padding: 5px; border-style: solid; border-width: 1px;",
                                  column(
                                      6,
                                      align = "left",
                                      style = "border-right: 1px solid",
-                                     plotlyOutput("plot_1030_1")
+                                     withSpinner(plotlyOutput("plot_1030_1"), type=3)
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border-left: 1px solid;",
-                                     plotlyOutput("plot_1030_3")
+                                     withSpinner(plotlyOutput("plot_1030_3"), type=3)
                                  )
                              ),
                              fluidRow(
@@ -1259,20 +1258,20 @@ ui <- navbarPage(
                                      6,
                                      align = "left",
                                      style = "border-right: 1px solid",
-                                     plotlyOutput("plot_1030_4")
+                                     withSpinner(plotlyOutput("plot_1030_4"), type=3)
                                  ),
                                  column(
                                      6,
                                      align = "left",
                                      style = "border-left: 1px solid;",
-                                     plotlyOutput("plot_1030_2")
+                                     withSpinner(plotlyOutput("plot_1030_2"), type=3)
                                  )
                              )
                              
                          ),
                          tabPanel("Sponsor Data",
                                   fluidRow(
-                                      DT::dataTableOutput("dt_sponsor_recruitment")
+                                      withSpinner(DT::dataTableOutput("dt_sponsor_recruitment"), type=3)
                                   ))
                      )
                  ))
@@ -1288,13 +1287,13 @@ ui <- navbarPage(
                                   width = 12,
                                   fluidRow(tags$h4("Previous vs Current Year Trends")),
                                   fluidRow(
-                                      box(plotlyOutput("plot_1001", height = 200), title = "Studies Registered"),
-                                      box(plotlyOutput("plot_1002", height = 200), title = "Studies Started")
+                                      withSpinner(box(plotlyOutput("plot_1001", height = 200), title = "Studies Registered"), type=3),
+                                      withSpinner(box(plotlyOutput("plot_1002", height = 200), title = "Studies Started"), type=3)
                                   ),
                                   #create box for plot 1001
                                   fluidRow(
-                                      box(plotlyOutput("plot_1003", height = 200), title = "Studies Completed"),
-                                      box(plotlyOutput("plot_1004", height = 200), title = "Results Posted")
+                                      withSpinner(box(plotlyOutput("plot_1003", height = 200), title = "Studies Completed"), type=3),
+                                      withSpinner(box(plotlyOutput("plot_1004", height = 200), title = "Results Posted"), type=3)
                                   )
                               )),
                      tabPanel(
@@ -1303,13 +1302,13 @@ ui <- navbarPage(
                              width = 12,
                              fluidRow(tags$h4("Monthly Comparison (Last Year Month Vs Current Year Month)")),
                              fluidRow(
-                                 box(plotlyOutput("plot_month_1001", height = 200), title = "Studies Registered"),
-                                 box(plotlyOutput("plot_month_1002", height = 200), title = "Studies Started")
+                                 withSpinner(box(plotlyOutput("plot_month_1001", height = 200), title = "Studies Registered"), type=3),
+                                 withSpinner(box(plotlyOutput("plot_month_1002", height = 200), title = "Studies Started"), type=3)
                              ),
                              #create box for plot 1001
                              fluidRow(
-                                 box(plotlyOutput("plot_month_1003", height = 200), title = "Studies Completed"),
-                                 box(plotlyOutput("plot_month_1004", height = 200), title = "Results Posted")
+                                 withSpinner(box(plotlyOutput("plot_month_1003", height = 200), title = "Studies Completed"), type=3),
+                                 withSpinner(box(plotlyOutput("plot_month_1004", height = 200), title = "Results Posted"), type=3)
                              )
                          )
                      )
@@ -1327,6 +1326,7 @@ ui <- navbarPage(
     
     #ending main bracket
 )
+)
 
 ############################################################################################################
 #Server function begins
@@ -1339,7 +1339,7 @@ server <- function(input, output) {
     
     #Home Page begins
     ###################################
-    #Create infobox for sponsor dashboard
+    #summary for home page Infobox
     summ_home_page <- data.frame(
         cnt_studies = length(unique(agg_studies$nct_id)),        
         cnt_studies_completed = sum(ifelse(agg_studies$overall_status == "Completed", 1, 0), na.rm = TRUE),
@@ -1348,7 +1348,7 @@ server <- function(input, output) {
         cnt_studies_observational = sum(ifelse(agg_studies$study_type == "Observational", 1, 0), na.rm = TRUE),
         cnt_sponsors = length(unique(agg_sponsors$lead_sponsor_name))
     )
-    
+    #Create infobox for sponsor dashboard
     output$homebox_cnt_studies <- shinydashboard::renderValueBox({
         valueBox("Studies",
                  summ_home_page$cnt_studies
@@ -1387,75 +1387,113 @@ server <- function(input, output) {
     output$plot_home_sum_1111 <- renderPlotly({
         agg_studies %>%
             group_by(overall_status) %>%
-            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            summarise(cnt_studies = length(unique((nct_id)))) %>%
             plot_ly(
-                values =  ~ cnt_sponsors,
+                values =  ~ cnt_studies,
                 labels =  ~ (overall_status),
                 type = 'pie',
                 hole=0.3,
-                marker= list(colors = brewer.pal(8,"Set2"))
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(12,"Set3"))
             ) %>%
             layout(title = "Studies by Status",
             showlegend = FALSE
             )
     })
-
+    
+    #top sponsors - home summary
+    top_sponsors_home <-
+        agg_sponsors_by_time %>%
+        filter(sponsor_type == "Industry" & common_year == var_current_year) %>%
+        group_by(lead_sponsor_name) %>%
+        summarise(cnt_studies = sum(cnt_studies_registered)) %>%
+        arrange(desc(cnt_studies)) %>%
+        top_n(20, cnt_studies)
+    
+    top_sponsors_home$lead_sponsor_name <-
+        factor(top_sponsors_home$lead_sponsor_name,
+               levels = unique(top_sponsors_home$lead_sponsor_name)[order(top_sponsors_home$cnt_studies, decreasing = FALSE)])
+    
+    
     output$plot_home_sum_1112 <- renderPlotly({
+        top_sponsors_home %>%
+            plot_ly(
+                x =  ~ cnt_studies,
+                y =  ~ lead_sponsor_name,
+                type = 'bar',                
+                marker= list(colors = brewer.pal(12,"Set3")),
+                text = ~ paste(lead_sponsor_name,": ",cnt_studies),
+                textposition = 'auto',
+                orientation = 'h'
+            ) %>%
+            layout(
+                title = paste0("Top Industry Sponsors in ", var_current_year),
+                xaxis = list(title = 'Studies Registered'),
+                yaxis = list(title="Industry Sponsor", showticklabels = FALSE)
+            )
+    })
+
+    output$plot_home_sum_1113 <- renderPlotly({
         agg_studies %>%
             group_by(study_type) %>%
-            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            summarise(cnt_studies = length(unique((nct_id)))) %>%
             plot_ly(
-                values =  ~ cnt_sponsors,
+                values =  ~ cnt_studies,
                 labels =  ~ (study_type),
                 type = 'pie',
                 hole=0.3,
-                marker= list(colors = brewer.pal(8,"Set2"))
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(12,"Set3"))
             ) %>%
             layout(title = "Studies by Study Type",
             showlegend = FALSE)
         
     })
 
-    output$plot_home_sum_1113 <- renderPlotly({
+    output$plot_home_sum_1114 <- renderPlotly({
         agg_studies %>%
             group_by(phase) %>%
-            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            summarise(cnt_studies = length(unique((nct_id)))) %>%
             plot_ly(
-                values =  ~ cnt_sponsors,
+                values =  ~ cnt_studies,
                 labels =  ~ (phase),
                 type = 'pie',
                 hole=0.3,
-                marker= list(colors = brewer.pal(8,"Set2"))
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(12,"Set3"))
             ) %>%
             layout(title = "Studies by Study Phase",
             showlegend = FALSE)
     })
     
-    output$plot_home_sum_1114 <- renderPlotly({
+    output$plot_home_sum_1115 <- renderPlotly({
         agg_studies %>%
             group_by(intervention_type) %>%
-            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            summarise(cnt_studies = length(unique((nct_id)))) %>%
+            top_n(10, cnt_studies) %>%
             plot_ly(
-                values =  ~ cnt_sponsors,
+                values =  ~ cnt_studies,
                 labels =  ~ (intervention_type),
                 type = 'pie',
                 hole=0.3,
-                marker= list(colors = brewer.pal(8,"Set2"))
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(12,"Set3"))
             ) %>%
             layout(title = "Studies by Intervention Type",
                    showlegend = FALSE)
     })
     
-    output$plot_home_sum_1115 <- renderPlotly({
+    output$plot_home_sum_1116 <- renderPlotly({
         agg_studies %>%
             group_by(sponsor_type) %>%
-            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            summarise(cnt_studies = length(unique((nct_id)))) %>%
             plot_ly(
-                values =  ~ cnt_sponsors,
+                values =  ~ cnt_studies,
                 labels =  ~ (sponsor_type),
                 type = 'pie',
                 hole=0.3,
-                marker= list(colors = brewer.pal(8,"Set2"))
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(12,"Set3"))
             ) %>%
             layout(title = "Studies by Sponsor Type",
                    showlegend = FALSE)
@@ -1652,7 +1690,10 @@ server <- function(input, output) {
             plot_ly(
                 values =  ~ cnt_sponsors,
                 labels =  ~ (sponsor_type),
-                type = 'pie'
+                type = 'pie',
+                hole=0.3,
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(8,"Set2"))
             ) %>%
             layout(title = "Num of Sponsors by Type",
                    legend = list(orientation = "h"))
@@ -2661,7 +2702,10 @@ server <- function(input, output) {
             plot_ly(
                 values =  ~ cnt,
                 labels =  ~ factor(Region),
-                type = 'pie'
+                type = 'pie',
+                hole=0.3,
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(8,"Set2"))
             ) %>%
             layout(title = "Recruiting Studies by Region",
                    legend = list(orientation = "h"))
@@ -2740,7 +2784,10 @@ server <- function(input, output) {
             plot_ly(
                 values =  ~ cnt_st,
                 labels =  ~ (StudyPhase),
-                type = 'pie'
+                type = 'pie',
+                hole=0.3,
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(8,"Set2"))
             ) %>%
             layout(title = "Recruiting Studies by Phase",
                    legend = list(orientation = "h"))
@@ -2795,7 +2842,10 @@ server <- function(input, output) {
             plot_ly(
                 values =  ~ cnt_sponsors,
                 labels =  ~ (AgencyClass),
-                type = 'pie'
+                type = 'pie',
+                hole=0.3,
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(8,"Set2"))
             ) %>%
             layout(title = "Sponsors by Class",
                    legend = list(orientation = "h"))
@@ -2809,7 +2859,10 @@ server <- function(input, output) {
             plot_ly(
                 values =  ~ cnt_sponsors,
                 labels =  ~ (SponsorType),
-                type = 'pie'
+                type = 'pie',
+                hole=0.3,
+                textinfo='label+percent',
+                marker= list(colors = brewer.pal(8,"Set2"))
             ) %>%
             layout(title = "Sponsors by Class",
                    legend = list(orientation = "h"))
