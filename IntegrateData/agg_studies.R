@@ -47,5 +47,21 @@ agg_studies_combined<-agg_collaborators_by_study
 #write combined results to agg_studies txt file
 write.table(agg_studies_combined,paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies.txt", sep=""), sep = "|", row.names = FALSE)
 
+#create a mini subset to be used in apps
+agg_studies_mini<-subset.data.frame(agg_studies_combined,
+                                    select = c("nct_id",
+                                               "overall_status",
+                                               "study_type",
+                                               "phase",
+                                               "intervention_type",
+                                               "lead_sponsor_name",
+                                               "sponsor_type",
+                                               "condition_name",
+                                               "study_first_posted_year",
+                                               "cnt_conditions",
+                                               "cnt_sites"
+                                               ))
 
 
+#write combined results to agg_studies txt file
+write.table(agg_studies_mini,paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies_mini.txt", sep=""), sep = "|", row.names = FALSE)

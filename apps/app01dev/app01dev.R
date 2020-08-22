@@ -198,6 +198,17 @@ rec_sponsors <-
         stringsAsFactors = FALSE
     )
 
+#Study data
+agg_studies <-
+    read.csv(
+        "data/agg_studies_mini.txt",
+        header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
+
 
 #####################
 # for spinners 2-3 match the background color of spinner
@@ -237,68 +248,83 @@ ui <- navbarPage(
         fluidRow((
             h3("Kalehdoo Clinical Analytics Platform (Under Development)", style = "margin-top:0px;margin-left:5%; margin-right:5%")
         )),
-        fluidRow(
-            style = "margin-top:0px;margin-left:1%; margin-right:1%",
-            p(
-                "Clinical Analytics provides insights into the clinical research industry.
-               The market and competitive intelligence gained from the insights can benefit Sponsors, CROs, Industry Analysts, Non-Profit, Government and Special Interest Organizations explore avenues for future growth."
-            ),
-            p(
-                tags$h4("Sponsors:"),
-                tags$ul(
-                    tags$li("Design Clinical Study"),
-                    tags$li("Reduce Redundant Studies"),
-                    tags$li("Clinical Site Selection"),
-                    tags$li("Design Study Endpoints"),
-                    tags$li("Explore Collaboration Opportunities"),
-                    tags$li("Competitive Intelligence"),
-                    tags$li("Clinical Trends"),
-                    tags$li("Clinical Industry Landscape")
-                )
-            ),
-            p(tags$h4("Physicians & Patients:"),
-              tags$ul(
-                  tags$li("Participation Opportunities"),
-                  tags$li("Recruiting Studies")
-              )),
-            p(
-                tags$h4("Market & Industry Analysts:"),
-                tags$ul(tags$li("Current Trends"),
-                        tags$li("Market Intelligence"))
-            ),
-            p(
-                tags$h4("Special Interest Organizations:"),
-                tags$ul(tags$li("Global Clinical Activity"),
-                        tags$li("Demographics"))
-            )
-        ),
-        fluidRow((
-            p(
-                "Visit us at  "
-                ,
-                tags$a(href = "https://oakbloc.com", "Oakbloc Technologies", target =
-                           "_blank"),
-                style = "margin-top:0px;margin-left:1%; margin-right:1%"
-            )
-        )),
+        fluidRow(style = "margin:2px;",
+                                 column(align = "center", style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("homebox_cnt_studies", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("homebox_cnt_studies_completed", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("homebox_cnt_studies_recruiting", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("homebox_cnt_studies_interventional", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("homebox_cnt_studies_observational", width = 2)
+                                 ),
+                                 column(align = "center",style = "background-color: #46D2CE; padding: 2px; border-style: solid; border-width: 0.3px;",
+                                        2,
+                                        shinydashboard::valueBoxOutput("homebox_cnt_sponsors", width = 2)
+                                 )
+                             ),
+                             fluidRow(
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                 column(
+                                     4,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     withSpinner(plotlyOutput("plot_home_sum_1111"), type = 3)
+                                 ),
+                                 column(
+                                     4,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     withSpinner(plotlyOutput("plot_home_sum_1112"), type = 3)
+                                 ),
+                                 column(
+                                     4,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     withSpinner(plotlyOutput("plot_home_sum_1113"), type = 3)
+                                 )
+                             ),
+                             fluidRow(
+                                 style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                 column(
+                                     4,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     withSpinner(plotlyOutput("plot_home_sum_1114"), type = 3)
+                                 ),
+                                 column(
+                                     4,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     withSpinner(plotlyOutput("plot_home_sum_1115"), type = 3)
+                                 ),
+                                 column(
+                                     4,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     withSpinner(plotlyOutput("plot_home_sum_1116"), type = 3)
+                                 )
+                             ),        
         fluidRow(
             h5(
                 "Disclaimer: The source data for the application is obtained from ",
                 tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
                            "_blank"),
-                "Oakbloc Technologies tries to keep the data as accurate as possible. However, there are chances of mistakes and inaccuracies which is solely unintentional. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information by anyone. Please use at your own risk.",
+                "Oakbloc Technologies tries to keep the data as accurate as possible. However, there are possibilities of mistakes and inaccuracies which would be purely unintentional. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information by anyone. Please use the information at your own risk.",
                 style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:2%; text-align:justify;"
             )
-        ),
-        fluidRow((
-            p(
-                "Follow us on Twitter for regular updates  "
-                ,
-                tags$a(href = "https://twitter.com/OakBlocTech", "Twitter", target =
-                           "_blank"),
-                style = "margin-top:0px;margin-left:1%; margin-right:1%"
-            )
-        ))
+        )        
     ),
     #sponsor Starts Here
     navbarMenu(
@@ -1311,6 +1337,135 @@ server <- function(input, output) {
     #SERVER Begins
     #############################################################################################
     
+    #Home Page begins
+    ###################################
+    #Create infobox for sponsor dashboard
+    summ_home_page <- data.frame(
+        cnt_studies = length(unique(agg_studies$nct_id)),        
+        cnt_studies_completed = sum(ifelse(agg_studies$overall_status == "Completed", 1, 0), na.rm = TRUE),
+        cnt_studies_recruiting = sum(ifelse(agg_studies$overall_status == "Recruiting", 1, 0), na.rm = TRUE),
+        cnt_studies_interventional = sum(ifelse(agg_studies$study_type == "Interventional", 1, 0), na.rm = TRUE),
+        cnt_studies_observational = sum(ifelse(agg_studies$study_type == "Observational", 1, 0), na.rm = TRUE),
+        cnt_sponsors = length(unique(agg_sponsors$lead_sponsor_name))
+    )
+    
+    output$homebox_cnt_studies <- shinydashboard::renderValueBox({
+        valueBox("Studies",
+                 summ_home_page$cnt_studies
+        )
+    })
+    
+    output$homebox_cnt_studies_completed <- shinydashboard::renderValueBox({
+        valueBox("Completed",
+                 summ_home_page$cnt_studies_completed
+                 #icon = icon("credit-card")
+        )
+    })
+    
+    output$homebox_cnt_studies_recruiting <- shinydashboard::renderValueBox({
+        valueBox("Recruiting",
+                 summ_home_page$cnt_studies_recruiting
+        )
+    })
+    
+    output$homebox_cnt_studies_interventional <- shinydashboard::renderValueBox({
+        valueBox("Interventional",
+                 summ_home_page$cnt_studies_interventional)
+    })
+    
+    output$homebox_cnt_studies_observational <- shinydashboard::renderValueBox({
+        valueBox("Observational",
+                 summ_home_page$cnt_studies_observational)
+    })
+    
+    output$homebox_cnt_sponsors <- shinydashboard::renderValueBox({
+        valueBox("Sponsors",
+                 summ_home_page$cnt_sponsors)
+    })
+
+
+    output$plot_home_sum_1111 <- renderPlotly({
+        agg_studies %>%
+            group_by(overall_status) %>%
+            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            plot_ly(
+                values =  ~ cnt_sponsors,
+                labels =  ~ (overall_status),
+                type = 'pie',
+                hole=0.3,
+                marker= list(colors = brewer.pal(8,"Set2"))
+            ) %>%
+            layout(title = "Studies by Status",
+            showlegend = FALSE
+            )
+    })
+
+    output$plot_home_sum_1112 <- renderPlotly({
+        agg_studies %>%
+            group_by(study_type) %>%
+            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            plot_ly(
+                values =  ~ cnt_sponsors,
+                labels =  ~ (study_type),
+                type = 'pie',
+                hole=0.3,
+                marker= list(colors = brewer.pal(8,"Set2"))
+            ) %>%
+            layout(title = "Studies by Study Type",
+            showlegend = FALSE)
+        
+    })
+
+    output$plot_home_sum_1113 <- renderPlotly({
+        agg_studies %>%
+            group_by(phase) %>%
+            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            plot_ly(
+                values =  ~ cnt_sponsors,
+                labels =  ~ (phase),
+                type = 'pie',
+                hole=0.3,
+                marker= list(colors = brewer.pal(8,"Set2"))
+            ) %>%
+            layout(title = "Studies by Study Phase",
+            showlegend = FALSE)
+    })
+    
+    output$plot_home_sum_1114 <- renderPlotly({
+        agg_studies %>%
+            group_by(intervention_type) %>%
+            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            plot_ly(
+                values =  ~ cnt_sponsors,
+                labels =  ~ (intervention_type),
+                type = 'pie',
+                hole=0.3,
+                marker= list(colors = brewer.pal(8,"Set2"))
+            ) %>%
+            layout(title = "Studies by Intervention Type",
+                   showlegend = FALSE)
+    })
+    
+    output$plot_home_sum_1115 <- renderPlotly({
+        agg_studies %>%
+            group_by(sponsor_type) %>%
+            summarise(cnt_sponsors = length(unique((nct_id)))) %>%
+            plot_ly(
+                values =  ~ cnt_sponsors,
+                labels =  ~ (sponsor_type),
+                type = 'pie',
+                hole=0.3,
+                marker= list(colors = brewer.pal(8,"Set2"))
+            ) %>%
+            layout(title = "Studies by Sponsor Type",
+                   showlegend = FALSE)
+    })
+
+    
+    ###################################
+    #Home Page Ends
+    ###################################
+
     #reactive dataset for sponsor comparison
     agg_sponsor_compare <-
         eventReactive(input$update_agg_sponsor_1, {
