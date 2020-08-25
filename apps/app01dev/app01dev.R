@@ -4,15 +4,15 @@ library(shinydashboard)
 library(dplyr)
 library(ggplot2)
 library(plotly)
-library(markdown)
+#library(markdown)
 library(DT)
 library(RColorBrewer)
 library(leaflet)
 library(htmltools)
 library(data.table)
-library(wordcloud)
+#library(wordcloud)
 library(shinythemes)
-library(rsample)
+#library(rsample)
 library(lubridate)
 library(shinycssloaders)
 library(shinyWidgets)
@@ -149,7 +149,9 @@ mv_studies_recruiting <-
     filter(is.na(nct_id) == FALSE)
 
 
-var_studyphase_name <- unique(mv_studies_recruiting$StudyPhase)
+var_studyphase_name <- unique(agg_studies$phase)
+var_study_type <- unique(agg_studies$study_type)
+var_intervention_type <- unique(agg_studies$intervention_type)
 var_sponsor_size <- sort(unique(agg_sponsors$sponsor_size), decreasing=TRUE)
 
 #mv_studies_recruiting <-
@@ -616,6 +618,73 @@ fluidPage(
                  mainPanel(
                      width = 12,
                      tabsetPanel(type = "tabs",
+                                    tabPanel(
+                                     "Summary",
+                                     fluidRow(
+                                         style = "padding:2px;",
+                                         column(
+                                             3,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_sponsor_per_summ1",
+                                                 label = NULL,
+                                                 value = "pfizer",
+                                                 placeholder = "Sponsor Name"
+                                             )
+                                         ),  
+                                         
+                                 column(
+                                     3,
+                                     align = "center",
+                                     pickerInput(
+                                         inputId = "select_phase_spon_summ_1",
+                                         label = NULL,
+                                         choices = var_studyphase_name,
+                                         options = list(`actions-box` = TRUE, style = "btn-info"),
+                                         multiple = TRUE,
+                                         selected = c(var_studyphase_name)
+                                     )
+                                 ),
+                                 column(
+                                   4,
+                                   align = "center",
+                                   pickerInput(
+                                     inputId = "select_st_type_spon_summ_1",
+                                     label = NULL,
+                                     choices = var_study_type,
+                                     options = list(`actions-box` = TRUE, style = "btn-info"),                                     
+                                     multiple = TRUE,
+                                     selected = c(var_study_type)
+                                   )
+                                 ),                                
+                                 column(2,
+                                                align = "left",
+                                                tags$div(
+                                                    class = "text-center",
+                                                    actionButton(
+                                                        "update_per_summ_1",
+                                                        "Display Results",
+                                                        class = "btn btn-primary",
+                                                        style = "margin-bottom: 0.5%;"
+                                                    )
+                                                ))
+                                     ),
+                                     fluidRow(
+                                         style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid",
+                                             withSpinner(plotlyOutput("plot_sp_per_summ_1311"), type = 3)
+                                         ),
+                                         column(
+                                             6,
+                                             align = "left",
+                                             style = "border: 0.3px solid;",
+                                             withSpinner(plotlyOutput("plot_sp_per_summ_1312"), type = 3)
+                                         )
+                                     )
+                                 ),
                                  tabPanel(
                                      "Compare",
                                      fluidRow(
@@ -1944,7 +2013,46 @@ server <- function(input, output) {
     
     ####################################################################
     #Sponsor - Performance
+    ################################################################
     #sponsor - performance - Summary
+
+    #reactive dataset for sponsor performance summary
+    agg_studies_spon_per_summ <-
+        eventReactive(input$update_per_summ_1, {
+            subset(agg_studies,
+                subset = (
+                    casefold(lead_sponsor_name) == casefold(c(input$select_sponsor_per_summ1))
+                &
+                    casefold(phase) %in% casefold(c(input$select_phase_spon_summ_1))
+                &
+                    casefold(study_type) %in% casefold(c(input$select_st_type_spon_summ_1))                
+                )
+            )
+            
+                        
+        })
+
+    output$plot_sp_per_summ_1311 <- renderPlotly({
+        agg_studies_spon_per_summ() %>%        
+        group_by(study_first_posted_year) %>%
+        summarize(cnt_studies=length(unique(nct_id))) %>%
+            plot_ly(
+                y =  ~ cnt_studies,
+                x =  ~ study_first_posted_year,
+                type = 'bar',
+                text = ~ paste(                    
+                    paste("Year:", study_first_posted_year),                    
+                    paste("Studies Registered:", cnt_studies),                    
+                    sep = "<br />"
+                ),
+                hoverinfo = 'text') %>%
+            layout(yaxis = list(title = 'No of Studies Registered'),
+                   xaxis = list(title = "Registration Year", showgrid = TRUE),
+                   title = 'Sponsors Trend - Registration')
+    })
+
+    
+###################################################################################
     agg_sponsors_completion <- reactive({
         subset.data.frame(agg_sponsors, subset=(sponsor_size == input$select_sponsor_size_completion)
         )
