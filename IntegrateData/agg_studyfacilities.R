@@ -1,3 +1,5 @@
+#the code adds geo information to x_facilities
+
 #import libraries
 library(dplyr)
 library(stringr)

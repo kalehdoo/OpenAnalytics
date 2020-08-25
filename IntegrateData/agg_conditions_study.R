@@ -13,8 +13,8 @@ x_conditions<-read.csv(in_path_x_conditions, header=TRUE, sep = "|",na.strings =
 
 #agg conditions at study level
 agg_conditions_study<-data.table(x_conditions)[,list( 
-  condition_name  = paste(condition_name, collapse =","),
-  cnt_conditions = length(condition_name),
+  condition_name  = paste(unique(condition_name), collapse =","),
+  cnt_conditions = length(unique(condition_name)),
   cnt_match_rare_condition = sum(flag_rare_disease, na.rm = TRUE)
 ), by='nct_id']
 
