@@ -4,19 +4,25 @@ library(shinydashboard)
 library(dplyr)
 library(ggplot2)
 library(plotly)
-library(markdown)
+#library(markdown)
 library(DT)
 library(RColorBrewer)
 library(leaflet)
 library(htmltools)
 library(data.table)
-library(wordcloud)
+#library(wordcloud)
 library(shinythemes)
-library(rsample)
+#library(rsample)
 library(lubridate)
 library(shinycssloaders)
 library(shinyWidgets)
 library(collapsibleTree)
+
+
+#read log file
+log_app02 <- read.csv("data/log_app02.txt", header = FALSE)
+log_app02_time <- substr(log_app02, 1, 10)
+log_app02_time <- format.Date(log_app02_time, "%d-%b-%Y")
 
 var_current_year<- year(today())
 
@@ -149,8 +155,7 @@ mv_studies_recruiting <-
   filter(is.na(nct_id) == FALSE)
 
 
-var_studyphase_name <- unique(mv_studies_recruiting$StudyPhase)
-var_sponsor_size <- sort(unique(agg_sponsors$sponsor_size), decreasing=TRUE)
+
 
 #mv_studies_recruiting <-
 #    subset.data.frame(mv_studies_recruiting) %>%
@@ -210,6 +215,11 @@ agg_studies <-
     stringsAsFactors = FALSE
   )
 
+var_studyphase_name <- unique(agg_studies$phase)
+var_study_type <- unique(agg_studies$study_type)
+var_intervention_type <- unique(agg_studies$intervention_type)
+var_sponsor_size <- sort(unique(agg_sponsors$sponsor_size), decreasing=TRUE)
+
 #####################
 # for spinners 2-3 match the background color of spinner
 options(spinner.color.background = "#772953")
@@ -240,13 +250,8 @@ ui <-
       collapsible	= TRUE,
       fluid = TRUE,
       inverse = TRUE,
-      footer = h4(
-        tags$a(href = "https://www.oakbloc.com/", "Oakbloc Technologies", target =
-                 "_blank"),
-        style = "margin-top:2%;margin-bottom:2%;",
-        align = "center",
-        "2019-2020",
-      ),
+      footer = h4(class="text-center",style = "color: #F37312; margin-top:2px; margin-left:2px; margin-right:2px;",
+                  paste0("Data Refreshed On: ",log_app02_time)),
       #Landing Home page starts
       
       tabPanel(
@@ -548,7 +553,7 @@ ui <-
                                   tags$li(tags$span("avg_start_to_complete_days_ph2: The average number of days from study initiation to study completion for Phase 2 studies.")),
                                   tags$li(tags$span("avg_start_to_complete_days_ph3: The average number of days from study initiation to study completion for Phase 3 studies.")),
                                   tags$li(tags$span("avg_start_to_complete_days_ph4: The average number of days from study initiation to study completion for Phase 4 studies.")),
-                                  tags$li(tags$span("sponsor_size: The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponor has registered studies between 11 and 50.")),
+                                  tags$li(tags$span("sponsor_size: The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponsor has registered total studies between 11 and 50.")),
                                   tags$li(tags$span("cnt_collaborators: The total number of collaborators a sponsor has worked with.")),
                                   tags$li(tags$span("cnt_colab_NIH: The total number of NIH collaborators a sponsor has worked with.")),
                                   tags$li(tags$span("cnt_colab_nonind: The total number of Non-Industry collaborators a sponsor has worked with.")),
@@ -616,6 +621,79 @@ ui <-
                  mainPanel(
                    width = 12,
                    tabsetPanel(type = "tabs",
+                               tabPanel(
+                                 "Summary",
+                                 fluidRow(
+                                   style = "padding:2px;",
+                                   column(
+                                     3,
+                                     align = "center",
+                                     textInput(
+                                       inputId = "select_sponsor_per_summ1",
+                                       label = NULL,
+                                       value = "pfizer",
+                                       placeholder = "Sponsor Name"
+                                     )
+                                   ),  
+                                   
+                                   column(
+                                     3,
+                                     align = "center",
+                                     pickerInput(
+                                       inputId = "select_phase_spon_summ_1",
+                                       label = NULL,
+                                       choices = var_studyphase_name,
+                                       options = list(`actions-box` = TRUE, style = "btn-info"),
+                                       multiple = TRUE,
+                                       selected = c(var_studyphase_name)
+                                     )
+                                   ),
+                                   column(
+                                     4,
+                                     align = "center",
+                                     pickerInput(
+                                       inputId = "select_st_type_spon_summ_1",
+                                       label = NULL,
+                                       choices = var_study_type,
+                                       options = list(`actions-box` = TRUE, style = "btn-info"),                                     
+                                       multiple = TRUE,
+                                       selected = c(var_study_type)
+                                     )
+                                   ),                                
+                                   column(2,
+                                          align = "left",
+                                          tags$div(
+                                            class = "text-center",
+                                            actionButton(
+                                              "update_per_summ_1",
+                                              "Display Results",
+                                              class = "btn btn-primary",
+                                              style = "margin-bottom: 0.5%;"
+                                            )
+                                          ))
+                                 ),
+                                 fluidRow(
+                                   style = "padding: 5px; border-style: solid; border-width: 0.3px;",
+                                   column(
+                                     5,
+                                     align = "left",
+                                     style = "border: 0.3px solid",
+                                     withSpinner(plotlyOutput("plot_sp_per_summ_1311"), type = 3)
+                                   ),
+                                   column(
+                                     7,
+                                     align = "left",
+                                     style = "border: 0.3px solid;",
+                                     withSpinner(DT::dataTableOutput("dt_agg_sponsor_per_summ"), type = 3)
+                                   )
+                                 )
+                               ),
+                               tabPanel(
+                                 "Details",
+                                 fluidRow(
+                                   withSpinner(DT::dataTableOutput("dt_agg_studies_per_summ"), type = 3)
+                                 )
+                               ),
                                tabPanel(
                                  "Compare",
                                  fluidRow(
@@ -743,7 +821,7 @@ ui <-
                                             #tags$h2("Dropdown Button"),
                                             #br(),
                                             dropdownButton(
-                                              tags$h5("Select the sponsor size. The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponor has registered studies between 11 and 50."),
+                                              tags$h5("Select the sponsor size. The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponsor has registered total studies between 11 and 50."),
                                               circle = TRUE, 
                                               status = "info",
                                               icon = icon("info"), 
@@ -805,7 +883,7 @@ ui <-
                                      #tags$h2("Dropdown Button"),
                                      #br(),
                                      dropdownButton(
-                                       tags$h5("Select the sponsor size. The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponor has registered studies between 11 and 50."),
+                                       tags$h5("Select the sponsor size. The size of the sponsor based on the number of studies registered. For example in 2_XXS_11T50, 2 is the rank 1 being the smallest, XXS is Extra Extra Small, 11T50 means the sponsor has registered total studies between 11 and 50."),
                                        circle = TRUE, 
                                        status = "info",
                                        icon = icon("info"), 
@@ -984,6 +1062,47 @@ ui <-
                                )
                    )
                  )),
+        tabPanel(
+          "Collaborators",
+          mainPanel(width = 12,
+                    tabsetPanel(
+                      type = "tabs",
+                      tabPanel("Data Table",
+                               fluidRow(
+                                 withSpinner(DT::dataTableOutput("dt_collaborator_sponsor"), type = 3)
+                               )),
+                      tabPanel(
+                        "Network",
+                        fluidRow(
+                          style = "margin-top:2px;",
+                          column(
+                            3,
+                            align = "center",
+                            textInput(
+                              inputId = "select_coll_sponsor",
+                              label = NULL,
+                              value = "quintiles",
+                              placeholder = "Collaborator Name"
+                            )
+                          ),
+                          column(9,
+                                 align = "left",
+                                 tags$div(
+                                   class = "text-center",
+                                   actionButton(
+                                     "update_collaborator_sponsor_1",
+                                     "Display Results",
+                                     class = "btn btn-primary",
+                                     style = "margin-bottom: 0.5%;"
+                                   )
+                                 ))
+                        ),
+                        fluidRow(withSpinner(
+                          collapsibleTreeOutput("coll_sponsor_tree"), type = 3
+                        ))
+                      )
+                    ))
+        ),
         tabPanel("Interventions",
                  mainPanel(
                    width = 12,
@@ -994,48 +1113,7 @@ ui <-
                                         )))
                  ))
       ),
-      navbarMenu("Collaborator",
-                 tabPanel(
-                   "Network",
-                   mainPanel(width = 12,
-                             tabsetPanel(
-                               type = "tabs",
-                               tabPanel("Data Table",
-                                        fluidRow(
-                                          withSpinner(DT::dataTableOutput("dt_collaborator_sponsor"), type = 3)
-                                        )),
-                               tabPanel(
-                                 "Network",
-                                 fluidRow(
-                                   style = "margin-top:2px;",
-                                   column(
-                                     3,
-                                     align = "center",
-                                     textInput(
-                                       inputId = "select_coll_sponsor",
-                                       label = NULL,
-                                       value = "quintiles",
-                                       placeholder = "Collaborator Name"
-                                     )
-                                   ),
-                                   column(9,
-                                          align = "left",
-                                          tags$div(
-                                            class = "text-center",
-                                            actionButton(
-                                              "update_collaborator_sponsor_1",
-                                              "Display Results",
-                                              class = "btn btn-primary",
-                                              style = "margin-bottom: 0.5%;"
-                                            )
-                                          ))
-                                 ),
-                                 fluidRow(withSpinner(
-                                   collapsibleTreeOutput("coll_sponsor_tree"), type = 3
-                                 ))
-                               )
-                             ))
-                 )),
+      
       #Recruitment Dashboard starts here
       navbarMenu(
         "Recruitment",
@@ -1502,33 +1580,7 @@ server <- function(input, output) {
   
   ###################################
   #Home Page Ends
-  ###################################
-  
-  #reactive dataset for sponsor comparison
-  agg_sponsor_compare <-
-    eventReactive(input$update_agg_sponsor_1, {
-      agg_sponsor_1<-subset(agg_sponsors,
-                            subset = (
-                              casefold(lead_sponsor_name) %like% casefold(c(input$select_sponsor_name_1))
-                              |
-                                casefold(lead_sponsor_name) %like% casefold(c(input$select_sponsor_name_2))
-                            )
-      )
-      
-      
-    })
-  
-  
-  
-  output$dt_agg_sponsor_compare <- renderDataTable({
-    DT::datatable(
-      agg_sponsor_compare(),
-      escape = FALSE,
-      rownames = FALSE,
-      options = list(lengthChange = FALSE,
-                     dom='t')
-    )
-  })
+  ###################################   
   
   ######################################################################
   #Create infobox for sponsor dashboard
@@ -1944,7 +1996,105 @@ server <- function(input, output) {
   
   ####################################################################
   #Sponsor - Performance
+  ################################################################
   #sponsor - performance - Summary
+  
+  #reactive dataset for sponsor performance summary
+  agg_studies_spon_per_summ <-
+    eventReactive(input$update_per_summ_1, {
+      subset(agg_studies,
+             subset = (
+               casefold(lead_sponsor_name) %like% casefold(c(input$select_sponsor_per_summ1))
+               &
+                 casefold(phase) %in% casefold(c(input$select_phase_spon_summ_1))
+               &
+                 casefold(study_type) %in% casefold(c(input$select_st_type_spon_summ_1))                
+             )
+      )
+      
+      
+    })
+  
+  output$plot_sp_per_summ_1311 <- renderPlotly({
+    agg_studies_spon_per_summ() %>%        
+      group_by(study_first_posted_year) %>%
+      summarize(cnt_studies=length(unique(nct_id))) %>%
+      plot_ly(
+        y =  ~ cnt_studies,
+        x =  ~ study_first_posted_year,
+        type = 'bar',
+        text = ~ paste(                    
+          paste("Year:", study_first_posted_year),                    
+          paste("Studies Registered:", cnt_studies),                    
+          sep = "<br />"
+        ),
+        hoverinfo = 'text') %>%
+      layout(yaxis = list(title = 'No of Studies Registered'),
+             xaxis = list(title = "Registration Year", showgrid = TRUE),
+             title = 'Sponsors Trend - Registration')
+  })
+  
+  output$dt_agg_sponsor_per_summ <- renderDataTable({
+    agg_studies_spon_per_summ_dt<- agg_studies_spon_per_summ() %>%
+      group_by(condition_name, study_first_posted_year) %>%
+      summarize(cnt_studies=length(unique(nct_id)))
+    
+    DT::datatable(
+      agg_studies_spon_per_summ_dt,
+      escape = FALSE,
+      filter = 'top',
+      rownames = FALSE,            
+      options = list(lengthChange = FALSE,
+                     pageLength = 5,
+                     searchHighlight = TRUE,
+                     order = list(list(1, 'desc'), 
+                                  list(2, 'desc'))
+      ))
+  })
+  
+  output$dt_agg_studies_per_summ <- renderDataTable({
+    DT::datatable(
+      agg_studies,
+      escape = FALSE,
+      filter = 'top',
+      rownames = FALSE,            
+      options = list(lengthChange = FALSE,
+                     pageLength = 10,
+                     searchHighlight = TRUE,
+                     order = list(list(8, 'desc'), 
+                                  list(10, 'desc'))
+      ))
+  })
+  
+  
+  
+  ##########################################
+  #reactive dataset for sponsor comparison
+  agg_sponsor_compare <-
+    eventReactive(input$update_agg_sponsor_1, {
+      agg_sponsor_1<-subset(agg_sponsors,
+                            subset = (
+                              casefold(lead_sponsor_name) %like% casefold(c(input$select_sponsor_name_1))
+                              |
+                                casefold(lead_sponsor_name) %like% casefold(c(input$select_sponsor_name_2))
+                            )
+      )
+      
+      
+    })   
+  
+  
+  output$dt_agg_sponsor_compare <- renderDataTable({
+    DT::datatable(
+      agg_sponsor_compare(),
+      escape = FALSE,
+      rownames = FALSE,
+      options = list(lengthChange = FALSE,
+                     dom='t')
+    )
+  })
+  
+  ###################################################################################
   agg_sponsors_completion <- reactive({
     subset.data.frame(agg_sponsors, subset=(sponsor_size == input$select_sponsor_size_completion)
     )

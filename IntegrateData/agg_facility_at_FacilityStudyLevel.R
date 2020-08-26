@@ -44,12 +44,18 @@ facilityStudy<-left_join(agg_facilities, agg_studies, by=c("nct_id"))
 facilityStudy<-subset.data.frame(facilityStudy,
                                 subset = (study_first_posted_year>=var_last_year_10))
 
+facilityStudy<-mutate(facilityStudy,
+                      states_len=stri_length(state)
+                      )
+
+library(stringi)
+
 agg_facilityStudy <- setDT(facilityStudy)[, list(
   countries=paste(unique(country, na.rm=TRUE), collapse =","),
-  cnt_countries=length(unique(country, na.rm=TRUE)),
-  states=paste(unique(ifelse(state=="","na",state), na.rm=TRUE), collapse =","),
+  cnt_countries = length(unique(country, na.rm=TRUE)),
+  states=paste(unique(state, na.rm=TRUE), collapse =","),
   cnt_states=length(unique(state, na.rm=TRUE)),
   cities=paste(unique(city, na.rm=TRUE), collapse =","),
   cnt_cities=length(unique(city, na.rm=TRUE)),
   cnt_studies_registered = length(unique(nct_id))
-), by = c('facility_name')]
+), by = c('facility_name','nct_id')]
