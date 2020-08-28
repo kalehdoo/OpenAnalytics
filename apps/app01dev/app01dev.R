@@ -26,6 +26,11 @@ log_app02_time <- format.Date(log_app02_time, "%d-%b-%Y")
 
 var_current_year<- year(today())
 
+#import recruiting data
+agg_facility_by_facilityname <-
+  readRDS("data/agg_facility_by_facilityname.rds")
+  
+
 #read study Measurements by condition
 measurements <-
     read.csv(
