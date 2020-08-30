@@ -255,8 +255,18 @@ fluidPage(
     collapsible	= TRUE,
     fluid = TRUE,
     inverse = TRUE,
-    footer = h4(class="text-center",style = "color: #F37312; margin-top:2px; margin-left:2px; margin-right:2px;",
+    footer = fluidRow(style = "margin-top:3%;margin-left:1%; margin-right:1%",
+      h4(class="text-center",style = "color: #F37312; margin-top:2px; margin-left:2px; margin-right:2px;",
                 paste0("Data Refreshed On: ",log_app02_time)),
+      tags$br(),
+      h4(
+        tags$a(href = "https://www.oakbloc.com/", "Oakbloc Technologies", target =
+                 "_blank"),
+        style = "margin-bottom:2%;",
+        align = "center",
+        "2019-2020",
+      )
+    ),
     #Landing Home page starts
     
     tabPanel(
@@ -337,12 +347,12 @@ fluidPage(
                                      withSpinner(plotlyOutput("plot_home_sum_1116"), type = 3)
                                  )
                              ),        
-        fluidRow(
+        fluidRow(style = "margin-top:3%;margin-left:1%; margin-right:1%",
             h5(
                 "Disclaimer: The source data for the application is obtained from ",
                 tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
                            "_blank"),
-                "Oakbloc Technologies tries to keep the data as accurate as possible. However, there are possibilities of mistakes and inaccuracies which would be purely unintentional. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information by anyone. Please use the information at your own risk.",
+                "Oakbloc Technologies tries to keep the data as accurate as possible. However, there are possibilities of mistakes and inaccuracies which would be purely unintentional. Oakbloc Technologies does not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information by anyone. Please use the information at your own risk.",
                 style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:2%; text-align:justify;"
             )
         )        
@@ -1124,40 +1134,35 @@ fluidPage(
                    mainPanel(width = 12,
                              tabsetPanel(
                                  type = "tabs",
-                                 tabPanel("Data Table",
+                                 tabPanel("Site",
                                           fluidRow(
-                                              withSpinner(DT::dataTableOutput("dt_collaborator_sponsor1"), type = 3)
-                                          )),
-                                 tabPanel(
-                                     "Network",
-                                     fluidRow(
-                                         style = "margin-top:2px;",
-                                         column(
-                                             3,
-                                             align = "center",
-                                             textInput(
-                                                 inputId = "select_coll_sponsor1",
-                                                 label = NULL,
-                                                 value = "quintiles",
-                                                 placeholder = "Collaborator Name1"
-                                             )
-                                         ),
-                                         column(9,
-                                                align = "left",
-                                                tags$div(
-                                                    class = "text-center",
-                                                    actionButton(
-                                                        "update_collaborator_sponsor_11",
-                                                        "Display Results",
-                                                        class = "btn btn-primary",
-                                                        style = "margin-bottom: 0.5%;"
-                                                    )
-                                                ))
-                                     ),
-                                     fluidRow(withSpinner(
-                                         collapsibleTreeOutput("coll_sponsor_tree1"), type = 3
-                                     ))
-                                 )
+                                            style = "padding:2px;",
+                                            column(
+                                              6,
+                                              align = "center",
+                                              textInput(
+                                                inputId = "select_site_summ",
+                                                label = NULL,
+                                                value = "stanford university",
+                                                placeholder = "Site Name"
+                                              )
+                                            ),
+                                            column(6,
+                                                   align = "left",
+                                                   tags$div(
+                                                     class = "text-center",
+                                                     actionButton(
+                                                       "update_site_summ",
+                                                       "Display Results",
+                                                       class = "btn btn-primary",
+                                                       style = "margin-bottom: 0.5%;"
+                                                     )
+                                                   ))
+                                          ),
+                                          fluidRow(
+                                            withSpinner(DT::dataTableOutput("dt_facility_by_facilityname"), type = 3)
+                                          )
+                                          )
                              ))
                )),
     #Recruitment Dashboard starts here
@@ -2989,6 +2994,28 @@ server <- function(input, output) {
                    legend = list(orientation = "h"))
         
     })
+
+    #####################################################################
+    #####Site###########################
+     #reactive dataset for Site Summary
+    facility_by_facilityname <-
+        eventReactive(input$update_site_summ, {
+            subset(agg_facility_by_facilityname,
+                subset = (
+                    casefold(facility_name2) %like% casefold(c(input$select_site_summ))                              
+                )
+            )                        
+        })
+
+    
+    output$dt_facility_by_facilityname <-
+        renderDataTable(DT::datatable(facility_by_facilityname(), filter = 'top',
+        options = list(lengthChange = FALSE,
+                       pageLength = 5,
+                       searchHighlight = TRUE                       
+        )))  
+    
+    ######################################################################
     
     #Create recruitment infobox
     summ_rec <- data.frame(

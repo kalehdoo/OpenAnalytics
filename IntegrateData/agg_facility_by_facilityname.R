@@ -52,13 +52,13 @@ facilityStudy<-subset.data.frame(facilityStudy,
 
 
 agg_facility_by_facilityname <- setDT(facilityStudy)[, list(
+  conditions=paste(unique(condition_name), collapse =","),
   countries=paste(unique(country), collapse =","),
   cnt_countries = length(unique(country)),
   cities=paste(unique(city), collapse =","),
   cnt_cities=length(unique(city)),
-  sponsors=paste(unique(lead_sponsor_name), collapse =","),
+  #sponsors=paste(unique(lead_sponsor_name), collapse =","),
   cnt_sponsors=length(unique(lead_sponsor_name)),
-  conditions=paste(unique(condition_name), collapse =","),
   cnt_studies = length(unique(nct_id)),
   cnt_recruiting = sum(ifelse(status == "Recruiting", 1, 0), na.rm = TRUE)
 ), by = 'facility_name2']
