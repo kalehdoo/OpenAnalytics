@@ -27,8 +27,18 @@ log_app02_time <- format.Date(log_app02_time, "%d-%b-%Y")
 var_current_year<- year(today())
 
 #import recruiting data
+#agg_facility_by_facilityname <-
+#  readRDS("data/agg_facility_by_facilityname.rds")
+
 agg_facility_by_facilityname <-
-  readRDS("data/agg_facility_by_facilityname.rds")
+  read.csv(
+    "data/agg_facility_by_facilityname.txt",
+    header = TRUE,
+    sep = "|",
+    na.strings = "NA",
+    nrows = -100,
+    stringsAsFactors = FALSE
+  )
   
 
 #read study Measurements by condition
@@ -255,10 +265,10 @@ fluidPage(
     collapsible	= TRUE,
     fluid = TRUE,
     inverse = TRUE,
-    footer = fluidRow(style = "margin-top:3%;margin-left:1%; margin-right:1%",
+    footer = fluidRow(
       h4(class="text-center",style = "color: #F37312; margin-top:2px; margin-left:2px; margin-right:2px;",
                 paste0("Data Refreshed On: ",log_app02_time)),
-      tags$br(),
+      #tags$br(),
       h4(
         tags$a(href = "https://www.oakbloc.com/", "Oakbloc Technologies", target =
                  "_blank"),
@@ -1134,35 +1144,71 @@ fluidPage(
                    mainPanel(width = 12,
                              tabsetPanel(
                                  type = "tabs",
-                                 tabPanel("Site",
-                                          fluidRow(
-                                            style = "padding:2px;",
-                                            column(
-                                              6,
-                                              align = "center",
-                                              textInput(
-                                                inputId = "select_site_summ",
-                                                label = NULL,
-                                                value = "stanford university",
-                                                placeholder = "Site Name"
-                                              )
-                                            ),
-                                            column(6,
-                                                   align = "left",
-                                                   tags$div(
-                                                     class = "text-center",
-                                                     actionButton(
-                                                       "update_site_summ",
-                                                       "Display Results",
-                                                       class = "btn btn-primary",
-                                                       style = "margin-bottom: 0.5%;"
-                                                     )
-                                                   ))
-                                          ),
-                                          fluidRow(
+                                 tabPanel("Explore Data",
+                                 fluidRow(
                                             withSpinner(DT::dataTableOutput("dt_facility_by_facilityname"), type = 3)
                                           )
-                                          )
+                                 ),
+                                 tabPanel(
+                                     "Network Tree",
+                                     fluidRow(
+                                         style = "margin-top:2px;",
+                                         column(
+                                             3,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_site_sponsor",
+                                                 label = NULL,
+                                                 value = "Duke University",
+                                                 placeholder = "Facility Name"
+                                             )
+                                         ),
+                                         column(
+                                             2,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_site_sponsor_country",
+                                                 label = NULL,
+                                                 value = "United States",
+                                                 placeholder = "Country"
+                                             )
+                                         ),
+                                         column(
+                                             2,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_site_sponsor_city",
+                                                 label = NULL,
+                                                 value = "",
+                                                 placeholder = "City"
+                                             )
+                                         ),
+                                         column(
+                                             3,
+                                             align = "center",
+                                             textInput(
+                                                 inputId = "select_site_sponsor_sponsor",
+                                                 label = NULL,
+                                                 value = "",
+                                                 placeholder = "Sponsor Name"
+                                             )
+                                         ),
+                                         column(2,
+                                                align = "left",
+                                                tags$div(
+                                                    class = "text-center",
+                                                    actionButton(
+                                                        "update_site_sponsor_1",
+                                                        "Display Results",
+                                                        class = "btn btn-primary",
+                                                        style = "margin-bottom: 0.5%;"
+                                                    )
+                                                ))
+                                     ),
+                                     fluidRow(withSpinner(
+                                         collapsibleTreeOutput("site_sponsor_tree"), type = 3
+                                     ))
+                                 )                                 
                              ))
                )),
     #Recruitment Dashboard starts here
@@ -1809,7 +1855,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE)
+            options = list(lengthChange = FALSE, searchHighlight = TRUE)
         )
     })
     
@@ -2141,6 +2187,7 @@ server <- function(input, output) {
             escape = FALSE,
             rownames = FALSE,
             options = list(lengthChange = FALSE,
+                            searchHighlight = TRUE,
                            dom='t')
         )
     })
@@ -2516,7 +2563,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE)
+            options = list(lengthChange = FALSE, searchHighlight = TRUE)
         )
     })
     
@@ -2538,7 +2585,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE)
+            options = list(lengthChange = FALSE, searchHighlight = TRUE)
         )
     })
     #######################################################
@@ -2615,7 +2662,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE)
+            options = list(lengthChange = FALSE, searchHighlight = TRUE)
         )
     })
     
@@ -2680,7 +2727,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE)
+            options = list(lengthChange = FALSE, searchHighlight = TRUE)
         )
     })
     
@@ -2693,7 +2740,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE)
+            options = list(lengthChange = FALSE, searchHighlight = TRUE)
         )
     })
     
@@ -2704,13 +2751,15 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE)
+            options = list(lengthChange = FALSE, searchHighlight = TRUE)
         )
     })
     
     #display recruitment data
     output$dt_recruitment <-
-        renderDataTable(DT::datatable(mv_studies_recruiting_table, filter = 'top'))
+        renderDataTable(DT::datatable(mv_studies_recruiting_table, filter = 'top',
+        options = list(searchHighlight = TRUE)
+        ))
     
     #reactive dataset for maps with reduced columns
     mv_studies_recruiting_map_world <-
@@ -2997,23 +3046,83 @@ server <- function(input, output) {
 
     #####################################################################
     #####Site###########################
-     #reactive dataset for Site Summary
-    facility_by_facilityname <-
-        eventReactive(input$update_site_summ, {
-            subset(agg_facility_by_facilityname,
-                subset = (
-                    casefold(facility_name2) %like% casefold(c(input$select_site_summ))                              
-                )
-            )                        
-        })
-
-    
+    #Tableview for Site
     output$dt_facility_by_facilityname <-
-        renderDataTable(DT::datatable(facility_by_facilityname(), filter = 'top',
-        options = list(lengthChange = FALSE,
-                       pageLength = 5,
-                       searchHighlight = TRUE                       
-        )))  
+        renderDataTable(DT::datatable(agg_facility_by_facilityname, 
+        filter = 'top',
+        rownames = FALSE,
+        options = list(lengthChange = FALSE, 
+                        searchHighlight = TRUE,                         
+                        escape=TRUE,
+                        order = list(list(5, 'desc'))
+                        )
+        )) 
+
+    #reactive dataset for site-sponsor - reuse r_sponsor_site
+    site_sponsor_tree_data <-
+        eventReactive(input$update_site_sponsor_1, {
+            #createleaflet plot 1020 based on reactive set
+            subset(
+                r_sponsor_site,
+                select = c(
+                    "Sponsor",
+                    "StudyYear",
+                    "Country",
+                    "State",
+                    "City",
+                    "FacilityType",
+                    "studyPhase",
+                    "Facility",
+                    "cnt_studies"
+                ),
+                subset = (casefold(Facility) %like% casefold(c(
+                    input$select_site_sponsor
+                )) &
+                    casefold(Country) %like% casefold(c(
+                        input$select_site_sponsor_country
+                    )) &
+                    casefold(City) %like% casefold(c(
+                        input$select_site_sponsor_city
+                    )) &
+                    casefold(Sponsor) %like% casefold(c(
+                        input$select_site_sponsor_sponsor
+                    ))
+                
+                )
+            )
+        })
+    
+    output$site_sponsor_tree <- renderCollapsibleTree({
+        site_sponsor_tree_data() %>%
+            group_by(
+                site_sponsor_tree_data()$Facility,
+                site_sponsor_tree_data()$studyPhase,
+                site_sponsor_tree_data()$StudyYear,                
+                site_sponsor_tree_data()$Country,
+                site_sponsor_tree_data()$State,
+                site_sponsor_tree_data()$City,
+                site_sponsor_tree_data()$Sponsor,
+                site_sponsor_tree_data()$cnt_studies
+            ) %>%
+            summarise("Number of Sponsors" = n()) %>%
+            collapsibleTreeSummary(
+                hierarchy = c(
+                    "site_sponsor_tree_data()$Facility",                    
+                    "site_sponsor_tree_data()$studyPhase",
+                    "site_sponsor_tree_data()$StudyYear",                    
+                    "site_sponsor_tree_data()$Country",
+                    "site_sponsor_tree_data()$State",
+                    "site_sponsor_tree_data()$City",
+                    "site_sponsor_tree_data()$Sponsor",
+                    "site_sponsor_tree_data()$cnt_studies"
+                ),
+                root = "Facility",
+                width = 800,
+                attribute = c("Number of Sponsors"),
+                zoomable = TRUE
+            )
+    })   
+    
     
     ######################################################################
     
@@ -3132,7 +3241,9 @@ server <- function(input, output) {
     
     #display sponsor recruiting summary data
     output$dt_sponsor_recruitment <-
-        renderDataTable(DT::datatable(rec_sponsors, filter = 'top'))
+        renderDataTable(DT::datatable(rec_sponsors, filter = 'top',
+        options = list(searchHighlight = TRUE)
+        ))
     
     #create plot 1006
     output$plot_1006 <- renderPlotly({
@@ -3211,7 +3322,7 @@ server <- function(input, output) {
             filter = 'top',
             escape = FALSE,
             rownames = FALSE,
-            options = list(lengthChange = FALSE)
+            options = list(lengthChange = FALSE, searchHighlight = TRUE)
         )
     })
     

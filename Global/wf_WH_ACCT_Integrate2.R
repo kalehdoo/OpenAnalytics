@@ -34,6 +34,7 @@ assign("var_last_year_3", (var_current_year-3), envir = .GlobalEnv)
 assign("var_last_year_4", (var_current_year-4), envir = .GlobalEnv)
 assign("var_last_year_5", (var_current_year-5), envir = .GlobalEnv)
 assign("var_last_year_10", (var_current_year-10), envir = .GlobalEnv)
+assign("var_last_year_15", (var_current_year-15), envir = .GlobalEnv)
 
 ########################################################
 #prepare write and append log for warehouse load
@@ -92,6 +93,14 @@ write(paste(NextBatchId,"end_agg_studyconditions_facilities",now(), sep="|"), de
 write(paste(NextBatchId,"start_agg_sponsors",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_sponsors.R"))
 write(paste(NextBatchId,"end_agg_sponsors",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_collaborators",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_collaborators.R"))
+write(paste(NextBatchId,"end_agg_collaborators",now(), sep="|"), dest_whlogfile, append=TRUE)
+
+write(paste(NextBatchId,"start_agg_facility_by_facilityname",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"IntegrateData/agg_facility_by_facilityname.R"))
+write(paste(NextBatchId,"end_agg_facility_by_facilityname",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 write(paste(NextBatchId,"start_agg_year",now(), sep="|"), dest_whlogfile, append=TRUE)
 source(paste0(var_DIR_HOME,"IntegrateData/agg_year.R"))

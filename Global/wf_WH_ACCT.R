@@ -61,6 +61,10 @@ write(paste(NextBatchId,"start_rec_conditions_list",now(), sep="|"), dest_whlogf
 source(paste0(var_DIR_HOME,"Extracts/rec_conditions_list.R"))
 write(paste(NextBatchId,"end_rec_conditions_list",now(), sep="|"), dest_whlogfile, append=TRUE)
 
+write(paste(NextBatchId,"start_sponsor_network",now(), sep="|"), dest_whlogfile, append=TRUE)
+source(paste0(var_DIR_HOME,"Extracts/sponsor_network.R"))
+write(paste(NextBatchId,"end_sponsor_network",now(), sep="|"), dest_whlogfile, append=TRUE)
+
 write(paste(NextBatchId,"DataMartEnd",now(), sep="|"), dest_whlogfile, append=TRUE)
 
 #########################################################################
@@ -81,6 +85,10 @@ var_path_agg_month<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_month.txt"
 var_path_agg_conditions_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_recruiting.txt", sep="")
 var_mv_recruiting_mini<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds", sep="")
 var_rec_conditions_list<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/rec_conditions_list.txt", sep="")
+var_r_sponsor_conditions<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_conditions.txt", sep="")
+var_r_sponsor_site<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_site.txt", sep="")
+var_r_sponsor_collaborator<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_collaborator.txt", sep="")
+var_r_sponsor_interventions<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_interventions.txt", sep="")
 
 ########################################################
 
@@ -107,6 +115,11 @@ write(paste(time_app02_mv_rec, sep="|"), dest_app02logfile, append=FALSE)
 file.copy(var_path_agg_year,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_path_agg_month,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_path_agg_conditions_recruiting,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_r_sponsor_conditions,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_r_sponsor_site,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_r_sponsor_collaborator,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_r_sponsor_interventions,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+
 
 ##################################################################
 #remove data in the memory and quit the session without saving the session
