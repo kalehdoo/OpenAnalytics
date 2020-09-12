@@ -4,15 +4,12 @@ library(shinydashboard)
 library(dplyr)
 library(ggplot2)
 library(plotly)
-#library(markdown)
 library(DT)
 library(RColorBrewer)
 library(leaflet)
 library(htmltools)
 library(data.table)
-#library(wordcloud)
 library(shinythemes)
-#library(rsample)
 library(lubridate)
 library(shinycssloaders)
 library(shinyWidgets)
@@ -25,10 +22,6 @@ log_app02_time <- substr(log_app02, 1, 10)
 log_app02_time <- format.Date(log_app02_time, "%d-%b-%Y")
 
 var_current_year<- year(today())
-
-#import recruiting data
-#agg_facility_by_facilityname <-
-#  readRDS("data/agg_facility_by_facilityname.rds")
 
 agg_facility_by_facilityname <-
   read.csv(
@@ -266,7 +259,7 @@ fluidPage(
     fluid = TRUE,
     inverse = TRUE,
     footer = fluidRow(
-      h4(class="text-center",style = "color: #F37312; margin-top:2px; margin-left:2px; margin-right:2px;",
+      h5(class="text-center",style = "color: #772953; margin-top:2px; margin-left:2px; margin-right:2px;",
                 paste0("Data Refreshed On: ",log_app02_time)),
       #tags$br(),
       h4(
@@ -385,7 +378,7 @@ fluidPage(
                                      #tags$h2("Dropdown Button"),
                                      #br(),
                                      dropdownButton(
-                                         tags$h5("Only Sponsors with more than one clinical study registered are included in this analysis."),
+                                         tags$h5("Only Sponsors with 2 or more clinical studies registered are included in this analysis."),
                                          #br(),
                                          tags$h5("See the Data Dictionary tab for detailed definitions of the metrics."),
                                          circle = TRUE, 
@@ -528,7 +521,7 @@ fluidPage(
                          tabPanel("Data Dictionary",
                                   fluidRow(
                                       style = "padding: 5px; border-style: solid; border-width: 0.3px;",
-                                      tags$h5("Only Sponsors with more than one clinical study registered are included in this analysis."),
+                                      tags$h5("Only Sponsors with 2 or more clinical studies registered are included in this analysis."),
                                       h5("List of column names and their descriptions:"),
                                       tags$div(tags$ol(
                                         tags$li(tags$span("lead_sponsor_name: The full name of the lead sponsor who sponsored the clinical trial.")),
@@ -605,6 +598,23 @@ fluidPage(
                              fluidRow(
                                  style = "margin-top:2px;",
                                  column(
+                                     1,
+                                     align = "left",
+                                     #tags$h2("Dropdown Button"),
+                                     #br(),
+                                     dropdownButton(
+                                         tags$h5("Enter the name of Sponsor and hit Display Results Button."),
+                                         #br(),
+                                         tags$h5("Network Tree: Sponsor - Sponsor Type - Study Phase - Collaborator Name - Number of Studies."),
+                                         circle = TRUE, 
+                                         status = "info",
+                                         icon = icon("info"), 
+                                         size = "xs",
+                                         width = "500px",
+                                         tooltip = tooltipOptions(title = "Help!")
+                                     )
+                                 ),
+                                 column(
                                      5,
                                      align = "center",
                                      textInput(
@@ -615,7 +625,7 @@ fluidPage(
                                      )
                                  ),
                                  column(
-                                     5,
+                                     4,
                                      align = "center",
                                      textInput(
                                          inputId = "select_sponsor_coll_colname",
@@ -1280,7 +1290,7 @@ fluidPage(
                                   fluidRow(DT::dataTableOutput("dt_recruitment")))
                      )
                  )),
-        tabPanel("Study Finder",
+        tabPanel("Activity",
                  mainPanel(
                      width = 12,
                      tabsetPanel(

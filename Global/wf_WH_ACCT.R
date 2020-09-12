@@ -82,7 +82,7 @@ var_EXTRACT_TOAPP02_DIR<-paste(var_DIR_HOME, "apps/app02/data/", sep="")
 #paths for the files required
 var_path_agg_year<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_year_Lst10Yr.txt", sep="")
 var_path_agg_month<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_month.txt", sep="")
-var_path_agg_conditions_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_recruiting.txt", sep="")
+#var_path_agg_conditions_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_recruiting.txt", sep="")
 var_mv_recruiting_mini<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds", sep="")
 var_rec_conditions_list<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/rec_conditions_list.txt", sep="")
 var_r_sponsor_conditions<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_conditions.txt", sep="")
@@ -90,6 +90,15 @@ var_r_sponsor_site<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_site.
 var_r_sponsor_collaborator<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_collaborator.txt", sep="")
 var_r_sponsor_interventions<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_interventions.txt", sep="")
 
+var_path_agg_facility_by_facilityname<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_facility_by_facilityname.txt", sep="")
+var_path_agg_studies_mini<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies_mini.txt", sep="")
+var_path_agg_sponsors<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_sponsors.txt", sep="")
+var_path_agg_sponsorstype_by_time<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_sponsorstype_by_time.txt", sep="")
+var_path_agg_sponsors_by_time<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_sponsors_by_time.txt", sep="")
+var_path_agg_studies_outcome_measurements<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_studies_outcome_measurements.txt", sep="")
+var_path_mv_agg_rec_sponsors<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_agg_rec_sponsors.txt", sep="")
+var_path_mv_studies_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting.rds", sep="")
+var_path_mv_studies_recruiting_loc<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_loc.txt", sep="")
 ########################################################
 
 ##copy file extracts required for app02
@@ -114,12 +123,25 @@ write(paste(time_app02_mv_rec, sep="|"), dest_app02logfile, append=FALSE)
 #copy the files for app01
 file.copy(var_path_agg_year,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_path_agg_month,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
-file.copy(var_path_agg_conditions_recruiting,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+#file.copy(var_path_agg_conditions_recruiting,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_r_sponsor_conditions,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_r_sponsor_site,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_r_sponsor_collaborator,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 file.copy(var_r_sponsor_interventions,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 
+file.copy(var_path_agg_facility_by_facilityname,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_agg_studies_mini,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_agg_sponsors,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_agg_sponsorstype_by_time,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_agg_sponsors_by_time,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_agg_studies_outcome_measurements,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_mv_agg_rec_sponsors,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_mv_studies_recruiting,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+file.copy(var_path_mv_studies_recruiting_loc,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
+
+#copy the timestamped log file from app02 to app01 - to reuse the same file to display latest data updated
+var_app02logfile<-paste(var_EXTRACT_TOAPP02_DIR, "log_app02.txt", sep="")
+file.copy(var_app02logfile,var_EXTRACT_TOAPP01_DIR, overwrite = TRUE)
 
 ##################################################################
 #remove data in the memory and quit the session without saving the session
