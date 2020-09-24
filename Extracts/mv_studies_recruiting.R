@@ -3,6 +3,7 @@
   library(sqldf)
   library(data.table)
   library(stringr)
+  library(xlsx)
 
   #HOME to store path of home dir
   assign("var_DIR_HOME", "C:/msrana/projects/github/OpenAnalytics/", envir = .GlobalEnv)
@@ -114,8 +115,13 @@ mv_studies_recruiting<-sqldf("Select urlid as 'ID',
                               from mv_studies_recruiting
                              where nct_id is not null")
 
+
+
+
+
+
 #create mini data set with important columns
-mv_studies_recruiting_mini<-sqldf("Select ID,
+mv_studies_recruiting_mini1<-sqldf("Select ID,
                                 nct_id,
                                 Condition,
                                  city,
@@ -127,10 +133,34 @@ mv_studies_recruiting_mini<-sqldf("Select ID,
                                  Facility,
                                  Region,
                                  latitude,
-                                 longitude,
-                                 StudyType
+                                 longitude
                               from mv_studies_recruiting
-                             where nct_id is not null")
+                             where nct_id is not null
+                             and length(Facility) >0
+                             and StudyType not in ('Observational','Observational [Patient Registry]')")
+
+# add the advertisement and image URL to the recruiting dataset
+#set paths for data files
+in_path_site_advert_existing<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/site_advert_existing.xlsx", sep="")
+
+#reads the data files into dataframes
+site_advert_existing<-read.xlsx2(in_path_site_advert_existing, sheetIndex = 1)
+
+mv_studies_recruiting_mini2<-left_join(mv_studies_recruiting_mini1, site_advert_existing, by=c("nct_id","Sponsor","Facility","country","state","city"))
+
+
+#set paths for data files
+in_path_site_advert_missing<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/site_advert_missing.xlsx", sep="")
+
+#reads the data files into dataframes
+site_advert_missing<-read.xlsx2(in_path_site_advert_missing, sheetIndex = 1)
+
+#union the new data
+mv_studies_recruiting_mini3<-rbind(mv_studies_recruiting_mini2, site_advert_missing)
+
+
+write.table(mv_studies_recruiting_mini3,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.txt", sep=""), sep = "|", row.names = FALSE)
+saveRDS(mv_studies_recruiting_mini3, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds"))
 
 #recruitment by location
 #agg conditions at condition level
@@ -140,18 +170,12 @@ mv_studies_recruiting_loc<-data.table(mv_studies_recruiting)[,list(
   cnt_studies = length(unique(nct_id))
 ), by=c('iso2','iso3', 'state','statecode','city')]
 
+write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_loc.txt", sep=""), sep = "|", row.names = FALSE)
 
 #write to txt file
 write.table(mv_studies_recruiting,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting.txt", sep=""), sep = "|", row.names = FALSE)
 saveRDS(mv_studies_recruiting, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting.rds"))
 #write_feather(mv_studies_recruiting, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting.feather"))
-
-
-write.table(mv_studies_recruiting_mini,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.txt", sep=""), sep = "|", row.names = FALSE)
-saveRDS(mv_studies_recruiting_mini, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds"))
-
-
-write.table(mv_studies_recruiting_loc,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_loc.txt", sep=""), sep = "|", row.names = FALSE)
 
 #write to mongodb
 #library(mongolite)

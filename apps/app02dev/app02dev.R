@@ -16,27 +16,37 @@ log_app02_time <- format.Date(log_app02_time, "%d-%b-%Y")
 
 
 #read conditions file
-rec_conditions <-
-    read.csv(
-        "data/rec_conditions_list.txt",
-        header = TRUE,
-        sep = "|",
-        na.strings = "NA",
-        nrows = -100,
-        stringsAsFactors = FALSE
-    )
+#rec_conditions <-
+#    read.csv(
+#        "data/rec_conditions_list.txt",
+#        header = TRUE,
+#        sep = "|",
+#        na.strings = "NA",
+#        nrows = -100,
+#        stringsAsFactors = FALSE
+#    )
 
-rec_conditions_list1<-rec_conditions$rec_conditions_list1
-rec_conditions_list2<-rec_conditions$rec_conditions_list2
+#rec_conditions_list1<-rec_conditions$rec_conditions_list1
+#rec_conditions_list2<-rec_conditions$rec_conditions_list2
 #rec_conditions_list<-unique(rec_conditions$ConditionName)
 
 #rec_conditions_list2<-str_wrap(rec_conditions_list, width = 20)
 #rec_conditions_list3 <- str_replace_all(rec_conditions_list2, "\n", "<br>")
 
 #read data
+#mv_studies_recruiting <-
+ #   readRDS("data/mv_studies_recruiting_mini.rds") %>%
+  #  filter(is.na(nct_id) == FALSE)
+
 mv_studies_recruiting <-
-    readRDS("data/mv_studies_recruiting_mini.rds") %>%
-    filter(is.na(nct_id) == FALSE)
+    read.csv(
+        "data/mv_studies_recruiting_mini.txt",
+       header = TRUE,
+        sep = "|",
+        na.strings = "NA",
+        nrows = -100,
+        stringsAsFactors = FALSE
+    )
 
 
 var_studyphase_name <- unique(mv_studies_recruiting$StudyPhase)
@@ -130,8 +140,8 @@ ui <-
                 title = "Globe",
                 fluidRow(style = "margin-top:0%; margin-bottom:1%;",
                          column(4, align="center",
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
+                                div(style="display: inline-block;",tags$a(href="http://www.nano-retina.com/retinal-degenerative-diseases/", target="_blank", img(src="https://www.oakbloc.com/images/app02/adv_111.jpg", height=150, width=200, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=200, style="padding: 2px;")))
                          ),
                          column(4, align="center",
                                 h2("Kalehdoo Clinical Site Finder",
@@ -144,8 +154,8 @@ ui <-
                                     align = "center")
                          ),
                          column(4, align="center",
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=200, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="http://www.nano-retina.com/retinal-degenerative-diseases/", target="_blank", img(src="https://www.oakbloc.com/images/app02/adv_111.jpg", height=150, width=200, style="padding: 2px;")))
                          )
                 ),
                 fluidRow(
@@ -165,19 +175,31 @@ ui <-
                     column(
                         2,
                         align = "center",
-                        pickerInput(
+                        textInput(
                             inputId = "select_condition_map_world",
-                            choices = rec_conditions_list1,
-                            selected = c("covid-19"),
-                            multiple = TRUE,
-                            options = list(`live-search` = TRUE,style = "btn-info",
-                                           `actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"
-                            ),
-                            choicesOpt = list(
-                                content = rec_conditions_list2
-                            )
+                            label = NULL,
+                            value="covid-19",
+                            placeholder = "Disease Name"
                         )
                     ),
+                    
+                    #code to create selectable and searchable LOV
+                    #column(
+                     #   2,
+                      #  align = "center",
+                      #  pickerInput(
+                       #     inputId = "select_condition_map_world",
+                        #    choices = rec_conditions_list1,
+                         #   selected = c("covid-19"),
+                          #  multiple = TRUE,
+                           # options = list(`live-search` = TRUE,style = "btn-info",
+                            #               `actions-box` = TRUE, size = 10, `selected-text-format` = "count > 3"
+                            #),
+                            #choicesOpt = list(
+                             #   content = rec_conditions_list2
+                            #)
+                        #)
+                   # ),
                     
                     
                     column(
@@ -188,10 +210,9 @@ ui <-
                             label = NULL,
                             placeholder = "City Name"
                         )
-                    ),    
-                    
+                    ),                    
                     column(
-                        3,
+                        2,
                         align = "center",
                         textInput(
                             inputId = "select_sponsor_map_world",
@@ -200,16 +221,18 @@ ui <-
                         )
                     ),
                     column(
-                        3,
+                        2,
                         align = "center",
                         textInput(
                             inputId = "select_facility_map_world",
                             label = NULL,
                             placeholder = "Facility Name"
                         )
-                    )
-                ),
-                fluidRow(tags$div(
+                    ),
+                    column(
+                        2,
+                        align = "center",    
+                    (tags$div(
                     class = "text-center",
                     actionButton(
                         "update_global",
@@ -217,15 +240,16 @@ ui <-
                         class = "btn btn-primary",
                         style = "margin-bottom: 0.5%;"
                     )
-                )),
+                )))
+                ),
+                
                 fluidRow(withSpinner(leafletOutput("plot_1020"), type = 3)),
                 fluidRow(style = "margin-top:2%; margin-bottom:1%;",
                          column(12, align="center",
+                                div(style="display: inline-block;",tags$a(href="http://www.nano-retina.com/retinal-degenerative-diseases/", target="_blank", img(src="https://www.oakbloc.com/images/app02/adv_111.jpg", height=150, width=150, style="padding: 2px;"))),
                                 div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
                                 div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;"))),
+                                div(style="display: inline-block;",tags$a(href="http://www.nano-retina.com/retinal-degenerative-diseases/", target="_blank", img(src="https://www.oakbloc.com/images/app02/adv_111.jpg", height=150, width=150, style="padding: 2px;"))),
                                 div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=150, style="padding: 2px;")))
                          )
                 ),
@@ -822,7 +846,7 @@ server <- function(input, output, session) {
                 subset = (
                     StudyPhase %in%  c(input$select_studyphase_name_world) &
                         casefold(city) %like%  casefold(input$select_city_map_world) &
-                        casefold(Condition) %in%   c(input$select_condition_map_world) &
+                        casefold(Condition) %like%   c(input$select_condition_map_world) &
                         casefold(Facility) %like%  casefold(input$select_facility_map_world) &
                         casefold(Sponsor) %like%  casefold(input$select_sponsor_map_world)
                 )
@@ -834,14 +858,17 @@ server <- function(input, output, session) {
     f_labels_1020 <-
         function() {
             sprintf(
-                "<br><strong>Study ID: %s</strong></br><strong>Phase: %s</strong><br/><strong>Country: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",
+                "<br><strong>%s</strong><br/><strong>Contact Site: %s</strong><br/><strong>View Study Details: %s</strong></br><strong>Phase: %s</strong><br/><strong>Country: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",
+                #"<br><strong>ClinicalTrials.gov%s</strong></br><strong>Img%s</strong></br><strong>Phase: %s</strong><br/><strong>Country: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",
+                mv_studies_recruiting_map_world()$img_url,                
+                mv_studies_recruiting_map_world()$link_url,
                 mv_studies_recruiting_map_world()$ID,
                 mv_studies_recruiting_map_world()$StudyPhase,
                 mv_studies_recruiting_map_world()$country,
                 mv_studies_recruiting_map_world()$city,
                 mv_studies_recruiting_map_world()$Facility,
                 mv_studies_recruiting_map_world()$Sponsor,
-                mv_studies_recruiting_map_world()$Condition
+                mv_studies_recruiting_map_world()$Condition                
             ) %>%
                 lapply(htmltools::HTML)
         }
