@@ -8,6 +8,9 @@ library(DT)
 library(shinythemes)
 library(shinycssloaders)
 library(shinyWidgets)
+library(aws.s3)
+
+
 
 #read log file
 log_app02 <- read.csv("data/log_app02.txt", header = FALSE)
@@ -38,15 +41,55 @@ log_app02_time <- format.Date(log_app02_time, "%d-%b-%Y")
  #   readRDS("data/mv_studies_recruiting_mini.rds") %>%
   #  filter(is.na(nct_id) == FALSE)
 
-mv_studies_recruiting <-
-    read.csv(
-        "data/mv_studies_recruiting_mini.txt",
-       header = TRUE,
-        sep = "|",
-        na.strings = "NA",
-        nrows = -100,
-        stringsAsFactors = FALSE
-    )
+#read data from amazon aws s3 bucket
+mv_studies_recruiting <- 
+  aws.s3::s3read_using(read.csv, object = "s3://oakblocsite/mv_studies_recruiting_mini.txt",
+                       header = TRUE,
+                       sep = "|",
+                       na.strings = "NA",
+                       nrows = -100,
+                       stringsAsFactors = FALSE)
+
+#mv_studies_recruiting <-
+#    read.csv(
+#        "data/mv_studies_recruiting_mini.txt",
+#       header = TRUE,
+#        sep = "|",
+#        na.strings = "NA",
+#        nrows = -100,
+#        stringsAsFactors = FALSE
+#    )
+
+site_advert_existing <- 
+  aws.s3::s3read_using(read.csv, object = "s3://oakblocsite/site_advert_existing.txt",
+                       header = TRUE,
+                       sep = "|",
+                       na.strings = "NA",
+                       nrows = -100,
+                       stringsAsFactors = FALSE)
+
+#site_advert_existing <-
+#  read.csv(
+#    "data/site_advert_existing.txt",
+#    header = TRUE,
+#    sep = "|",
+#    na.strings = "NA",
+#    nrows = -100,
+#    stringsAsFactors = FALSE
+#  )
+#site_advert_existing<-read.xlsx("data/site_advert_existing.xlsx", sheetIndex = 1)
+mv_studies_recruiting<-left_join(mv_studies_recruiting, site_advert_existing, by=c("nct_id","Sponsor","Facility","country","state","city"))
+
+site_advert_missing <- 
+  aws.s3::s3read_using(read.csv, object = "s3://oakblocsite/site_advert_missing.txt",
+                       header = TRUE,
+                       sep = "|",
+                       na.strings = "NA",
+                       nrows = -100,
+                       stringsAsFactors = FALSE)
+
+mv_studies_recruiting<-rbind(mv_studies_recruiting, site_advert_missing)
+
 
 
 var_studyphase_name <- unique(mv_studies_recruiting$StudyPhase)
@@ -138,11 +181,7 @@ ui <-
             
             tabPanel(
                 title = "Globe",
-                fluidRow(style = "margin-top:0%; margin-bottom:1%;",
-                         column(4, align="center",
-                                div(style="display: inline-block;",tags$a(href="http://www.nano-retina.com/retinal-degenerative-diseases/", target="_blank", img(src="https://www.oakbloc.com/images/app02/adv_111.jpg", height=150, width=200, style="padding: 2px;"))),
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=200, style="padding: 2px;")))
-                         ),
+                fluidRow(style = "margin-top:0%; margin-bottom:1%;",                         
                          column(4, align="center",
                                 h2("Kalehdoo Clinical Site Finder",
                                    #class = "display-4",
@@ -151,11 +190,24 @@ ui <-
                                 ),
                                 h4( "Modify search criteria and Hit Display Results button",
                                     style = "color: #F37312;",
-                                    align = "center")
+                                    align = "center"),
+                                dropdownButton(
+                                                 tags$h5("Change the disease name and hit the Orange Display Results buttons. The results would appear below. Click on the colored cirles to narrow down until you find the site location in blue. Click this Blue icon to view the Clinical Trial details and Facility contact details."),
+                                                 circle = TRUE, 
+                                                 status = "info",
+                                                 icon = icon("info"), 
+                                                 size = "sm",
+                                                 width = "500px",
+                                                 tooltip = tooltipOptions(title = "Help!")
+                                             )
                          ),
                          column(4, align="center",
-                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=200, style="padding: 2px;"))),
-                                div(style="display: inline-block;",tags$a(href="http://www.nano-retina.com/retinal-degenerative-diseases/", target="_blank", img(src="https://www.oakbloc.com/images/app02/adv_111.jpg", height=150, width=200, style="padding: 2px;")))
+                                #div(style="display: inline-block;",tags$a(href="http://www.nano-retina.com/retinal-degenerative-diseases/", target="_blank", img(src="https://www.oakbloc.com/images/app02/adv_111.jpg", height=150, width=200, style="padding: 1px;"))),
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=400, style="padding: 1px;")))
+                         ),
+                         column(4, align="center",
+                                div(style="display: inline-block;",tags$a(href="https://www.oakbloc.com", target="_blank", img(src="https://www.oakbloc.com/images/smartdevice.png", height=150, width=400, style="padding: 1px;")))
+                                #div(style="display: inline-block;",tags$a(href="http://www.nano-retina.com/retinal-degenerative-diseases/", target="_blank", img(src="https://www.oakbloc.com/images/app02/adv_111.jpg", height=150, width=200, style="padding: 1px;")))
                          )
                 ),
                 fluidRow(
@@ -242,7 +294,7 @@ ui <-
                     )
                 )))
                 ),
-                
+                tags$style(type = "text/css", "#plot_1020 {height: calc(100vh - 80px) !important;}"),
                 fluidRow(withSpinner(leafletOutput("plot_1020"), type = 3)),
                 fluidRow(style = "margin-top:2%; margin-bottom:1%;",
                          column(12, align="center",
@@ -268,24 +320,14 @@ ui <-
                         "Once a study is located, the details of the study and contact details of the site can be viewed by navigating to clinicaltrials.gov by simply clicking on the hyperlink.
                                 ",
                         style = "text-align:justify;"
-                    ),
-                    h4(
-                        "The application is built using open-source OpenStreet Maps, R and Shiny.",
-                        style = "text-align:justify;"
                     )
                 ),
-                fluidRow(
+                fluidRow(                    
                     h5(
-                        "Disclaimer: The source data for the application is obtained from clinicaltrials.gov ACCT-CTTI website ",
-                        tags$a(href = "https://aact.ctti-clinicaltrials.org/download", "ACCT-CTTI.", target =
-                                   "_blank"),
-                        style = "margin-top:2%;margin-left:1%; margin-right:1%; text-align:justify;"
-                    ),
-                    h5(
-                        "The detail level data for individual clinical trials is available on ",
+                        "Disclaimer: The Clinical Trials data is available on clinicaltrials.gov website ",
                         tags$a(href = "https://clinicaltrials.gov/", "ClinicalTrials.gov", target =
                                    "_blank"),
-                        "The users are advised to verify the details on clinicaltrials.gov and consult with their physicians for any medical and legal advise. This study finder app should be used as an interactive assistant in finding the relevant clinical trials. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information.",
+                        "The patients are advised to verify the details on clinicaltrials.gov and consult with their physicians for any medical and legal advise. The purpose of study finder app is to help patients in finding the relevant clinical trials easily. Oakbloc Technologies do not accept any responsibility or liability for any direct, indirect, or consequential loss or damage resulting from any such irregularity, inaccuracy, or use of the information.",
                         style = "margin-top:0.1%;margin-left:1%; margin-right:1%; margin-bottom:2%; text-align:justify;"
                     )
                 )
@@ -838,8 +880,7 @@ server <- function(input, output, session) {
     #updatePickerInput(session = session, inputId = 'select_condition_map_world',selected = "covid-19")
     #reactive dataset for world maps with reduced columns
     mv_studies_recruiting_map_world <-
-        eventReactive(input$update_global, {
-            
+        eventReactive(input$update_global, {            
             #createleaflet plot 1020 based on reactive set
             subset(
                 mv_studies_recruiting_world,
@@ -858,17 +899,18 @@ server <- function(input, output, session) {
     f_labels_1020 <-
         function() {
             sprintf(
-                "<br><strong>%s</strong><br/><strong>Contact Site: %s</strong><br/><strong>View Study Details: %s</strong></br><strong>Phase: %s</strong><br/><strong>Country: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",
+                "<strong>%s</strong><br/><strong>Facility: %s</strong><br/><strong>Email: %s</strong><br/><strong>Phone: %s</strong><br/><strong>Website URL: %s</strong><br/><strong>Location: %s</strong></br><strong>Sponsor: %s</strong><br/><strong>Trial Phase: %s</strong><br/><strong>Condition: %s</strong><br/><strong>View More Details: %s</strong>",
                 #"<br><strong>ClinicalTrials.gov%s</strong></br><strong>Img%s</strong></br><strong>Phase: %s</strong><br/><strong>Country: %s</strong><br/><strong>City: %s</strong><br/><strong>Facility Name: %s</strong><br/><strong>Sponsor: %s</strong><br/><strong>Conditions: %s</strong>",
-                mv_studies_recruiting_map_world()$img_url,                
-                mv_studies_recruiting_map_world()$link_url,
-                mv_studies_recruiting_map_world()$ID,
-                mv_studies_recruiting_map_world()$StudyPhase,
-                mv_studies_recruiting_map_world()$country,
-                mv_studies_recruiting_map_world()$city,
+                mv_studies_recruiting_map_world()$img_url,
                 mv_studies_recruiting_map_world()$Facility,
+                mv_studies_recruiting_map_world()$contact_email,
+                mv_studies_recruiting_map_world()$contact_phone,                
+                mv_studies_recruiting_map_world()$contact_url,
+                paste0(mv_studies_recruiting_map_world()$city,', ',mv_studies_recruiting_map_world()$country),                
                 mv_studies_recruiting_map_world()$Sponsor,
-                mv_studies_recruiting_map_world()$Condition                
+                mv_studies_recruiting_map_world()$StudyPhase,                
+                mv_studies_recruiting_map_world()$Condition,
+                mv_studies_recruiting_map_world()$ID                
             ) %>%
                 lapply(htmltools::HTML)
         }
@@ -880,10 +922,10 @@ server <- function(input, output, session) {
                 setView(
                     lng = -4.055685,
                     lat = 41.294856,
-                    zoom = 1.5
+                    zoom = 2.0
                 ) %>%
                 addProviderTiles(providers$CartoDB.Positron,
-                                 options = providerTileOptions(noWrap = TRUE)) %>%
+                                 options = providerTileOptions(noWrap = FALSE)) %>%
                 addMarkers(
                     ~ longitude,
                     ~ latitude,

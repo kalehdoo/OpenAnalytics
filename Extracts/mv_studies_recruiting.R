@@ -125,7 +125,7 @@ mv_studies_recruiting_mini1<-sqldf("Select ID,
                                 nct_id,
                                 Condition,
                                  city,
-                                 state,
+                                 case when length(state)=0 THEN 'NULL VALUE' ELSE state END as 'state',
                                  country,
                                  ZipCode,
                                  case when length(StudyPhase)=0 THEN 'NULL VALUE' ELSE StudyPhase END as 'StudyPhase',
@@ -141,26 +141,26 @@ mv_studies_recruiting_mini1<-sqldf("Select ID,
 
 # add the advertisement and image URL to the recruiting dataset
 #set paths for data files
-in_path_site_advert_existing<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/site_advert_existing.xlsx", sep="")
+#in_path_site_advert_existing<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/site_advert_existing.xlsx", sep="")
 
 #reads the data files into dataframes
-site_advert_existing<-read.xlsx2(in_path_site_advert_existing, sheetIndex = 1)
+#site_advert_existing<-read.xlsx2(in_path_site_advert_existing, sheetIndex = 1)
 
-mv_studies_recruiting_mini2<-left_join(mv_studies_recruiting_mini1, site_advert_existing, by=c("nct_id","Sponsor","Facility","country","state","city"))
+#mv_studies_recruiting_mini2<-left_join(mv_studies_recruiting_mini1, site_advert_existing, by=c("nct_id","Sponsor","Facility","country","state","city"))
 
 
 #set paths for data files
-in_path_site_advert_missing<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/site_advert_missing.xlsx", sep="")
+#in_path_site_advert_missing<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/site_advert_missing.xlsx", sep="")
 
 #reads the data files into dataframes
-site_advert_missing<-read.xlsx2(in_path_site_advert_missing, sheetIndex = 1)
+#site_advert_missing<-read.xlsx2(in_path_site_advert_missing, sheetIndex = 1)
 
 #union the new data
-mv_studies_recruiting_mini3<-rbind(mv_studies_recruiting_mini2, site_advert_missing)
+#mv_studies_recruiting_mini3<-rbind(mv_studies_recruiting_mini2, site_advert_missing)
 
 
-write.table(mv_studies_recruiting_mini3,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.txt", sep=""), sep = "|", row.names = FALSE)
-saveRDS(mv_studies_recruiting_mini3, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds"))
+write.table(mv_studies_recruiting_mini1,paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.txt", sep=""), sep = "|", row.names = FALSE)
+saveRDS(mv_studies_recruiting_mini1, paste0(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds"))
 
 #recruitment by location
 #agg conditions at condition level
