@@ -1,0 +1,12 @@
+name: sponsor
+title: sponsor
+username:
+account: kalehdoo
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3085967
+bundleId: 3834301
+url: https://kalehdoo.shinyapps.io/sponsor/
+when: 1604849279.61716
+asMultiple: FALSE
+asStatic: FALSE

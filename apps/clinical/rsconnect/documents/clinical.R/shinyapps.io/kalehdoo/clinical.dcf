@@ -1,0 +1,12 @@
+name: clinical
+title: clinical
+username:
+account: kalehdoo
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3085983
+bundleId: 3777033
+url: https://kalehdoo.shinyapps.io/clinical/
+when: 1603523731.72197
+asMultiple: FALSE
+asStatic: FALSE
