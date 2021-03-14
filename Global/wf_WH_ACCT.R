@@ -83,7 +83,7 @@ var_EXTRACT_TOAPP02_DIR<-paste(var_DIR_HOME, "apps/app02/data/", sep="")
 var_path_agg_year<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_year_Lst10Yr.txt", sep="")
 var_path_agg_month<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_month.txt", sep="")
 #var_path_agg_conditions_recruiting<-paste(var_DIR_HOME, "Data/ACCT/DATA/warehouse/agg_conditions_recruiting.txt", sep="")
-var_mv_recruiting_mini<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.rds", sep="")
+var_mv_recruiting_mini<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/mv_studies_recruiting_mini.txt", sep="")
 var_rec_conditions_list<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/rec_conditions_list.txt", sep="")
 var_r_sponsor_conditions<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_conditions.txt", sep="")
 var_r_sponsor_site<-paste(var_DIR_HOME, "Data/ACCT/DATA/extracts/r_sponsor_site.txt", sep="")
@@ -106,7 +106,7 @@ file.copy(var_mv_recruiting_mini,var_EXTRACT_TOAPP02_DIR, overwrite = TRUE)
 file.copy(var_rec_conditions_list,var_EXTRACT_TOAPP02_DIR, overwrite = TRUE)
 
 #extract the timestamps of the files copied to app02
-path_app02_mv_rec<-paste(var_EXTRACT_TOAPP02_DIR,"mv_studies_recruiting_mini.rds", sep="")
+path_app02_mv_rec<-paste(var_EXTRACT_TOAPP02_DIR,"mv_studies_recruiting_mini.txt", sep="")
 time_app02_mv_rec<-file.info(path_app02_mv_rec)$mtime
 
 #prepare write and append log for app02
