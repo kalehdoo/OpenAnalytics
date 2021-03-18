@@ -27,7 +27,7 @@ app02 is the study finder app.
 app03qlik is the qlikview application.
 
 ## Issues
-For any issues, feel free to connect.
+For any issues, feel free to connect at manohar.rana@live.com.
 
 
 
